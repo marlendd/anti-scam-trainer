@@ -1,18 +1,35 @@
-import { useMemo } from 'react'
 import type { AgChartOptions } from 'ag-charts-community'
 import { AgCharts } from 'ag-charts-react'
 
-import { rankingHistory } from '../model/rankingHistory'
+import { balanceHistory } from '../model/balanceHistory'
 
-import styles from './DashboardRatingChart.module.scss'
+import styles from './DashboardBalanceChart.module.scss'
 
-const IMPROVEMENT_COLOR = '#04e061'
-const DECLINE_COLOR = '#ff4053'
+const INCREASE_COLOR = '#04e061'
+const DECREASE_COLOR = '#ff4053'
 const NEUTRAL_COLOR = '#858585'
 
-function createOptions(chartColor: string): AgChartOptions {
-  return {
-    data: rankingHistory,
+export function DashboardBalanceChart() {
+  const currentBalance =
+    balanceHistory[balanceHistory.length - 1]?.balance
+
+  const previousBalance =
+    balanceHistory[balanceHistory.length - 2]?.balance
+
+  const balanceDifference =
+    previousBalance !== undefined && currentBalance !== undefined
+      ? currentBalance - previousBalance
+      : 0
+
+  const chartColor =
+    balanceDifference > 0
+      ? INCREASE_COLOR
+      : balanceDifference < 0
+        ? DECREASE_COLOR
+        : NEUTRAL_COLOR
+
+  const options: AgChartOptions = {
+    data: balanceHistory,
 
     background: {
       fill: 'transparent',
@@ -46,11 +63,10 @@ function createOptions(chartColor: string): AgChartOptions {
       y: {
         type: 'number',
         position: 'left',
-        reverse: true,
         nice: false,
 
         label: {
-          formatter: ({ value }) => `#${value}`,
+          formatter: ({ value }) => `${value} ₽`,
         },
 
         gridLine: {
@@ -68,8 +84,8 @@ function createOptions(chartColor: string): AgChartOptions {
       {
         type: 'line',
         xKey: 'date',
-        yKey: 'rank',
-        yName: 'Место в рейтинге',
+        yKey: 'balance',
+        yName: 'Баланс',
 
         interpolation: {
           type: 'smooth',
@@ -91,8 +107,8 @@ function createOptions(chartColor: string): AgChartOptions {
           renderer: ({ datum }) => ({
             data: [
               {
-                label: 'Место',
-                value: `#${datum.rank}`,
+                label: 'Остаток',
+                value: `${datum.balance} ₽`,
               },
             ],
           }),
@@ -100,60 +116,33 @@ function createOptions(chartColor: string): AgChartOptions {
       },
     ],
   }
-}
-
-export function DashboardRatingChart() {
-  const currentRank =
-    rankingHistory[rankingHistory.length - 1]?.rank
-
-  const previousRank =
-    rankingHistory[rankingHistory.length - 2]?.rank
-
-  const rankDifference =
-    previousRank !== undefined && currentRank !== undefined
-      ? previousRank - currentRank
-      : 0
-
-  const chartColor =
-    rankDifference > 0
-      ? IMPROVEMENT_COLOR
-      : rankDifference < 0
-        ? DECLINE_COLOR
-        : NEUTRAL_COLOR
-
-  const options = useMemo(
-    () => createOptions(chartColor),
-    [chartColor],
-  )
 
   return (
     <section className={styles.card}>
       <header className={styles.header}>
         <div className={styles.text}>
-          <h2 className={styles.title}>
-            Позиция в рейтинге
-          </h2>
+          <h2 className={styles.title}>Ваш баланс</h2>
 
           <p className={styles.description}>
-            Чем выше линия, тем лучше результат
+            История изменения баланса
           </p>
         </div>
 
-        <div className={styles.currentRank}>
-          <span className={styles.rank}>
-            {currentRank}
+        <div className={styles.currentBalance}>
+          <span className={styles.balance}>
+            {currentBalance} ₽
           </span>
 
-          {rankDifference !== 0 && (
+          {balanceDifference !== 0 && (
             <span
               className={
-                rankDifference > 0
+                balanceDifference > 0
                   ? styles.improvement
                   : styles.decline
               }
             >
-              {rankDifference > 0 ? '↑' : '↓'}{' '}
-              {Math.abs(rankDifference)}
+              {balanceDifference > 0 ? '↑' : '↓'}{' '}
+              {Math.abs(balanceDifference)} ₽
             </span>
           )}
         </div>

@@ -1,0 +1,82 @@
+.card {
+  padding: 24px;
+
+  //border: 1px solid #e8e8e8;
+  border-radius: 24px;
+
+  background-color: #f7f7f7;
+
+  max-width: 800px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 16px;
+
+  .text {
+    padding-left: 16px;
+    text-align: left;
+  }
+}
+
+.title {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.description {
+  margin: 6px 0 0;
+
+  color: #858585;
+
+  font-size: 14px;
+}
+
+.currentRank {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.rank {
+  color: #858585;
+  font-size: 24px;
+  font-weight: normal;
+}
+
+.improvement {
+  color: #00a86b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.decline {
+  color: #e34242;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.chart {
+  width: 100%;
+  height: 320px;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 18px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .chart {
+    height: 280px;
+  }
+}

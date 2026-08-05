@@ -21,7 +21,10 @@ export function ScamSchemeCard({
     >
       <div className={styles.header}>
         <h3 className={styles.title}>{title}</h3>
-        <Icon icon={faChevronRight} />
+
+          <span className={styles.chevron} aria-hidden="true">
+            <Icon icon={faChevronRight} />
+          </span>
       </div>
       <p className={styles.description}>{description}</p>
     </Link>
