@@ -7,14 +7,20 @@ import (
 	"testing"
 	"time"
 
+	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRunIntegration(t *testing.T) {
-	cfg := Config{
-		LogLevel: "DEBUG",
-		Address:  "127.0.0.1:8089",
-		Timeout:  2 * time.Second,
+	cfg := config.Config{
+		LogLevel:        "DEBUG",
+		Port:            "8089",
+		Timeout:         2 * time.Second,
+		DatabaseURL:     "postgres://postgres:postgres@127.0.0.1:5433/antiscam_test?sslmode=disable",
+		MaxOpenConns:    5,
+		MaxIdleConns:    5,
+		ConnMaxLifetime: 1 * time.Minute,
+		ConnMaxIdleTime: 1 * time.Minute,
 	}
 
 	logger := mustMakeLogger(cfg.LogLevel)
@@ -24,21 +30,21 @@ func TestRunIntegration(t *testing.T) {
 		errCh <- run(&cfg, logger)
 	}()
 
-	time.Sleep(100 * time.Millisecond)
+	// Даем серверу и БД время на запуск
+	time.Sleep(150 * time.Millisecond)
 
 	select {
 	case err := <-errCh:
-		require.NoError(t, err, "Сервер завершился с ошибкой при старте")
+		t.Fatalf("Сервер завершился с ошибкой при старте: %v", err)
 	default:
 	}
 
-	res, err := http.Get("http://" + cfg.Address + "/example")
-
+	url := "http://localhost:" + cfg.Port + "/example"
+	res, err := http.Get(url)
 	require.NoError(t, err, "HTTP-запрос должен выполниться без ошибок")
 	defer func() {
-		err := res.Body.Close()
-		if err != nil {
-			slog.Error("error when close body")
+		if err := res.Body.Close(); err != nil {
+			slog.Error("error when close body", "error", err)
 		}
 	}()
 
