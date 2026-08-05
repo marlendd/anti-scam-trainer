@@ -1,9 +1,9 @@
 ﻿import { Link } from 'react-router-dom'
 import { Logo } from '@/shared/ui/logo'
 import styles from './Header.module.scss'
-import { AvatarDropdown } from './AvatarDropdown'
 import { FragmentCounter } from './FragmentCounter'
 import { PointsCounter } from './PointsCounter'
+import {Avatar} from "@/shared/ui/avatar";
 
 export const Header = () => {
   return (
@@ -26,7 +26,7 @@ export const Header = () => {
               <PointsCounter value={0} />
             </div>
 
-            <AvatarDropdown />
+            <Avatar />
         </div>
 
       </div>
