@@ -1,0 +1,122 @@
+// src/app/layouts/auth-layout/AuthLayout.module.scss
+
+.page {
+  position: relative;
+
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px 40px;
+
+  overflow: hidden;
+
+  background-color: #f7f7f7;
+}
+
+.brand {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+
+  color: #242424;
+
+  font-size: 20px;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:visited {
+    color: #242424;
+  }
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid #ff4053;
+    outline-offset: 4px;
+  }
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  max-width: 460px;
+  padding: 36px;
+
+  border: 1px solid #ededed;
+  border-radius: 28px;
+
+  background-color: #ffffff;
+}
+
+.decoration {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  span {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(20px);
+  }
+}
+
+.redDot {
+  top: 16%;
+  left: 12%;
+  width: 184px;
+  height: 184px;
+  background-color: #ff4053;
+}
+
+.blueDot {
+  right: 13%;
+  bottom: 17%;
+  width: 168px;
+  height: 168px;
+  background-color: #2f70ff;
+}
+
+.greenDot {
+  top: 20%;
+  right: 18%;
+  width: 134px;
+  height: 134px;
+  background-color: #97cf26;
+}
+
+.purpleDot {
+  bottom: 12%;
+  left: 19%;
+  width: 144px;
+  height: 144px;
+  background-color: #a169f7;
+}
+
+@media (max-width: 640px) {
+  .page {
+    align-items: flex-start;
+    padding: 88px 16px 24px;
+
+    background-color: #ffffff;
+  }
+
+  .brand {
+    top: 24px;
+    left: 20px;
+  }
+
+  .card {
+    max-width: none;
+    padding: 24px 4px;
+
+    border: 0;
+    border-radius: 0;
+  }
+
+  .decoration {
+    display: none;
+  }
+}

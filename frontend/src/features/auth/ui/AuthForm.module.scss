@@ -1,0 +1,120 @@
+// src/features/auth/ui/AuthForm.module.scss
+
+.content {
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  margin: 0;
+
+  color: #242424;
+
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  margin: 8px 0 0;
+
+  color: #858585;
+
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+}
+
+.submit {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+
+  border: 0;
+  border-radius: 14px;
+
+  color: #ffffff;
+  background-color: #ff4053;
+
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 150ms ease,
+    transform 100ms ease;
+
+  &:hover {
+    background-color: #ed3043;
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(255 64 83 / 25%);
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.footer {
+  margin: 24px 0 0;
+
+  color: #858585;
+
+  font-size: 14px;
+  text-align: center;
+}
+
+.link,
+.secondaryLink {
+  color: #ff4053;
+  font-weight: 500;
+  text-decoration: none;
+
+  &:visited {
+    color: #ff4053;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    border-radius: 3px;
+    outline: 2px solid #ff4053;
+    outline-offset: 3px;
+  }
+}
+
+.secondaryLink {
+  font-size: 13px;
+}
