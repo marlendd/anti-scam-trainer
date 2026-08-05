@@ -32,7 +32,7 @@ func TestRunIntegration(t *testing.T) {
 	}()
 
 	// Даем серверу и БД время на запуск
-	time.Sleep(150 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
 	select {
 	case err := <-errCh:
@@ -40,7 +40,7 @@ func TestRunIntegration(t *testing.T) {
 	default:
 	}
 
-	url := "http://localhost:" + cfg.Port + "/example"
+	url := "http://127.0.0.1:" + cfg.Port + "/example"
 	res, err := http.Get(url)
 	require.NoError(t, err, "HTTP-запрос должен выполниться без ошибок")
 	defer func() {
