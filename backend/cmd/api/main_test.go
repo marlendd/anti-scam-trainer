@@ -17,6 +17,7 @@ func TestRunIntegration(t *testing.T) {
 		Port:            "8089",
 		Timeout:         2 * time.Second,
 		DatabaseURL:     "postgres://postgres:postgres@127.0.0.1:5433/antiscam_test?sslmode=disable",
+		MigrationsPath:  "../../migrations",
 		MaxOpenConns:    5,
 		MaxIdleConns:    5,
 		ConnMaxLifetime: 1 * time.Minute,

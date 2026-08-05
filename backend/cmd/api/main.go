@@ -39,7 +39,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 
 	log.Info("database connection established successfully")
 
-	if err := postgres.RunMigrations(cfg.DatabaseURL, "migrations"); err != nil {
+	if err := postgres.RunMigrations(cfg.DatabaseURL, cfg.MigrationsPath); err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 	
