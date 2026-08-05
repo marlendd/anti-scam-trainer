@@ -1,5 +1,5 @@
 ﻿import styles from './GlossaryPage.module.scss';
-import GlossaryImage from '@/shared/assets/images/glossary.png';
+import GlossaryImage from '@/shared/assets/images/glossary.webp';
 import {ScamSchemeGrid} from "@/widgets/scam-scheme-grid";
 
 export function GlossaryPage() {
