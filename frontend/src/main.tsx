@@ -4,6 +4,9 @@ import { BrowserRouter } from 'react-router-dom'
 import { AppProviders } from './app/providers/AppProviders'
 import './app/styles/global.scss'
 import App from './app/App'
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
+
+ModuleRegistry.registerModules([AllCommunityModule])
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
