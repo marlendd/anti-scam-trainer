@@ -5,6 +5,7 @@ import { DashboardPage } from '@/pages/dashboard'
 import { GlossaryPage } from '@/pages/glossary'
 import { HomePage } from '@/pages/home'
 import { LeaderboardPage } from '@/pages/leaderboard'
+import { NotFoundPage } from '@/pages/not-found'
 import { ScamSchemePage } from '@/pages/scam-scheme'
 import { WelcomePage } from '@/pages/welcome'
 
@@ -23,6 +24,8 @@ export function AppRouter() {
           <Route index element={<GlossaryPage />} />
           <Route path=":schemeId" element={<ScamSchemePage />} />
         </Route>
+
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   )

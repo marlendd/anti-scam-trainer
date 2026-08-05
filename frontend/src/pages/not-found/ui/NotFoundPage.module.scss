@@ -1,0 +1,55 @@
+.page {
+  display: flex;
+  min-height: 80vh;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.content {
+  display: flex;
+  max-width: 520px;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+.image {
+  max-width: 500px;
+}
+
+.title {
+  margin: 28px 0 0;
+
+  color: #000000;
+
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.description {
+  margin: 12px 0 0;
+
+  color: #858585;
+
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+
+@media (max-width: 640px) {
+  .page {
+    min-height: 60vh;
+    padding: 32px 20px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .description {
+    font-size: 15px;
+  }
+}
