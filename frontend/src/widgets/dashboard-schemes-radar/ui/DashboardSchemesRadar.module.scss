@@ -1,0 +1,100 @@
+.card {
+  width: 100%;
+  padding: 24px;
+
+  border-radius: 24px;
+
+  background-color: #ffffff;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 8px;
+}
+
+.title {
+  margin: 0;
+
+  text-align: left;
+  
+  color: #000000;
+
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.description {
+  max-width: 620px;
+  margin: 8px 0 0;
+
+  text-align: left;
+
+  color: #858585;
+
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.average {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.averageLabel {
+  color: #858585;
+
+  font-size: 13px;
+}
+
+.averageValue {
+  color: #965eeb;
+
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.chart {
+  width: 100%;
+  height: 520px;
+}
+
+.empty {
+  margin: 40px 0;
+
+  color: #858585;
+
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .average {
+    align-items: flex-start;
+  }
+
+  .chart {
+    height: 420px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart {
+    height: 360px;
+  }
+}

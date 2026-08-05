@@ -29,7 +29,7 @@ export function Avatar({
   ...props
 }: AvatarProps) {
   const classes = [styles.avatar, className].filter(Boolean).join(' ')
-  const initials = name ? getInitials(name) : <Icon icon={faUser} style={{ color: '#9c9c9c' }}/>
+  const initials = name ? getInitials(name) : <Icon icon={faUser} style={{ color: '#9c9c9c', width: size/2, height: size/2 }}/>
 
   return (
     <div

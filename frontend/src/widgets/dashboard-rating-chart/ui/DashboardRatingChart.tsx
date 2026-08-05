@@ -68,21 +68,20 @@ const options: AgChartOptions = {
         type: 'smooth',
       },
 
-      stroke: '#965eeb',
+      stroke: '#ff4053',
       strokeWidth: 3,
       lineDash: [10, 7],
 
       marker: {
         enabled: true,
         size: 7,
-        fill: '#ffffff',
-        stroke: '#965eeb',
+        fill: '#f7f7f7',
+        stroke: '#ff4053',
         strokeWidth: 3,
       },
 
       tooltip: {
         renderer: ({ datum }) => ({
-          title: datum.date,
           data: [
             {
               label: 'Место',

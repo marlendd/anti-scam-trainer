@@ -8,16 +8,16 @@ import {
 } from 'ag-grid-community'
 
 import {
-  AllCommunityModule as ChartsAllCommunityModule,
+  AllEnterpriseModule as ChartsAllEnterpriseModule,
   ModuleRegistry as ChartsModuleRegistry,
-} from 'ag-charts-community'
+} from 'ag-charts-enterprise'
 
 import { AppProviders } from './app/providers/AppProviders'
 import './app/styles/global.scss'
 import App from './app/App'
 
 GridModuleRegistry.registerModules([GridAllCommunityModule])
-ChartsModuleRegistry.registerModules([ChartsAllCommunityModule])
+ChartsModuleRegistry.registerModules([ChartsAllEnterpriseModule])
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
