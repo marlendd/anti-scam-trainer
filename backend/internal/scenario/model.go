@@ -15,9 +15,9 @@ const (
 	RoleBuyer  Role = "buyer"
 	RoleSeller Role = "seller"
 
-	ScoreCritical  ChoiceScore = 0
-	ScoreDangerous ChoiceScore = 50
-	ScoreSafe      ChoiceScore = 100
+	ScoreCritical ChoiceScore = 0
+	ScoreRisky    ChoiceScore = 50
+	ScoreSafe     ChoiceScore = 100
 
 	WeightLow    Weight = 1
 	WeightMedium Weight = 2
