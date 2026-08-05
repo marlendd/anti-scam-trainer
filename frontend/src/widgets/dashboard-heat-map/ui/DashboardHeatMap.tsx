@@ -120,23 +120,23 @@ export function DashboardHeatMap() {
 
                         fills: [
                             {
-                                color: '#fff1f2',
+                                color: '#eef9ff',
                                 stop: 1,
                             },
                             {
-                                color: '#ffd9dd',
+                                color: '#d6f1ff',
                                 stop: 3,
                             },
                             {
-                                color: '#ffadb5',
+                                color: '#a8e2ff',
                                 stop: 5,
                             },
                             {
-                                color: '#ff7380',
+                                color: '#66ccff',
                                 stop: 7,
                             },
                             {
-                                color: '#ff4053',
+                                color: '#00aaff',
                             },
                         ],
                     },

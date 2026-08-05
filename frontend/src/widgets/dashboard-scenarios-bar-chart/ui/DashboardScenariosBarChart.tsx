@@ -90,8 +90,8 @@ const options: AgChartOptions<ScenarioCategoryStat> = {
       yKey: 'completed',
       yName: 'Пройдено сценариев',
 
-      fill: '#ff4053',
-      stroke: '#ff4053',
+      fill: '#00aaff',
+      stroke: '#00aaff',
       strokeWidth: 0,
 
       cornerRadius: 12,

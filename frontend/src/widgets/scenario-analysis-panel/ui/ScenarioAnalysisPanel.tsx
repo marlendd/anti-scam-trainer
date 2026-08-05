@@ -1,12 +1,9 @@
 // src/widgets/scenario-analysis-panel/ui/ScenarioAnalysisPanel.tsx
 
-import { faCheck } from '@fortawesome/free-solid-svg-icons'
-
 import type {
   ScenarioAnalysis,
   ScenarioRedFlag,
 } from '@/entities/training-scenario'
-import { Icon } from '@/shared/ui/icon'
 
 import styles from './ScenarioAnalysisPanel.module.scss'
 

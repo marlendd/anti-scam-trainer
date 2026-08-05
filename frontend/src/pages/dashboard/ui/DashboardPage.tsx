@@ -11,9 +11,9 @@ export function DashboardPage() {
     <main className={styles.page}>
         <DashboardOverview/>
         <DashboardRatingChart/>
-        <DashboardHeatMap/>
-        <DashboardBalanceChart/>
         <DashboardScenariosBarChart/>
+        <DashboardBalanceChart/>
+        <DashboardHeatMap/>
     </main>
   )
 }

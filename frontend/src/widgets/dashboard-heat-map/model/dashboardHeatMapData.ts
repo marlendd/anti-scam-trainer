@@ -51,23 +51,33 @@ function addDays(date: Date, days: number) {
   return result
 }
 
+function seededRandom(seed: number) {
+  const value = Math.sin(seed) * 10_000
+
+  return value - Math.floor(value)
+}
+
 /**
- * Временный детерминированный mock.
- * Значения не меняются при повторном рендере страницы.
+ * Псевдослучайный детерминированный mock.
+ * Для одной даты всегда возвращается одинаковое значение.
  */
 function getMockActivity(date: Date) {
   const seed =
-    date.getFullYear() +
-    (date.getMonth() + 1) * 17 +
-    date.getDate() * 31
+    date.getFullYear() * 10_000 +
+    (date.getMonth() + 1) * 100 +
+    date.getDate()
 
-  const value = seed % 11
+  const activityChance = seededRandom(seed)
+  const activityValue = seededRandom(seed + 42)
 
-  if (value < 4 || date.getDay() === 0) {
+  const isWeekend = date.getDay() === 0 || date.getDay() === 6
+  const emptyDayChance = isWeekend ? 0.5 : 0.3
+
+  if (activityChance < emptyDayChance) {
     return 0
   }
 
-  return Math.min(value - 2, 8)
+  return Math.floor(activityValue * 8) + 1
 }
 
 export function createdashboardHeatMapData(
