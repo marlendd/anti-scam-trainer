@@ -39,6 +39,10 @@ func run(cfg *config.Config, log *slog.Logger) error {
 
 	log.Info("database connection established successfully")
 
+	if err := postgres.RunMigrations(cfg.DatabaseURL, "migrations"); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+	
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /example", func(w http.ResponseWriter, r *http.Request) {
