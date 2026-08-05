@@ -58,6 +58,10 @@
   }
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #root {
@@ -71,8 +75,6 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
   margin: 0 auto;
   text-align: center;
   min-height: 100svh;
@@ -125,4 +127,26 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+a {
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  transition: color 0.25s;
+
+  &:visited {
+    color: inherit;
+  }
+
+  &:hover {
+    color: #ff4053;
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid #00aaff;
+    outline-offset: 3px;
+  }
 }
