@@ -1,0 +1,25 @@
+// features/scenario-player/ui/ScenarioPlayer.module.scss
+
+.messages {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+
+  overflow-y: auto;
+}
+
+.typing {
+  align-self: flex-start;
+  margin: 8px 0 0 52px;
+  padding: 10px 16px;
+
+  border-radius: 20px;
+
+  color: #858585;
+  background-color: #f1f1f1;
+
+  font-size: 14px;
+}

@@ -1,0 +1,36 @@
+// widgets/training-chat/ui/TrainingChat.module.scss
+
+.chat {
+  display: flex;
+  width: 100%;
+  //height: min(720px, calc(100vh - 180px));
+  flex-direction: column;
+
+  border: 1px solid #e8e8e8;
+  border-radius: 28px;
+
+  background-color: #ffffff;
+
+  overflow: hidden;
+}
+
+.header {
+  padding: 20px 24px;
+
+  border-bottom: 1px solid #eeeeee;
+}
+
+.title {
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.description {
+  margin: 4px 0 0;
+
+  color: #858585;
+
+  font-size: 13px;
+}
