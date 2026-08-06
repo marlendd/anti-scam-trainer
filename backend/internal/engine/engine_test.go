@@ -40,27 +40,51 @@ func TestTransition_ToNextNode(t *testing.T) {
 }
 
 func TestTransition_ToEnding(t *testing.T) {
-	in := getValidInput()
-	in.CurrentNodeID = testfixture.FinalNodeID
-	in.ChoiceID = testfixture.FinalChoiceID
+	tests := []struct {
+		name                string
+		choiceID            scenario.ChoiceID
+		expectedChoiceIndex int
+		expectedEndingID    scenario.EndingID
+	}{
+		{
+			name:                "safe ending",
+			choiceID:            testfixture.FinalChoiceID,
+			expectedChoiceIndex: 0,
+			expectedEndingID:    testfixture.SafeEndingID,
+		},
+		{
+			name:                "risky ending",
+			choiceID:            testfixture.RiskyFinalChoiceID,
+			expectedChoiceIndex: 2,
+			expectedEndingID:    testfixture.RiskyEndingID,
+		},
+	}
 
-	require.NoError(
-		t,
-		scenario.Validate(in.Scenario),
-		"getValidInput returned invalid scenario",
-	)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			in := getValidInput()
+			in.CurrentNodeID = testfixture.FinalNodeID
+			in.ChoiceID = tt.choiceID
 
-	expectedChoice := in.Scenario.Nodes[2].Choices[0]
+			require.NoError(
+				t,
+				scenario.Validate(in.Scenario),
+				"getValidInput returned invalid scenario",
+			)
 
-	result, err := engine.Transition(in)
+			expectedChoice := in.Scenario.Nodes[2].Choices[tt.expectedChoiceIndex]
 
-	require.NoError(t, err)
-	require.Empty(t, result.NextNodeID)
-	require.Equal(t, testfixture.SafeEndingID, result.EndingID)
-	require.True(t, result.Completed)
+			result, err := engine.Transition(in)
 
-	require.Equal(t, expectedChoice, result.Choice)
-	require.Equal(t, expectedChoice.Consequence, result.Consequence)
+			require.NoError(t, err)
+			require.Empty(t, result.NextNodeID)
+			require.Equal(t, tt.expectedEndingID, result.EndingID)
+			require.True(t, result.Completed)
+
+			require.Equal(t, expectedChoice, result.Choice)
+			require.Equal(t, expectedChoice.Consequence, result.Consequence)
+		})
+	}
 }
 
 func TestTransition_CurrentNodeNotFound(t *testing.T) {

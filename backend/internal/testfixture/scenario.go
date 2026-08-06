@@ -7,13 +7,14 @@ import (
 )
 
 const (
-	StartNodeID   scenario.NodeID   = "node-start"
-	MiddleNodeID  scenario.NodeID   = "node-middle"
-	FinalNodeID   scenario.NodeID   = "node-final"
-	StartChoiceID scenario.ChoiceID = "start-choice-1"
-	FinalChoiceID scenario.ChoiceID = "final-choice-1"
-	SafeEndingID  scenario.EndingID = "ending-safe"
-	RiskyEndingID scenario.EndingID = "ending-risk"
+	StartNodeID        scenario.NodeID   = "node-start"
+	MiddleNodeID       scenario.NodeID   = "node-middle"
+	FinalNodeID        scenario.NodeID   = "node-final"
+	StartChoiceID      scenario.ChoiceID = "start-choice-1"
+	FinalChoiceID      scenario.ChoiceID = "final-choice-1"
+	RiskyFinalChoiceID scenario.ChoiceID = "final-choice-3"
+	SafeEndingID       scenario.EndingID = "ending-safe"
+	RiskyEndingID      scenario.EndingID = "ending-risk"
 )
 
 // ValidScenario - валидный сценарий для тестов backend-модулей.
