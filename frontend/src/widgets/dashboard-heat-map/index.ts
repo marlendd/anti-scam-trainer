@@ -1,1 +1,0 @@
-export { DashboardHeatMap } from './ui/DashboardHeatMap';
