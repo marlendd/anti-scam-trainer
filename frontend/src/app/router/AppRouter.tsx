@@ -14,6 +14,7 @@ import {ScamSchemePage} from '@/pages/scam-scheme'
 import {WelcomePage} from '@/pages/welcome'
 import {RoleSelectionPage} from "@/pages/role-selection";
 import {GameLayout} from "@/app/layouts/game-layout";
+import {BuyerPathPage} from "../../pages/buyer-path/ui/BuyerPathPage.tsx";
 
 export function AppRouter() {
     return (
@@ -30,16 +31,9 @@ export function AppRouter() {
                     <Route path="role-selection" element={<RoleSelectionPage/>}/>
 
 
-                    <Route path="path">
-                        <Route path="buyer">
-                            <Route index element={<RoleSelectionPage/>}/>
-                            <Route path=":schemeId" element={<ScamSchemePage/>}/>
-
-                        </Route>
-                        <Route path="seller">
-                            <Route index element={<RoleSelectionPage/>}/>
-                            <Route path=":schemeId" element={<ScamSchemePage/>}/>
-                        </Route>
+                    <Route path="path/:pathId">
+                        <Route index element={<BuyerPathPage/>}/>
+                        <Route path=":schemeId" element={<ScamSchemePage/>}/>
                     </Route>
 
                 </Route>

@@ -1,22 +1,22 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useMatch } from 'react-router-dom'
 
-import {
-  GameHeader,
-  type GameHeaderProps,
-} from '@/widgets/game-header'
+import { GameHeader } from '@/widgets/game-header'
 
 import styles from './GameLayout.module.scss'
 
-type GameLayoutProps = {
-  headerProps?: GameHeaderProps
-}
+export function GameLayout() {
+  const sessionMatch = useMatch({
+    path: '/training/path/:pathId/:schemeId',
+    end: true,
+  })
 
-export function GameLayout({
-  headerProps,
-}: GameLayoutProps) {
+  const headerVariant = sessionMatch
+    ? 'session'
+    : 'setup'
+
   return (
     <div className={styles.layout}>
-      <GameHeader {...headerProps} />
+      <GameHeader variant={headerVariant} />
 
       <main className={styles.content}>
         <Outlet />

@@ -16,7 +16,7 @@ export const Header = () => {
 
             <div className={styles.left}>
                 <nav className={styles.navigation}>
-                    <Link to='/'>Сценарии</Link>
+                    <Link to='/training/role-selection'>Сценарии</Link>
                     <Link to='/glossary'>Глоссарий</Link>
                     <Link to='/leaderboard'>Лидеры</Link>
                     <Link to='/dashboard'>Статистика</Link>
