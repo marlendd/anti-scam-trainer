@@ -1,9 +1,14 @@
 FROM golang:1.25 AS build
 
-COPY go.mod go.sum /src/
-COPY cmd/api /src/api
+WORKDIR /src
 
-RUN cd /src && go build -o /api api/main.go
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY cmd ./cmd
+COPY internal ./internal
+
+RUN go build -o /api ./cmd/api
 
 FROM alpine:3.20
 
