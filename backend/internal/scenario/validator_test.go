@@ -19,6 +19,28 @@ func TestValidate_ValidScenarioWithThreeChoicesAndBranching(t *testing.T) {
 	}
 }
 
+func TestValidate_KnownRiskCategories(t *testing.T) {
+	categories := []scenario.RiskCategory{
+		scenario.RiskExternalMessenger,
+		scenario.RiskExternalLink,
+		scenario.RiskSMSCode,
+		scenario.RiskOffPlatformPayment,
+		scenario.RiskFakePaymentDelivery,
+		scenario.RiskUrgencyPressure,
+		scenario.RiskDisableProtection,
+	}
+
+	for _, category := range categories {
+		t.Run(string(category), func(t *testing.T) {
+			s := testfixture.ValidScenario()
+			s.Nodes[0].Choices[0].Score = scenario.ScoreRisky
+			s.Nodes[0].Choices[0].RiskCategories = []scenario.RiskCategory{category}
+
+			require.NoError(t, scenario.Validate(s))
+		})
+	}
+}
+
 func TestValidate_InvalidScenarios(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -47,6 +69,13 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 			wantErr: scenario.ErrEmptyNodeID,
 		},
 		{
+			name: "empty node text",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Text = "  "
+			},
+			wantErr: scenario.ErrEmptyNodeText,
+		},
+		{
 			name: "duplicated node ID",
 			mutate: func(s *scenario.Scenario) {
 				s.Nodes = append(s.Nodes, s.Nodes[0])
@@ -59,6 +88,20 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 				s.Endings[0].ID = ""
 			},
 			wantErr: scenario.ErrEmptyEndingID,
+		},
+		{
+			name: "empty ending header",
+			mutate: func(s *scenario.Scenario) {
+				s.Endings[0].Header = "\t"
+			},
+			wantErr: scenario.ErrEmptyEndingHeader,
+		},
+		{
+			name: "empty ending result",
+			mutate: func(s *scenario.Scenario) {
+				s.Endings[0].Result = "\n"
+			},
+			wantErr: scenario.ErrEmptyEndingResult,
 		},
 		{
 			name: "duplicated ending ID",
@@ -80,6 +123,27 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 				s.Nodes[0].Choices[0].ID = ""
 			},
 			wantErr: scenario.ErrEmptyChoiceID,
+		},
+		{
+			name: "empty choice text",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Choices[0].Text = " "
+			},
+			wantErr: scenario.ErrEmptyChoiceText,
+		},
+		{
+			name: "empty choice consequence",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Choices[0].Consequence = "\t"
+			},
+			wantErr: scenario.ErrEmptyConsequence,
+		},
+		{
+			name: "empty choice explanation",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Choices[0].Explanation = "\n"
+			},
+			wantErr: scenario.ErrEmptyExplanation,
 		},
 		{
 			name: "duplicated choice ID",
@@ -146,19 +210,33 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 			wantErr: scenario.ErrMissingRiskCategory,
 		},
 		{
+			name: "choice has unknown risk category",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Choices[0].Score = scenario.ScoreRisky
+				s.Nodes[0].Choices[0].RiskCategories = []scenario.RiskCategory{
+					"externl_link",
+				}
+			},
+			wantErr: scenario.ErrUnknownRiskCategory,
+		},
+		{
 			name: "unreachable node",
 			mutate: func(s *scenario.Scenario) {
 				choices := make([]scenario.Choice, 4)
 				for i := range choices {
 					choices[i] = scenario.Choice{
-						ID:         scenario.ChoiceID(fmt.Sprintf("choice-disconnected-%d", i)),
-						Weight:     scenario.WeightLow,
-						Score:      scenario.ScoreSafe,
-						NextNodeID: testfixture.FinalNodeID,
+						ID:          scenario.ChoiceID(fmt.Sprintf("choice-disconnected-%d", i)),
+						Text:        "Вариант ответа",
+						Consequence: "Последствие ответа",
+						Explanation: "Объяснение ответа",
+						Weight:      scenario.WeightLow,
+						Score:       scenario.ScoreSafe,
+						NextNodeID:  testfixture.FinalNodeID,
 					}
 				}
 				s.Nodes = append(s.Nodes, scenario.Node{
 					ID:      "node-disconnected",
+					Text:    "Недостижимый узел",
 					Choices: choices,
 				})
 			},
@@ -168,7 +246,9 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 			name: "unreachable ending",
 			mutate: func(s *scenario.Scenario) {
 				s.Endings = append(s.Endings, scenario.Ending{
-					ID: "unreachable-ending",
+					ID:     "unreachable-ending",
+					Header: "Недостижимая концовка",
+					Result: "Недостижимый результат",
 				})
 			},
 			wantErr: scenario.ErrUnreachableEnding,
