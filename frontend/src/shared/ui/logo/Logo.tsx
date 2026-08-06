@@ -1,30 +1,45 @@
 import type { ImgHTMLAttributes } from 'react'
-import logo from '@/shared/assets/images/LogoScam.svg'
-import logoInverse from '@/shared/assets/images/Logo_inverse.svg'
+
+import logoLarge from '@/shared/assets/images/LogoScam.svg'
+import logoDefault from '@/shared/assets/images/Logo.svg'
+import logoSmall from '@/shared/assets/images/LogoSmall.svg'
+
 import styles from './Logo.module.scss'
 
-type LogoVariant = 'default' | 'inverse'
-
-type LogoProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'> & {
-  variant?: LogoVariant
+type LogoProps = Omit<
+  ImgHTMLAttributes<HTMLImageElement>,
+  'src'
+> & {
   alt?: string
 }
 
 export function Logo({
-  variant = 'default',
-  alt = 'Logo',
+  alt = 'Антискам-тренажёр',
   className,
   ...props
 }: LogoProps) {
-  const image = variant === 'inverse' ? logoInverse : logo
-  const classes = [styles.logo, className].filter(Boolean).join(' ')
+  const classes = [styles.image, className]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-      <div className={styles.logo}>
-        <img className={classes} src={image} alt={alt} {...props} />
-        <span className={styles.info}>
+    <picture className={styles.logo}>
+      <source
+        media="(max-width: 860px)"
+        srcSet={logoSmall}
+      />
 
-        </span>
-      </div>
+      <source
+        media="(max-width: 1100px)"
+        srcSet={logoDefault}
+      />
+
+      <img
+        {...props}
+        className={classes}
+        src={logoLarge}
+        alt={alt}
+      />
+    </picture>
   )
 }

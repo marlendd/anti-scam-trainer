@@ -5,6 +5,7 @@ import {FragmentCounter} from './FragmentCounter'
 import {PointsCounter} from './PointsCounter'
 // import {Avatar} from "@/shared/ui/avatar";
 import {LoginButton} from "@/features/login-button";
+import {BurgerNavigation} from "@/widgets/header/ui/BurgerNavigation.tsx";
 // import {PlayButton} from "@/features/play-button";
 
 export const Header = () => {
@@ -33,6 +34,8 @@ export const Header = () => {
                     {/*</Link>*/}
 
                     <LoginButton/>
+
+                    <BurgerNavigation />
 
                     {/*<PlayButton/>*/}
                 </div>
