@@ -19,6 +19,8 @@ type Config struct {
 	MaxIdleConns    int           `yaml:"max_idle_conns" env:"DB_MAX_IDLE_CONNS" env-default:"25"`
 	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime" env:"DB_CONN_MAX_LIFETIME" env-default:"60m"`
 	ConnMaxIdleTime time.Duration `yaml:"conn_max_idle_time" env:"DB_CONN_MAX_IDLE_TIME" env-default:"5m"`
+
+	SecureCookies bool `yaml:"secure_cookies" env:"SECURE_COOKIES" env-default:"false"`
 }
 
 func MustLoad(configPath string) Config {

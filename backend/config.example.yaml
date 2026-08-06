@@ -1,0 +1,14 @@
+env: "local"
+port: "8080"
+timeout: "5s"
+log_level: "DEBUG"
+
+# database_url: задаётся через переменную окружения DATABASE_URL, не хранится тут
+migrations_path: "migrations"
+
+max_open_conns: 50
+max_idle_conns: 25
+conn_max_lifetime: "60m"
+conn_max_idle_time: "5m"
+
+secure_cookies: false
