@@ -1,6 +1,7 @@
 package scenario
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -132,6 +133,14 @@ func validScenario() Scenario {
 			},
 		},
 	}
+	for nodeIndex := range nodes {
+		originalChoices := append([]Choice(nil), nodes[nodeIndex].Choices...)
+		for _, originalChoice := range originalChoices {
+			alternative := originalChoice
+			alternative.ID = ChoiceID(fmt.Sprintf("%s-alternative", originalChoice.ID))
+			nodes[nodeIndex].Choices = append(nodes[nodeIndex].Choices, alternative)
+		}
+	}
 
 	s := Scenario{
 		ID:          "1",
@@ -148,7 +157,7 @@ func validScenario() Scenario {
 	return s
 }
 
-func TestValidate_ValidScenario(t *testing.T) {
+func TestValidate_ValidScenarioWithThreeChoicesAndBranching(t *testing.T) {
 	s := validScenario()
 
 	err := Validate(s)
@@ -205,6 +214,13 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 				s.Endings = append(s.Endings, s.Endings[0])
 			},
 			wantErr: ErrDuplicateEndingID,
+		},
+		{
+			name: "node has fewer than four choices",
+			mutate: func(s *Scenario) {
+				s.Nodes[0].Choices = s.Nodes[0].Choices[:3]
+			},
+			wantErr: ErrTooFewNodeChoices,
 		},
 		{
 			name: "empty choice ID",
@@ -279,16 +295,18 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 		{
 			name: "unreachable node",
 			mutate: func(s *Scenario) {
+				choices := make([]Choice, 4)
+				for i := range choices {
+					choices[i] = Choice{
+						ID:         ChoiceID(fmt.Sprintf("choice-disconnected-%d", i)),
+						Weight:     WeightLow,
+						Score:      ScoreSafe,
+						NextNodeID: "node-sms",
+					}
+				}
 				s.Nodes = append(s.Nodes, Node{
-					ID: "node-disconnected",
-					Choices: []Choice{
-						{
-							ID:         "choice-disconnected",
-							Weight:     WeightLow,
-							Score:      ScoreSafe,
-							NextNodeID: "node-sms",
-						},
-					},
+					ID:      "node-disconnected",
+					Choices: choices,
 				})
 			},
 			wantErr: ErrUnreachableNode,
@@ -306,7 +324,9 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 			name: "too few reachable endings",
 			mutate: func(s *Scenario) {
 				s.Endings = s.Endings[:1]
-				s.Nodes[3].Choices[1].EndingID = s.Endings[0].ID
+				for i := range s.Nodes[3].Choices {
+					s.Nodes[3].Choices[i].EndingID = s.Endings[0].ID
+				}
 			},
 			wantErr: ErrTooFewReachableEndings,
 		},
@@ -319,6 +339,31 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 				choice.NextNodeID = s.Nodes[0].ID
 			},
 			wantErr: ErrCycleDetected,
+		},
+		{
+			name: "path has only two choices",
+			mutate: func(s *Scenario) {
+				for i := range s.Nodes[0].Choices {
+					s.Nodes[0].Choices[i].NextNodeID = s.Nodes[3].ID
+				}
+				s.Nodes = []Node{s.Nodes[0], s.Nodes[3]}
+			},
+			wantErr: ErrPathTooShort,
+		},
+		{
+			name: "all choices on path lead to the same target",
+			mutate: func(s *Scenario) {
+				for i := range s.Nodes[0].Choices {
+					s.Nodes[0].Choices[i].NextNodeID = s.Nodes[0].Choices[0].NextNodeID
+				}
+				for i := range s.Nodes[1].Choices {
+					s.Nodes[1].Choices[i].NextNodeID = s.Nodes[1].Choices[0].NextNodeID
+				}
+				for i := range s.Nodes[3].Choices {
+					s.Nodes[3].Choices[i].EndingID = s.Nodes[3].Choices[0].EndingID
+				}
+			},
+			wantErr: ErrPathWithoutBranching,
 		},
 	}
 
