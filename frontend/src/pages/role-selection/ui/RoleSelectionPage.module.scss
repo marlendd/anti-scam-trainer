@@ -3,7 +3,10 @@
   max-width: 1440px;
   margin: 0 auto;
   height: 100%;
-  padding: 0 32px 32px 32px;
+  //padding: 0 32px 32px 32px;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .hero {
@@ -144,6 +147,11 @@
 }
 
 @media (max-width: 900px) {
+  .page {
+    .hero {
+      order: 2;
+    }
+  }
   .grid {
     grid-template-columns: 1fr;
   }

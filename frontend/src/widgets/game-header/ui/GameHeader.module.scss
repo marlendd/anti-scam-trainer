@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 1800px;
+  max-width: 1480px;
   height: 100%;
   margin: 0 auto;
   padding: 0 48px;
@@ -47,6 +47,10 @@
   color: #858585;
 
   font-size: 22px;
+}
+
+.stats {
+  display: flex;
 }
 
 .timerValue {
@@ -164,7 +168,7 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 800px) {
   .header {
     height: 64px;
   }
@@ -195,5 +199,10 @@
 
   .timerIcon {
     font-size: 18px;
+  }
+}
+@media (max-width: 520px) {
+  .stats {
+    display: none;
   }
 }

@@ -42,26 +42,3 @@
   align-items: center;
   justify-content: center;
 }
-
-.card:hover {
-  .chevron {
-    animation: chevronMove 1.5s ease-in-out infinite;
-  }
-}
-
-@keyframes chevronMove {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  50% {
-    transform: translateX(6px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card:hover .chevron {
-    animation: none;
-  }
-}

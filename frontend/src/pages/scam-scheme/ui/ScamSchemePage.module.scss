@@ -25,10 +25,6 @@
 }
 
 @media (max-width: 640px) {
-  .page {
-    padding: 16px;
-  }
-
   .training {
     gap: 16px;
   }
@@ -40,17 +36,32 @@
   flex-direction: column;
   justify-content: center;
   align-items: start;
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.description {
+  font-size: 1rem;
+  max-width: 700px;
+  text-align: left;
+}
+
+
+@media (max-width: 640px) {
+  .text {
+    margin-bottom: 16px;
+  }
 
   .title {
-    font-size: 2rem;
-    margin-bottom: 8px;
+    font-size: 24px;
   }
 
   .description {
-    font-size: 1rem;
-    max-width: 700px;
-    text-align: left;
+    font-size: 16px;
   }
-
-  margin-bottom: 32px;
 }

@@ -96,8 +96,11 @@ export function GameHeader({
                         className={styles.separator}
                         aria-hidden="true"
                     />
-                    <FragmentCounter value={0}/>
-                    <PointsCounter value={0}/>
+
+                    <div className={styles.stats}>
+                        <FragmentCounter value={0}/>
+                        <PointsCounter value={0}/>
+                    </div>
                 </div>
 
                 {/*<div*/}

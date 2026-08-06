@@ -53,6 +53,7 @@
   pointer-events: none;
   transform: rotate(45deg);
 }
+
 .text {
   display: flex;
   flex-direction: row;
@@ -61,16 +62,16 @@
   flex-wrap: nowrap;
 
   padding-bottom: 16px;
+}
 
-  .title {
-    font-size: 32px;
-  }
+.title {
+  font-size: 32px;
+}
 
-  .counter {
-    font-size: 28px;
-    font-weight: bold;
-    color: #a1a1a1;
-  }
+.counter {
+  font-size: 28px;
+  font-weight: bold;
+  color: #a1a1a1;
 }
 
 .card {
@@ -175,6 +176,20 @@
 }
 
 @media (max-width: 640px) {
+  .text {
+    justify-content: space-between;
+  }
+
+  .title {
+    font-size: 24px;
+    text-align: left;
+
+  }
+
+  .counter {
+    font-size: 24px;
+  }
+
   .periods {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -187,5 +202,16 @@
 
   .grid {
     --ag-cell-horizontal-padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .title {
+    font-size: 20px;
+  }
+
+  .counter {
+    display: none;
   }
 }
