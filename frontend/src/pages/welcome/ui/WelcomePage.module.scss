@@ -1,0 +1,276 @@
+.page {
+  --slide-accent: #00aaff;
+
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+
+  display: flex;
+
+  height: calc(100dvh - 80px);
+
+  padding: 48px 64px 32px;
+  flex-direction: column;
+
+  background:
+    radial-gradient(
+      circle at 80% 45%,
+      color-mix(in srgb, var(--slide-accent) 14%, transparent),
+      transparent 34%
+    ),
+    #ffffff;
+
+  overflow: hidden;
+
+}
+
+.skipButton {
+  position: absolute;
+  z-index: 2;
+  top: 48px;
+  right: 48px;
+
+  padding: 10px 14px;
+
+  border: 0;
+  border-radius: 12px;
+
+  color: #858585;
+  background-color: transparent;
+
+  font: inherit;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+
+  &:hover {
+    color: #111111;
+    background-color: #f2f2f2;
+  }
+}
+
+.slide {
+  display: grid;
+  width: 100%;
+  max-width: 1440px;
+  margin: auto;
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+  align-items: center;
+  gap: 64px;
+
+  animation: slideAppear 350ms ease;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+
+  height: 100%;
+  max-width: 650px;
+
+  text-align: left;
+}
+
+.text {
+
+}
+
+.eyebrow {
+  display: inline-flex;
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  color: var(--slide-accent);
+  background-color:
+    color-mix(in srgb, var(--slide-accent) 12%, white);
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.title {
+  max-width: 680px;
+  margin: 24px 0 0;
+
+  color: #111111;
+
+  font-size: clamp(42px, 5vw, 72px);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+
+.description {
+  max-width: 590px;
+  margin: 28px 0 0;
+
+  color: #707070;
+
+  font-size: clamp(17px, 1.5vw, 21px);
+  line-height: 1.55;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.illustrationWrapper {
+  position: relative;
+
+  display: grid;
+  min-width: 0;
+  place-items: center;
+}
+
+.illustrationBackground {
+  position: absolute;
+
+  width: min(85%, 620px);
+  aspect-ratio: 1 / 1;
+
+  border-radius: 42% 58% 52% 48% / 50% 44% 56% 50%;
+
+  background-color:
+    color-mix(in srgb, var(--slide-accent) 10%, white);
+
+  transform: rotate(-6deg);
+
+  transition: background-color 250ms ease;
+}
+
+.illustration {
+  position: relative;
+  z-index: 1;
+
+  display: block;
+  width: min(100%, 680px);
+  height: 500px;
+
+  object-fit: contain;
+  filter: drop-shadow(0 28px 40px rgb(0 0 0 / 8%));
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.paginationButton {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 999px;
+
+  background-color: #d9d9d9;
+
+  cursor: pointer;
+
+  transition:
+    width 200ms ease,
+    background-color 200ms ease;
+
+  &[data-active='true'] {
+    width: 32px;
+    background-color: var(--slide-accent);
+  }
+}
+
+@keyframes slideAppear {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 960px) {
+  .page {
+    min-height: auto;
+    padding: 88px 32px 28px;
+  }
+
+  .slide {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .content {
+    max-width: 720px;
+    text-align: center;
+  }
+
+  .description {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .controls {
+    justify-content: center;
+  }
+
+  .illustration {
+    width: min(78vw, 520px);
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 80px 20px 24px;
+  }
+
+  .skipButton {
+    top: 20px;
+    right: 20px;
+  }
+
+  .title {
+    font-size: 38px;
+  }
+
+  .description {
+    margin-top: 20px;
+    font-size: 16px;
+  }
+
+  .controls {
+    margin-top: 28px;
+  }
+
+  .illustration {
+    width: min(88vw, 420px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    animation: none;
+  }
+
+  .paginationButton {
+    transition: none;
+  }
+}
