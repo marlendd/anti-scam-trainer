@@ -35,7 +35,7 @@ export function WelcomePage() {
 
     function handleNext() {
         if (isLastSlide) {
-            navigate('/role-selection')
+            navigate('/training/role-selection')
             return
         }
 
@@ -49,7 +49,7 @@ export function WelcomePage() {
     }
 
     function handleSkip() {
-        navigate('/role-selection')
+        navigate('/training/role-selection')
     }
 
     useEffect(() => {

@@ -12,6 +12,8 @@ import {NotFoundPage} from '@/pages/not-found'
 import {RegisterPage} from '@/pages/register'
 import {ScamSchemePage} from '@/pages/scam-scheme'
 import {WelcomePage} from '@/pages/welcome'
+import {RoleSelectionPage} from "@/pages/role-selection";
+import {GameLayout} from "@/app/layouts/game-layout";
 
 export function AppRouter() {
     return (
@@ -21,6 +23,15 @@ export function AppRouter() {
             <Route element={<AuthLayout/>}>
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/register" element={<RegisterPage/>}/>
+            </Route>
+
+            <Route element={<GameLayout/>}>
+                <Route path="/training">
+                    <Route path="role-selection" element={<RoleSelectionPage/>}/>
+                    <Route path="buyer" element={<RoleSelectionPage/>}/>
+                    <Route path="seller" element={<RoleSelectionPage/>}/>
+                </Route>
+
             </Route>
 
             <Route element={<DefaultLayout/>}>
