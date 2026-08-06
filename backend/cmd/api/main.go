@@ -4,35 +4,20 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
+	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 )
-
-type Config struct {
-	LogLevel string        `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
-	Address  string        `yaml:"address" env:"API_ADDRESS" env-default:"localhost:80"`
-	Timeout  time.Duration `yaml:"timeout" env:"API_TIMEOUT" env-default:"5s"`
-}
-
-func MustLoad(configPath string) Config {
-	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config %q: %s", configPath, err)
-	}
-	return cfg
-}
 
 func main() {
 	var configPath string
 	flag.StringVar(&configPath, "config", "config.yaml", "server configuration file")
 	flag.Parse()
 
-	cfg := MustLoad(configPath)
+	cfg := config.MustLoad(configPath)
 	log := mustMakeLogger(cfg.LogLevel)
 
 	if err := run(&cfg, log); err != nil {
@@ -41,7 +26,23 @@ func main() {
 	}
 }
 
-func run(cfg *Config, log *slog.Logger) error {
+func run(cfg *config.Config, log *slog.Logger) error {
+	db, err := postgres.NewDB(*cfg)
+	if err != nil {
+		return fmt.Errorf("failed to init postgres: %w", err)
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Error("failed to close postgres connection", "error", err)
+		}
+	}()
+
+	log.Info("database connection established successfully")
+
+	if err := postgres.RunMigrations(cfg.DatabaseURL, cfg.MigrationsPath); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+	
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /example", func(w http.ResponseWriter, r *http.Request) {
@@ -50,13 +51,18 @@ func run(cfg *Config, log *slog.Logger) error {
 		}
 	})
 
+	addr := ":" + cfg.Port
+	if cfg.Port == "" {
+		addr = ":8080"
+	}
+
 	server := http.Server{
-		Addr:        cfg.Address,
+		Addr:        addr,
 		ReadTimeout: cfg.Timeout,
 		Handler:     mux,
 	}
 
-	slog.Info("server run success", "addr", cfg.Address)
+	log.Info("server run success", "addr", server.Addr)
 
 	if err := server.ListenAndServe(); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
