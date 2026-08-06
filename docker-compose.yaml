@@ -1,0 +1,14 @@
+services:
+  backend:
+    image: backend:latest
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - 18080:8080
+    environment:
+      - LOG_LEVEL=DEBUG
+      - API_ADDRESS="localhost:8080"
+      - API_TIMEOUT=5s
