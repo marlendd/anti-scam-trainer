@@ -4,6 +4,7 @@ import styles from './Header.module.scss'
 import {FragmentCounter} from './FragmentCounter'
 import {PointsCounter} from './PointsCounter'
 import {Avatar} from "@/shared/ui/avatar";
+import {LoginButton} from "@/features/login-button";
 // import {PlayButton} from "@/features/play-button";
 
 export const Header = () => {
@@ -27,7 +28,11 @@ export const Header = () => {
                         <PointsCounter value={0}/>
                     </div>
 
-                    <Avatar/>
+                    {/*<Link to={'/dashboard'}>*/}
+                    {/*    <Avatar/>*/}
+                    {/*</Link>*/}
+
+                    <LoginButton/>
 
                     {/*<PlayButton/>*/}
                 </div>
