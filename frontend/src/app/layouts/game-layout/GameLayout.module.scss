@@ -1,15 +1,22 @@
 .layout {
   display: flex;
-  width: 100%;
-  min-height: 100dvh;
   flex-direction: column;
 
-  background-color: #ffffff;
+  width: 100%;
+  min-height: 100vh;
+
+  padding: 56px 0 0 0;
 }
 
 .content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   width: 100%;
-  min-height: calc(100dvh - 76px);
+  height: 100%;
+  max-width: 1480px;
+
   flex: 1;
 }
 

@@ -61,11 +61,11 @@ export function RoleSelectionPage() {
     const navigate = useNavigate()
 
     function handleSelectBuyer() {
-        navigate('/training/buyer')
+        navigate('/training/path/buyer')
     }
 
     function handleSelectSeller() {
-        navigate('/training/seller')
+        navigate('/training/path/seller')
     }
 
     return (

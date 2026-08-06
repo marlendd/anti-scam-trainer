@@ -28,8 +28,20 @@ export function AppRouter() {
             <Route element={<GameLayout/>}>
                 <Route path="/training">
                     <Route path="role-selection" element={<RoleSelectionPage/>}/>
-                    <Route path="buyer" element={<RoleSelectionPage/>}/>
-                    <Route path="seller" element={<RoleSelectionPage/>}/>
+
+
+                    <Route path="path">
+                        <Route path="buyer">
+                            <Route index element={<RoleSelectionPage/>}/>
+                            <Route path=":schemeId" element={<ScamSchemePage/>}/>
+
+                        </Route>
+                        <Route path="seller">
+                            <Route index element={<RoleSelectionPage/>}/>
+                            <Route path=":schemeId" element={<ScamSchemePage/>}/>
+                        </Route>
+                    </Route>
+
                 </Route>
 
             </Route>

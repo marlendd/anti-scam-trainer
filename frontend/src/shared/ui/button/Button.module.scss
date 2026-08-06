@@ -68,11 +68,11 @@
   }
 
   &[data-variant='ghost'] {
-    color: #00aaff;
+    color: #111111;
     background-color: transparent;
 
     &:hover:not(:disabled) {
-      background-color: rgb(0 170 255 / 10%);
+      background-color: #f1f1f1;
     }
   }
 
