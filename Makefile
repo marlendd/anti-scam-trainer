@@ -18,7 +18,7 @@ test:
 
 test-e2e: clean up
 	@echo "wait cluster to start..." && sleep 5
-	cd backend && go test -v -race ./...
+	cd backend && RUN_INTEGRATION_TESTS=1 go test -v -race ./...
 	$(MAKE) clean
 	@echo "e2e tests finished"
 

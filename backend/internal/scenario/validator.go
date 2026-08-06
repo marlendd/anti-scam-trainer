@@ -1,6 +1,9 @@
 package scenario
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Validate - валидатор данных сценария, проверяющий, удовлетворяет ли сценарий следующим условиям:
 // 1) ID старта, узлов, концовок и вариантов заполнены и уникальны;
@@ -16,6 +19,9 @@ func Validate(s Scenario) error {
 		if node.ID == "" {
 			return ErrEmptyNodeID
 		}
+		if strings.TrimSpace(node.Text) == "" {
+			return fmt.Errorf("%w: node %q", ErrEmptyNodeText, node.ID)
+		}
 
 		if _, exists := nodesByID[node.ID]; exists {
 			return fmt.Errorf("%w: %q", ErrDuplicateNodeID, node.ID)
@@ -27,6 +33,12 @@ func Validate(s Scenario) error {
 	for _, ending := range s.Endings {
 		if ending.ID == "" {
 			return ErrEmptyEndingID
+		}
+		if strings.TrimSpace(ending.Header) == "" {
+			return fmt.Errorf("%w: ending %q", ErrEmptyEndingHeader, ending.ID)
+		}
+		if strings.TrimSpace(ending.Result) == "" {
+			return fmt.Errorf("%w: ending %q", ErrEmptyEndingResult, ending.ID)
 		}
 		if _, exists := seenEndings[ending.ID]; exists {
 			return fmt.Errorf("%w: %q", ErrDuplicateEndingID, ending.ID)
@@ -52,6 +64,15 @@ func Validate(s Scenario) error {
 		for _, choice := range node.Choices {
 			if choice.ID == "" {
 				return ErrEmptyChoiceID
+			}
+			if strings.TrimSpace(choice.Text) == "" {
+				return fmt.Errorf("%w: choice %q", ErrEmptyChoiceText, choice.ID)
+			}
+			if strings.TrimSpace(choice.Consequence) == "" {
+				return fmt.Errorf("%w: choice %q", ErrEmptyConsequence, choice.ID)
+			}
+			if strings.TrimSpace(choice.Explanation) == "" {
+				return fmt.Errorf("%w: choice %q", ErrEmptyExplanation, choice.ID)
 			}
 
 			if _, exists := seenChoices[choice.ID]; exists {
@@ -95,15 +116,40 @@ func Validate(s Scenario) error {
 				return fmt.Errorf("%w: got %d", ErrInvalidScore, choice.Score)
 			}
 
-			if choice.Score != ScoreSafe {
-				if len(choice.RiskCategories) == 0 {
-					return fmt.Errorf("%w: choice %q", ErrMissingRiskCategory, choice.ID)
+			if choice.Score != ScoreSafe && len(choice.RiskCategories) == 0 {
+				return fmt.Errorf("%w: choice %q", ErrMissingRiskCategory, choice.ID)
+			}
+
+			for _, category := range choice.RiskCategories {
+				if !isKnownRiskCategory(category) {
+					return fmt.Errorf(
+						"%w: choice %q has %q",
+						ErrUnknownRiskCategory,
+						choice.ID,
+						category,
+					)
 				}
 			}
 		}
 	}
 
 	return validateGraph(s, nodesByID, seenEndings)
+}
+
+// isKnownRiskCategory - проверяет принадлежность категории риска закрытому набору значений.
+func isKnownRiskCategory(category RiskCategory) bool {
+	switch category {
+	case RiskExternalMessenger,
+		RiskExternalLink,
+		RiskSMSCode,
+		RiskOffPlatformPayment,
+		RiskFakePaymentDelivery,
+		RiskUrgencyPressure,
+		RiskDisableProtection:
+		return true
+	default:
+		return false
+	}
 }
 
 // validateGraph - валидатор графа сценария, проверяющий, удовлетворяет ли граф следующим условиям:

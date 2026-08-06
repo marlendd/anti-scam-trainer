@@ -20,6 +20,8 @@ type Result struct {
 	Completed   bool
 }
 
+// Transition - вычисляет результат выбора пользователя без изменения состояния.
+// Контракт: сценарий в Input должен предварительно успешно пройти scenario.Validate.
 func Transition(in Input) (Result, error) {
 	currentNode, err := findNode(in.Scenario.Nodes, in.CurrentNodeID)
 	if err != nil {
