@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
+	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
@@ -66,6 +67,10 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	authService := auth.NewService(userRepo, sessionRepo, passwordResetRepo, m, cfg.AppBaseURL)
 	authHandler := auth.NewHandler(authService, log, cfg.SecureCookies)
 	requireAuth := auth.RequireAuth(authService, log)
+	// evaluation
+	evalRepo := evaluation.NewPgRepository(db)
+	evalService := evaluation.NewService(evalRepo)
+	evalHandler := evaluation.NewHandler(evalService, log)
 
 	mux := http.NewServeMux()
 
@@ -83,7 +88,8 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.HandleFunc("POST /api/v1/auth/logout", authHandler.Logout)
 	mux.HandleFunc("POST /api/v1/auth/forgot-password", authHandler.ForgotPassword)
 	mux.HandleFunc("POST /api/v1/auth/reset-password", authHandler.ResetPassword)
-
+	mux.HandleFunc("GET  /api/v1/attempts/{id}/result", evalHandler.GetStatsOfAttempt)
+	mux.HandleFunc("GET  /api/v1/profile/progress", evalHandler.GetGlobalStatsHandler)
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
 

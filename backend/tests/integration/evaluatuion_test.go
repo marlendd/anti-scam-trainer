@@ -1,0 +1,71 @@
+package evaluation_test
+
+import (
+	"context"
+	"database/sql"
+	"os"
+	"testing"
+
+	_ "github.com/lib/pq"
+	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
+	"github.com/stretchr/testify/require"
+)
+
+func setupTestDB(t *testing.T) *sql.DB {
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		dbURL = "postgres://postgres:password@localhost:5433/postgres?sslmode=disable"
+	}
+
+	db, err := sql.Open("postgres", dbURL)
+	require.NoError(t, err)
+
+	return db
+}
+
+func TestEvaluation_Integration(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	repo := evaluation.NewPgRepository(db)
+	svc := evaluation.NewService(repo)
+	ctx := context.Background()
+
+	_, err := db.Exec("TRUNCATE users, scenario_versions, attempts, answers CASCADE")
+	require.NoError(t, err)
+
+	t.Run("Seed and Calculate Score", func(t *testing.T) {
+		seedSQL := `
+			INSERT INTO users (id, email, password_hash) VALUES ('00000000-0000-0000-0000-000000000001', 'test@test.com', 'hash');
+			INSERT INTO scenario_versions (id, logical_id, version, role, title, description, content) 
+			VALUES ('00000000-0000-0000-0000-000000000002', gen_random_uuid(), 1, 'buyer', 'title', 'desc', '{}'::jsonb);
+			INSERT INTO attempts (id, user_id, scenario_id, status, current_node_id) 
+			VALUES ('120b7935-62bf-4fd8-828a-6bbe7ef7a19a', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'in_progress', 'start_node');
+			
+			-- Тут оценка 50, значит риск ОБЯЗАТЕЛЕН
+			INSERT INTO answers (attempt_id, node_id, choice_id, idempotency_key, weight, choice_score, risk_categories, consequence, explanation, response)
+			VALUES ('120b7935-62bf-4fd8-828a-6bbe7ef7a19a', 'node1', 'c1', gen_random_uuid(), 2, 50, '["suspicious_link"]'::jsonb, 'cons', 'expl', '{}');
+			
+			-- Тут оценка 100, риск может быть пустым
+			INSERT INTO answers (attempt_id, node_id, choice_id, idempotency_key, weight, choice_score, risk_categories, consequence, explanation, response)
+			VALUES ('120b7935-62bf-4fd8-828a-6bbe7ef7a19a', 'node2', 'c2', gen_random_uuid(), 1, 100, '[]'::jsonb, 'cons', 'expl', '{}');
+		`
+		_, err := db.Exec(seedSQL)
+		require.NoError(t, err)
+
+		score, err := svc.GetAttemptResults(ctx, "120b7935-62bf-4fd8-828a-6bbe7ef7a19a")
+		require.NoError(t, err)
+		require.Equal(t, 66, score)
+	})
+
+	t.Run("Verify Global Progress Stats", func(t *testing.T) {
+		stats, err := repo.GetStatsByRole(ctx)
+		require.NoError(t, err)
+		require.NotEmpty(t, stats)
+		require.Len(t, stats, 1)
+
+		require.Equal(t, "buyer", stats[0].Role)
+		require.Equal(t, int64(1), stats[0].InProgressCount)
+		require.Equal(t, int64(0), stats[0].CompletedCount)
+	})
+}
