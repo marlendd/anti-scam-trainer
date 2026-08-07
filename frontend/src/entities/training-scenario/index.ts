@@ -1,20 +1,22 @@
 // src/entities/training-scenario/index.ts
 
 export {
-  fakeDeliveryScenario,
-  trainingScenarioMocks,
+    fakeDeliveryScenario,
+    trainingScenarioMocks,
 } from './model/mocks'
 
 export type {
-  ScenarioAnalysis,
-  ScenarioMessage,
-  ScenarioParticipant,
-  ScenarioParticipantRole,
-  ScenarioProduct,
-  ScenarioRedFlag,
-  TrainingScenario,
+    ScenarioAnalysis,
+    ScenarioMessage,
+    ScenarioTimelineItem,
+    ScenarioAnswerOption,
+    ScenarioParticipant,
+    ScenarioParticipantRole,
+    ScenarioProduct,
+    ScenarioRedFlag,
+    TrainingScenario,
 } from './model/types'
 
-export { mockScenarioRepository } from './api/mockScenarioRepository'
+export {mockScenarioRepository} from './api/mockScenarioRepository'
 
-export type { ScenarioRepository } from './api/scenarioRepository'
+export type {ScenarioRepository} from './api/scenarioRepository'

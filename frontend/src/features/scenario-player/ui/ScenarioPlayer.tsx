@@ -1,5 +1,3 @@
-// features/scenario-player/ui/ScenarioPlayer.tsx
-
 import { useEffect, useRef } from 'react'
 
 import type {
@@ -8,13 +6,21 @@ import type {
 } from '@/entities/training-scenario'
 import { ChatMessage } from '@/shared/ui/chat-message'
 
-import { useScenarioPlayback } from '../model/useScenarioPlayback'
+import {
+  type ScenarioResult,
+  useScenarioPlayback,
+} from '../model/useScenarioPlayback'
 
 import styles from './ScenarioPlayer.module.scss'
 
+export type ScenarioPlayerMode =
+  | 'preview'
+  | 'interactive'
+
 type ScenarioPlayerProps = {
   scenario: TrainingScenario
-  onComplete?: () => void
+  mode?: ScenarioPlayerMode
+  onComplete?: (result: ScenarioResult) => void
 }
 
 function getMessagePosition(
@@ -48,27 +54,57 @@ function getMessagePosition(
 
 export function ScenarioPlayer({
   scenario,
+  mode = 'preview',
   onComplete,
 }: ScenarioPlayerProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const {
     visibleMessages,
+    currentChoice,
+    selectedAnswers,
+    isWaitingForAnswer,
+    isTyping,
     isCompleted,
-  } = useScenarioPlayback(scenario.messages)
+    selectAnswer,
+  } = useScenarioPlayback({
+    timeline: scenario.timeline,
+    playerParticipantId:
+      scenario.playerParticipantId,
+    mode,
+  })
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'end',
     })
-  }, [visibleMessages.length])
+  }, [
+    visibleMessages.length,
+    isWaitingForAnswer,
+  ])
 
   useEffect(() => {
-    if (isCompleted) {
-      onComplete?.()
+    if (!isCompleted) {
+      return
     }
-  }, [isCompleted, onComplete])
+
+    const totalAnswers = selectedAnswers.length
+
+    const correctAnswers =
+      selectedAnswers.filter(
+        ({ answer }) => answer.isCorrect,
+      ).length
+
+    onComplete?.({
+      totalAnswers,
+      correctAnswers,
+    })
+  }, [
+    isCompleted,
+    onComplete,
+    selectedAnswers,
+  ])
 
   return (
     <div className={styles.messages}>
@@ -79,7 +115,8 @@ export function ScenarioPlayer({
         )
 
         const direction =
-          message.senderId === scenario.playerParticipantId
+          message.senderId ===
+          scenario.playerParticipantId
             ? 'outgoing'
             : 'incoming'
 
@@ -90,7 +127,8 @@ export function ScenarioPlayer({
 
         const showAvatar =
           direction === 'incoming' &&
-          (position === 'single' || position === 'last')
+          (position === 'single' ||
+            position === 'last')
 
         return (
           <ChatMessage
@@ -104,11 +142,34 @@ export function ScenarioPlayer({
         )
       })}
 
-      {!isCompleted && (
+      {isTyping && (
         <div className={styles.typing}>
           Собеседник печатает…
         </div>
       )}
+
+      {mode === 'interactive' &&
+        isWaitingForAnswer &&
+        currentChoice && (
+          <div className={styles.answers}>
+            <span className={styles.answersLabel}>
+              Выберите ответ
+            </span>
+
+            {currentChoice.options.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={styles.answer}
+                onClick={() => {
+                  selectAnswer(option)
+                }}
+              >
+                {option.text}
+              </button>
+            ))}
+          </div>
+        )}
 
       <div ref={messagesEndRef} />
     </div>

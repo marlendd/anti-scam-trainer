@@ -19,7 +19,7 @@ export const welcomeSlides: WelcomeSlide[] = [
   {
     id: 'introduction',
     eyebrow: 'Антискам-тренажёр',
-    title: 'Научитесь распознавать мошенников',
+    title: 'Распознавайте мошенников',
     description:
       'Пройдите интерактивные сценарии, основанные на реальных схемах обмана, и научитесь безопасно покупать и продавать товары.',
     illustration: welcomeImage,

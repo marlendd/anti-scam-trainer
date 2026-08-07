@@ -32,6 +32,7 @@ export function ScamSchemePage() {
       <div className={styles.training}>
         <TrainingChat
           scenario={scenario}
+          mode="preview"
           onScenarioComplete={() => {
             setIsScenarioCompleted(true)
           }}

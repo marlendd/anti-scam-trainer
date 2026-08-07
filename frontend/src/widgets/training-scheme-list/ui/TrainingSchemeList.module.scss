@@ -1,7 +1,7 @@
 .list {
-  display: flex;
   width: 100%;
-  flex-direction: column;
+  max-height: calc(100dvh - 120px);
+  overflow-y: scroll;
   gap: 16px;
 }
 
@@ -11,7 +11,13 @@
 
   background-color: #ffffff;
 
+  min-height: 160px;
+
   overflow: hidden;
+
+  &:not(:last-child) {
+    margin-bottom: 16px;
+  }
 }
 
 .schemeHeader {

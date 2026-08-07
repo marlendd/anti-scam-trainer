@@ -1,6 +1,6 @@
-// src/entities/training-scenario/model/types.ts
-
-export type ScenarioParticipantRole = 'buyer' | 'seller'
+export type ScenarioParticipantRole =
+  | 'buyer'
+  | 'seller'
 
 export type ScenarioParticipant = {
   id: string
@@ -17,11 +17,41 @@ export type ScenarioProduct = {
 }
 
 export type ScenarioMessage = {
+  type: 'message'
   id: string
   senderId: string
   text: string
   delayMs?: number
 }
+
+export type ScenarioAnswerOption = {
+  id: string
+  text: string
+  isCorrect: boolean
+
+  /**
+   * Потом сюда можно добавить объяснение,
+   * изменение score и т.д.
+   */
+  feedback?: string
+}
+
+export type ScenarioChoice = {
+  type: 'choice'
+  id: string
+
+  options: ScenarioAnswerOption[]
+
+  /**
+   * Какой ответ автоматически показывать
+   * в режиме preview / glossary.
+   */
+  previewOptionId?: string
+}
+
+export type ScenarioTimelineItem =
+  | ScenarioMessage
+  | ScenarioChoice
 
 export type ScenarioRedFlag = {
   id: string
@@ -41,9 +71,13 @@ export type TrainingScenario = {
   id: string
   title: string
   description: string
+
   product: ScenarioProduct
-  analysis: ScenarioAnalysis
+
   playerParticipantId: string
   participants: ScenarioParticipant[]
-  messages: ScenarioMessage[]
+
+  timeline: ScenarioTimelineItem[]
+
+  analysis: ScenarioAnalysis
 }

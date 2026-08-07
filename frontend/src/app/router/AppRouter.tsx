@@ -35,7 +35,7 @@ export function AppRouter() {
 
                     <Route path="path/:pathId">
                         <Route index element={<BuyerPathPage/>}/>
-                        <Route path=":schemeId" element={<ScamSchemePage/>}/>
+                        <Route path=":schemeId" element={<BuyerPathPage/>}/>
                     </Route>
 
                 </Route>
