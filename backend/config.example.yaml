@@ -1,9 +1,9 @@
+# config.example.yaml — скопируй в config.yaml и заполни своими значениями
 env: "local"
 port: "8080"
 timeout: "5s"
 log_level: "DEBUG"
 
-# database_url: задаётся через переменную окружения DATABASE_URL, не хранится тут
 migrations_path: "migrations"
 
 max_open_conns: 50
@@ -12,3 +12,11 @@ conn_max_lifetime: "60m"
 conn_max_idle_time: "5m"
 
 secure_cookies: false
+
+smtp_host: "smtp.yandex.ru"
+smtp_port: 465
+smtp_username: ""
+smtp_password: ""
+smtp_from: ""
+
+app_base_url: "http://localhost:3000"

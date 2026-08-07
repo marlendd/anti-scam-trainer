@@ -157,3 +157,66 @@ func respondJSON(w http.ResponseWriter, status int, payload any) {
 func respondError(w http.ResponseWriter, status int, message string) {
 	respondJSON(w, status, map[string]string{"error": message})
 }
+
+type forgotPasswordRequest struct {
+	Email string `json:"email"`
+}
+
+type resetPasswordRequest struct {
+	Token       string `json:"token"`
+	NewPassword string `json:"new_password"`
+}
+
+func (h *Handler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var req forgotPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	req.Email = strings.TrimSpace(req.Email)
+	if !isValidEmail(req.Email) {
+		respondError(w, http.StatusBadRequest, "invalid email")
+		return
+	}
+
+	if err := h.service.RequestPasswordReset(r.Context(), req.Email); err != nil {
+		h.log.Error("request password reset failed", "error", err)
+		// пользователю всё равно отвечаем 200 — не раскрываем детали
+	}
+
+	respondJSON(w, http.StatusOK, map[string]string{
+		"message": "если email зарегистрирован, на него отправлена ссылка для восстановления",
+	})
+}
+
+func (h *Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var req resetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if len(req.NewPassword) < 8 {
+		respondError(w, http.StatusBadRequest, "password must be at least 8 characters")
+		return
+	}
+
+	err := h.service.ResetPassword(r.Context(), req.Token, req.NewPassword)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrTokenNotFound):
+			respondError(w, http.StatusBadRequest, "invalid or expired token")
+		case errors.Is(err, ErrTokenExpired):
+			respondError(w, http.StatusBadRequest, "token expired")
+		case errors.Is(err, ErrTokenAlreadyUsed):
+			respondError(w, http.StatusBadRequest, "token already used")
+		default:
+			h.log.Error("reset password failed", "error", err)
+			respondError(w, http.StatusInternalServerError, "internal server error")
+		}
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]string{"message": "password updated successfully"})
+}

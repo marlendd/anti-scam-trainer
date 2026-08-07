@@ -2,9 +2,15 @@ package auth
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
 )
 
 const SessionTTL = 30 * 24 * time.Hour // 30 дней
@@ -12,16 +18,9 @@ const SessionTTL = 30 * 24 * time.Hour // 30 дней
 var (
 	ErrInvalidCredentials = errors.New("invalid email or password")
 	ErrEmailTaken         = errors.New("email already registered")
+	ErrTokenExpired       = errors.New("reset token expired")
+	ErrTokenAlreadyUsed   = errors.New("reset token already used")
 )
-
-type Service struct {
-	users    UserRepository
-	sessions SessionRepository
-}
-
-func NewService(users UserRepository, sessions SessionRepository) *Service {
-	return &Service{users: users, sessions: sessions}
-}
 
 func (s *Service) Register(ctx context.Context, email, password string) (User, error) {
 	hash, err := HashPassword(password)
@@ -81,4 +80,97 @@ func (s *Service) GetUserBySession(ctx context.Context, sessionID string) (User,
 func clientIP(r *http.Request) string {
 	ip := r.RemoteAddr
 	return ip
+}
+
+const PasswordResetTTL = 1 * time.Hour
+
+type Service struct {
+	users         UserRepository
+	sessions      SessionRepository
+	passwordReset PasswordResetRepository
+	mailer        *mailer.Mailer
+	appBaseURL    string
+}
+
+func NewService(users UserRepository, sessions SessionRepository, passwordReset PasswordResetRepository, m *mailer.Mailer, appBaseURL string) *Service {
+	return &Service{
+		users:         users,
+		sessions:      sessions,
+		passwordReset: passwordReset,
+		mailer:        m,
+		appBaseURL:    appBaseURL,
+	}
+}
+
+func (s *Service) RequestPasswordReset(ctx context.Context, email string) error {
+	u, err := s.users.GetByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, ErrUserNotFound) {
+			return nil // молча выходим, как будто всё ок
+		}
+		return err
+	}
+
+	rawToken, err := generateRandomToken()
+	if err != nil {
+		return err
+	}
+	tokenHash := hashToken(rawToken)
+
+	if _, err := s.passwordReset.Create(ctx, u.ID, tokenHash, PasswordResetTTL); err != nil {
+		return err
+	}
+
+	resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.appBaseURL, rawToken)
+
+	if err := s.mailer.SendPasswordReset(u.Email, resetLink); err != nil {
+		return fmt.Errorf("failed to send reset email: %w", err)
+	}
+
+	return nil
+}
+
+// ResetPassword проверяет токен и устанавливает новый пароль.
+func (s *Service) ResetPassword(ctx context.Context, rawToken, newPassword string) error {
+	tokenHash := hashToken(rawToken)
+
+	t, err := s.passwordReset.GetByTokenHash(ctx, tokenHash)
+	if err != nil {
+		return err // ErrTokenNotFound наружу
+	}
+
+	if t.UsedAt != nil {
+		return ErrTokenAlreadyUsed
+	}
+	if time.Now().After(t.ExpiresAt) {
+		return ErrTokenExpired
+	}
+
+	hash, err := HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	if err := s.users.UpdatePassword(ctx, t.UserID, hash); err != nil {
+		return err
+	}
+
+	if err := s.passwordReset.MarkUsed(ctx, t.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func generateRandomToken() (string, error) {
+	b := make([]byte, 32) // 256 бит энтропии
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
+func hashToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(sum[:])
 }

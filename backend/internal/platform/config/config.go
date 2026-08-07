@@ -21,6 +21,15 @@ type Config struct {
 	ConnMaxIdleTime time.Duration `yaml:"conn_max_idle_time" env:"DB_CONN_MAX_IDLE_TIME" env-default:"5m"`
 
 	SecureCookies bool `yaml:"secure_cookies" env:"SECURE_COOKIES" env-default:"false"`
+
+	// SMTP
+	SMTPHost     string `yaml:"smtp_host" env:"SMTP_HOST"`
+	SMTPPort     int    `yaml:"smtp_port" env:"SMTP_PORT" env-default:"587"`
+	SMTPUsername string `yaml:"smtp_username" env:"SMTP_USERNAME"`
+	SMTPPassword string `yaml:"smtp_password" env:"SMTP_PASSWORD"`
+	SMTPFrom     string `yaml:"smtp_from" env:"SMTP_FROM"`
+
+	AppBaseURL string `yaml:"app_base_url" env:"APP_BASE_URL" env-default:"http://localhost:3000"`
 }
 
 func MustLoad(configPath string) Config {

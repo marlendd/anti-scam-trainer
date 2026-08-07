@@ -14,6 +14,7 @@ import (
 
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
+	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 )
 
@@ -48,15 +49,27 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
+	// ---------- wiring mailer ----------
+	m := mailer.New(mailer.Config{
+		Host:     cfg.SMTPHost,
+		Port:     cfg.SMTPPort,
+		Username: cfg.SMTPUsername,
+		Password: cfg.SMTPPassword,
+		From:     cfg.SMTPFrom,
+	})
+
 	// ---------- wiring auth ----------
 	userRepo := auth.NewPgUserRepository(db)
 	sessionRepo := auth.NewPgSessionRepository(db)
-	authService := auth.NewService(userRepo, sessionRepo)
+	passwordResetRepo := auth.NewPgPasswordResetRepository(db)
+
+	authService := auth.NewService(userRepo, sessionRepo, passwordResetRepo, m, cfg.AppBaseURL)
 	authHandler := auth.NewHandler(authService, log, cfg.SecureCookies)
 	requireAuth := auth.RequireAuth(authService, log)
 
 	mux := http.NewServeMux()
 
+	// health/ready
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -68,6 +81,8 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)
 	mux.HandleFunc("POST /api/v1/auth/logout", authHandler.Logout)
+	mux.HandleFunc("POST /api/v1/auth/forgot-password", authHandler.ForgotPassword)
+	mux.HandleFunc("POST /api/v1/auth/reset-password", authHandler.ResetPassword)
 
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
