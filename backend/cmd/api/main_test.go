@@ -19,7 +19,7 @@ func TestRunIntegration_AuthFlow(t *testing.T) {
 		LogLevel:        "DEBUG",
 		Port:            "8089",
 		Timeout:         2 * time.Second,
-		DatabaseURL:     "postgres://postgres:postgres@127.0.0.1:5433/antiscam_test?sslmode=disable",
+		DatabaseURL:     "postgres://postgres:password@127.0.0.1:5433/postgres?sslmode=disable",
 		MigrationsPath:  "../../migrations",
 		MaxOpenConns:    5,
 		MaxIdleConns:    5,
