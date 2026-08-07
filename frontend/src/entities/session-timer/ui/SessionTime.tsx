@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import {
-  faStopwatch,
-} from '@fortawesome/free-solid-svg-icons'
+import { faStopwatch } from '@fortawesome/free-solid-svg-icons'
 
 import { Icon } from '@/shared/ui/icon'
 
@@ -11,6 +9,7 @@ import styles from './SessionTime.module.scss'
 type SessionTimeProps = {
   isRunning?: boolean
   initialSeconds?: number
+  storageKey?: string
 }
 
 function formatTime(totalSeconds: number) {
@@ -25,9 +24,21 @@ function formatTime(totalSeconds: number) {
 export function SessionTime({
   isRunning = true,
   initialSeconds = 0,
+  storageKey = 'session-time',
 }: SessionTimeProps) {
-  const [elapsedSeconds, setElapsedSeconds] =
-    useState(initialSeconds)
+  const [elapsedSeconds, setElapsedSeconds] = useState(() => {
+    const savedValue = localStorage.getItem(storageKey)
+
+    if (savedValue === null) {
+      return initialSeconds
+    }
+
+    const parsedValue = Number(savedValue)
+
+    return Number.isFinite(parsedValue)
+      ? parsedValue
+      : initialSeconds
+  })
 
   useEffect(() => {
     if (!isRunning) {
@@ -42,6 +53,13 @@ export function SessionTime({
       window.clearInterval(interval)
     }
   }, [isRunning])
+
+  useEffect(() => {
+    localStorage.setItem(
+      storageKey,
+      String(elapsedSeconds),
+    )
+  }, [elapsedSeconds, storageKey])
 
   return (
     <div

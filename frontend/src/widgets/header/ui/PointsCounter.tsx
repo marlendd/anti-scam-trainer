@@ -10,8 +10,7 @@ export function PointsCounter({value}: PointsCounterProps) {
     return (
         <div className={styles.counter}>
             <Icon icon={faGem} style={{color: '#00aaff'}}/>
-            {/*<span>{value}</span>*/}
-            {320}
+            <span>{value}</span>
         </div>
     )
 }

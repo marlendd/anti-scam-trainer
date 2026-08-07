@@ -1,0 +1,265 @@
+.card {
+  position: relative;
+
+  display: flex;
+  min-width: 0;
+  //padding: 24px;
+  flex-direction: column;
+  gap: 24px;
+
+  //border: 1px solid #ededed;
+  border-radius: 32px;
+
+  text-align: left;
+
+  //background-color: #ffffff;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+
+  &:hover {
+    //border-color: #dddddd;
+    //
+    //box-shadow:
+    //  0 18px 50px rgb(0 0 0 / 6%);
+    //
+    //transform: translateY(-2px);
+  }
+
+  &[data-completed='true'] {
+    border-color: rgb(0 170 255 / 25%);
+
+    background:
+      linear-gradient(
+        180deg,
+        rgb(0 170 255 / 3%),
+        transparent 45%
+      ),
+      #ffffff;
+  }
+}
+
+.puzzle {
+  position: relative;
+
+  width: 100%;
+  margin: 0 auto;
+}
+
+.completedBadge {
+  position: absolute;
+  z-index: 5;
+  top: 14px;
+  right: 14px;
+
+  display: inline-flex;
+  padding: 8px 12px;
+  align-items: center;
+  gap: 6px;
+
+  border-radius: 999px;
+
+  color: #008f45;
+  background-color: #ffffff;
+
+  box-shadow:
+    0 6px 20px rgb(0 0 0 / 10%);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.title {
+  margin: 0;
+
+  color: #111111;
+
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.description {
+  margin: 8px 0 0;
+
+  color: #858585;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #858585;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.progressTrack {
+  width: 100%;
+  height: 8px;
+
+  border-radius: 999px;
+
+  background-color: #eeeeee;
+
+  overflow: hidden;
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+
+  border-radius: inherit;
+
+  background-color: #00aaff;
+
+  transition: width 300ms ease;
+}
+
+.reward {
+  display: flex;
+  padding: 16px;
+  align-items: flex-start;
+  gap: 14px;
+
+  border-radius: 20px;
+
+  background-color: #f7f7f7;
+}
+
+.rewardIcon {
+  display: inline-flex;
+  width: 42px;
+  min-width: 42px;
+  aspect-ratio: 1 / 1;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 14px;
+
+  color: #00aaff;
+  background-color: rgb(0 170 255 / 10%);
+
+  font-size: 17px;
+}
+
+.rewardContent {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rewardLabel {
+  color: #858585;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rewardTitle {
+  color: #111111;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rewardDescription {
+  margin-top: 3px;
+
+  color: #858585;
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.footer {
+  display: none;
+  min-height: 48px;
+  margin-top: auto;
+  align-items: center;
+}
+
+.remaining {
+  width: 100%;
+
+  color: #858585;
+
+  font-size: 14px;
+  text-align: center;
+}
+
+.claimed {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border-radius: 14px;
+
+  color: #008f45;
+  background-color: rgb(4 224 97 / 8%);
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+
+    border-radius: 24px;
+
+    gap: 18px;
+  }
+
+  .puzzle {
+    width: min(100%, 320px);
+  }
+
+  .content {
+    gap: 18px;
+  }
+
+  .title {
+    font-size: 21px;
+  }
+
+  .reward {
+    padding: 14px;
+
+    border-radius: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .progressFill {
+    transition: none;
+  }
+}

@@ -10,8 +10,7 @@ export function FragmentCounter({ value }: FragmentCounterProps) {
   return (
     <div className={styles.counter}>
       <Icon icon={faPuzzlePiece} style={{ color: '#965eeb' }}/>
-      {/*<span>{value}</span>*/}
-      <span>2</span>
+      <span>{value}</span>
     </div>
   )
 }

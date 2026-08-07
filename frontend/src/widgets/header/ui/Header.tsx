@@ -18,6 +18,7 @@ export const Header = () => {
             <div className={styles.left}>
                 <nav className={styles.navigation}>
                     <Link to='/training/role-selection'>Сценарии</Link>
+                    <Link to='/puzzle'>Магазин</Link>
                     <Link to='/glossary'>Глоссарий</Link>
                     <Link to='/leaderboard'>Лидеры</Link>
                     <Link to='/dashboard'>Статистика</Link>

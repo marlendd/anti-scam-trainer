@@ -16,6 +16,7 @@ import {RoleSelectionPage} from "@/pages/role-selection";
 import {GameLayout} from "@/app/layouts/game-layout";
 import {BuyerPathPage} from "../../pages/buyer-path/ui/BuyerPathPage.tsx";
 import {ForgotPasswordPage} from "@/pages/forgot-password";
+import {PuzzlePage} from "@/pages/puzzle/ui/PuzzlePage.tsx";
 
 export function AppRouter() {
     return (
@@ -47,6 +48,7 @@ export function AppRouter() {
                 <Route path="/welcome" element={<WelcomePage/>}/>
                 <Route path="/dashboard" element={<DashboardPage/>}/>
                 <Route path="/leaderboard" element={<LeaderboardPage/>}/>
+                <Route path="/puzzle" element={<PuzzlePage/>}/>
 
                 <Route path="/glossary">
                     <Route index element={<GlossaryPage/>}/>
