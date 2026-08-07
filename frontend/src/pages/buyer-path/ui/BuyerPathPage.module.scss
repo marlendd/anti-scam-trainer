@@ -1,0 +1,14 @@
+.page {
+  width: 100%;
+  min-height: calc(100vh - 120px);
+  
+  display: grid;
+  grid-template-columns: 3fr 5fr;
+  justify-content: center;
+  align-items: stretch;
+  gap: 16px;
+
+  position: relative;
+
+  overflow: hidden;
+}

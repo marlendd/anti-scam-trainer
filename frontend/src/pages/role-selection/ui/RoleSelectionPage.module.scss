@@ -1,0 +1,185 @@
+.page {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  height: 100%;
+  //padding: 0 32px 32px 32px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  max-width: 720px;
+  margin: 0 auto 40px;
+
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-flex;
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  color: #00aaff;
+  background-color: rgb(0 170 255 / 10%);
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.title {
+  margin: 20px 0 0;
+
+  color: #111111;
+
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.description {
+  margin: 18px auto 0;
+
+  color: #777777;
+
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 400px);
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 28px;
+
+  cursor: pointer;
+  
+  border-radius: 32px;
+
+  background-color: #f7f7f7;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 8%);
+}
+
+.card[data-accent='blue'] {
+  .cardTitle {
+    color: #00aaff;
+  }
+}
+
+.card[data-accent='red'] {
+  .cardTitle {
+    color: #ff4053;
+  }
+}
+
+.card[data-accent='green'] {
+  .cardTitle {
+    color: #03cd58;
+  }
+}
+
+.imageWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.image {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  object-fit: contain;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.cardTitle {
+  margin: 0;
+
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.cardDescription {
+  margin: 14px 0 0;
+
+  color: #767676;
+
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.content :global(button) {
+  margin-top: auto;
+}
+
+.note {
+  margin: 24px 0 0;
+
+  color: #8a8a8a;
+
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .page {
+    .hero {
+      order: 2;
+    }
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 16px 40px;
+  }
+
+  .hero {
+    margin-bottom: 28px;
+  }
+
+  .description {
+    font-size: 16px;
+  }
+
+  .card {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .cardTitle {
+    font-size: 26px;
+  }
+
+  .cardDescription {
+    font-size: 15px;
+  }
+}

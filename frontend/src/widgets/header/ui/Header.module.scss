@@ -1,0 +1,72 @@
+﻿.header {
+  display: flex;
+  min-height: 80px;
+  padding: 20px 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.info {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 32px;
+}
+
+.left {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: nowrap;
+}
+
+.counters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  user-select: none;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  font-size: 16px;
+}
+
+/* Небольшие ноутбуки и планшеты */
+@media (max-width: 1100px) {
+  .header {
+    gap: 16px;
+  }
+
+  .info {
+    gap: 20px;
+  }
+
+  .left {
+    gap: 24px;
+  }
+
+  .navigation {
+    gap: 16px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 800px) {
+  .navigation {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .counters {
+    display: none;
+  }
+}
