@@ -24,3 +24,13 @@ type PuzzleProgress struct {
 	TotalCount  int              `json:"total_count"`
 	Fragments   []PuzzleFragment `json:"fragments"`
 }
+
+type CategoryStat struct {
+	Category string `json:"category"`
+	Count    int    `json:"count"`
+}
+
+type DashboardData struct {
+	TotalCompleted int            `json:"total_completed"`
+	Stats          []CategoryStat `json:"stats"`
+}

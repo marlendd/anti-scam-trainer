@@ -91,6 +91,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	// eval routes
 	mux.HandleFunc("GET  /api/v1/attempts/{id}/result", evalHandler.GetStatsOfAttempt)
 	mux.HandleFunc("GET  /api/v1/profile/progress", evalHandler.GetGlobalStatsHandler)
+	mux.HandleFunc("GET /api/v1/evaluation/categories", evalHandler.GetCategoryStats)
 
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))

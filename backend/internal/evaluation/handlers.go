@@ -46,14 +46,15 @@ func (h *Handler) GetGlobalStatsHandler(w http.ResponseWriter, r *http.Request) 
 	h.respondJSON(w, http.StatusOK, stats)
 }
 
-func (h *Handler) respondJSON(w http.ResponseWriter, status int, payload any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(payload)
-}
+func (h *Handler) GetCategoryStats(w http.ResponseWriter, r *http.Request) {
+	data, err := h.service.GetCategoryDashboard(r.Context())
+	if err != nil {
+		h.log.Error("failed to get dashboard stats", "error", err)
+		h.respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
 
-func (h *Handler) respondError(w http.ResponseWriter, status int, message string) {
-	h.respondJSON(w, status, map[string]string{"error": message})
+	h.respondJSON(w, http.StatusOK, data)
 }
 
 func (h *Handler) GetMyPuzzleProgress(w http.ResponseWriter, r *http.Request) {
@@ -72,4 +73,14 @@ func (h *Handler) GetMyPuzzleProgress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.respondJSON(w, http.StatusOK, progress)
+}
+
+func (h *Handler) respondJSON(w http.ResponseWriter, status int, payload any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(payload)
+}
+
+func (h *Handler) respondError(w http.ResponseWriter, status int, message string) {
+	h.respondJSON(w, status, map[string]string{"error": message})
 }

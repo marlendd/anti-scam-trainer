@@ -21,7 +21,36 @@ INSERT INTO scenario_versions(
 	'buying videocard',                   
 	'scam when buying',                     
 	true,
-	'{}'::jsonb  
+	'{
+  "start_node_id": "node-start",
+  "nodes": [
+    {
+      "id": "node-start",
+      "author": "seller",
+      "text": "Сообщение продавца",
+      "choices": [
+        {
+          "id": "choice-1",
+          "text": "Ответ пользователя",
+          "consequence": "Последствие выбора",
+          "explanation": "Почему это безопасно или опасно",
+          "weight": 3,
+          "score": 100,
+          "risk_categories": ["СМС оповещение", "Стороняя ссылка"],
+          "next_node_id": "node-2",
+          "ending_id": ""
+        }
+      ]
+    }
+  ],
+  "endings": [
+    {
+      "id": "ending-safe",
+      "header": "Безопасная концовка",
+      "result": "Пользователь избежал мошенничества"
+    }
+  ]
+}'::jsonb  
 );
 
 INSERT INTO attempts (

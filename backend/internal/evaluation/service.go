@@ -61,3 +61,20 @@ func (s *Service) GrantRewardIfEligible(ctx context.Context, userID, fragmentID 
 	}
 	return s.repo.SaveReward(ctx, userID, fragmentID)
 }
+
+func (s *Service) GetCategoryDashboard(ctx context.Context) (DashboardData, error) {
+	stats, err := s.repo.GetStatsByCategory(ctx)
+	if err != nil {
+		return DashboardData{}, err
+	}
+
+	total, err := s.repo.GetTotalCompletedCount(ctx)
+	if err != nil {
+		return DashboardData{}, err
+	}
+
+	return DashboardData{
+		TotalCompleted: total,
+		Stats:          stats,
+	}, nil
+}
