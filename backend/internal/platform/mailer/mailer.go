@@ -54,13 +54,22 @@ func (m *Mailer) sendViaImplicitTLS(toEmail string, msg []byte) error {
 	if err != nil {
 		return fmt.Errorf("tls dial failed: %w", err)
 	}
-	defer conn.Close()
+	defer func() {
+		if cerr := conn.Close(); cerr != nil {
+			// соединение уже могло быть закрыто через client.Quit() ниже — это не критично
+			_ = cerr
+		}
+	}()
 
 	client, err := smtp.NewClient(conn, m.cfg.Host)
 	if err != nil {
 		return fmt.Errorf("smtp client init failed: %w", err)
 	}
-	defer client.Close()
+	defer func() {
+		if cerr := client.Close(); cerr != nil {
+			_ = cerr
+		}
+	}()
 
 	auth := smtp.PlainAuth("", m.cfg.Username, m.cfg.Password, m.cfg.Host)
 	if err := client.Auth(auth); err != nil {
