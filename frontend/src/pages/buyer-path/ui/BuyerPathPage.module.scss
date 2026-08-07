@@ -30,7 +30,19 @@
 
 @media (max-width: 1000px) {
   .page {
-    display: block;
+    display: flex;
+    align-items: stretch;
+
+    min-height: calc(100dvh - 120px);
+  }
+
+  .chatColumn {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .pathColumn {
+    width: 100%;
   }
 
   /* /training/path/:pathId */

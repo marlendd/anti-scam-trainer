@@ -10,7 +10,8 @@ import styles from './GameHeader.module.scss'
 import {FragmentCounter} from "@/widgets/header/ui/FragmentCounter.tsx";
 import {PointsCounter} from "@/widgets/header/ui/PointsCounter.tsx";
 import {Button} from "@/shared/ui/button";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
+import {faHome} from "@fortawesome/free-regular-svg-icons";
 
 export type GameHeaderVariant = 'setup' | 'session'
 
@@ -46,6 +47,13 @@ export function GameHeader({
     const isSession = variant === 'session'
 
     const navigate = useNavigate()
+    const {pathname} = useLocation()
+
+    function handlePause() {
+        const parentPath = pathname.replace(/\/[^/]+$/, '')
+
+        navigate(parentPath)
+    }
 
     const handleBack = () => {
         navigate(-1);
@@ -64,9 +72,16 @@ export function GameHeader({
                         <Button variant='ghost' onClick={handleBack}>
                             <Icon icon={faChevronLeft}/>
                         </Button>
-                        <Button variant='ghost' onClick={handleHome}>
-                            <Icon icon={faPause}/>
-                        </Button>
+                        {
+                            isSession ?
+                                <Button variant='ghost' onClick={handlePause}>
+                                    <Icon icon={faPause}/>
+                                </Button>
+                                :
+                                <Button variant='ghost' onClick={handleHome}>
+                                    <Icon icon={faHome}/>
+                                </Button>
+                        }
                     </div>
 
                     {isSession ? (
