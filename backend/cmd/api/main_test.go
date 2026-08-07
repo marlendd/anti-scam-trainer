@@ -1,9 +1,12 @@
 package main
 
 import (
-	"io"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"testing"
 	"time"
@@ -12,11 +15,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRunIntegration(t *testing.T) {
+func TestRunIntegration_AuthFlow(t *testing.T) {
 	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
-		t.Skip("integration tests are disabled")
+		t.Skip("skipping integration test; set RUN_INTEGRATION_TESTS=1 to run")
 	}
-
 	cfg := config.Config{
 		LogLevel:        "DEBUG",
 		Port:            "8089",
@@ -27,6 +29,7 @@ func TestRunIntegration(t *testing.T) {
 		MaxIdleConns:    5,
 		ConnMaxLifetime: 1 * time.Minute,
 		ConnMaxIdleTime: 1 * time.Minute,
+		SecureCookies:   false, // локальный тест без HTTPS
 	}
 
 	logger := mustMakeLogger(cfg.LogLevel)
@@ -36,7 +39,7 @@ func TestRunIntegration(t *testing.T) {
 		errCh <- run(&cfg, logger)
 	}()
 
-	// Даем серверу и БД время на запуск
+	// Даём серверу и БД время на запуск
 	time.Sleep(1 * time.Second)
 
 	select {
@@ -45,18 +48,113 @@ func TestRunIntegration(t *testing.T) {
 	default:
 	}
 
-	url := "http://127.0.0.1:" + cfg.Port + "/example"
-	res, err := http.Get(url)
-	require.NoError(t, err, "HTTP-запрос должен выполниться без ошибок")
-	defer func() {
-		if err := res.Body.Close(); err != nil {
-			slog.Error("error when close body", "error", err)
+	baseURL := "http://127.0.0.1:" + cfg.Port
+
+	// cookie jar нужен, чтобы session_id из Set-Cookie после /login
+	// автоматически подставлялся в следующие запросы — как Postman Cookie Jar.
+	jar, err := cookiejar.New(nil)
+	require.NoError(t, err)
+	client := &http.Client{Jar: jar}
+
+	email := fmt.Sprintf("test_%d@example.com", time.Now().UnixNano())
+	password := "password123"
+
+	t.Run("register", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]string{
+			"email":    email,
+			"password": password,
+		})
+
+		res, err := client.Post(baseURL+"/api/v1/auth/register", "application/json", bytes.NewReader(body))
+		require.NoError(t, err)
+		defer closeBody(t, res)
+
+		require.Equal(t, http.StatusCreated, res.StatusCode)
+	})
+
+	t.Run("login sets session cookie", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]string{
+			"email":    email,
+			"password": password,
+		})
+
+		res, err := client.Post(baseURL+"/api/v1/auth/login", "application/json", bytes.NewReader(body))
+		require.NoError(t, err)
+		defer closeBody(t, res)
+
+		require.Equal(t, http.StatusOK, res.StatusCode)
+
+		var cookieFound bool
+		for _, c := range res.Cookies() {
+			if c.Name == "session_id" {
+				cookieFound = true
+				require.True(t, c.HttpOnly, "cookie должна быть HttpOnly")
+			}
 		}
-	}()
+		require.True(t, cookieFound, "ожидалась cookie session_id после логина")
+	})
 
-	require.Equal(t, http.StatusOK, res.StatusCode, "Ожидался статус 200 OK")
+	t.Run("me returns current user with valid session", func(t *testing.T) {
+		res, err := client.Get(baseURL + "/api/v1/users/me")
+		require.NoError(t, err)
+		defer closeBody(t, res)
 
-	body, err := io.ReadAll(res.Body)
-	require.NoError(t, err, "Тело ответа должно читаться без ошибок")
-	require.Equal(t, "Hello world!", string(body), "Тело ответа не совпадает с ожидаемым")
+		require.Equal(t, http.StatusOK, res.StatusCode)
+
+		var payload struct {
+			ID    string `json:"id"`
+			Email string `json:"email"`
+		}
+		require.NoError(t, json.NewDecoder(res.Body).Decode(&payload))
+		require.Equal(t, email, payload.Email)
+	})
+
+	t.Run("logout clears session", func(t *testing.T) {
+		res, err := client.Post(baseURL+"/api/v1/auth/logout", "application/json", nil)
+		require.NoError(t, err)
+		defer closeBody(t, res)
+
+		require.Equal(t, http.StatusNoContent, res.StatusCode)
+	})
+
+	t.Run("me returns 401 after logout", func(t *testing.T) {
+		res, err := client.Get(baseURL + "/api/v1/users/me")
+		require.NoError(t, err)
+		defer closeBody(t, res)
+
+		require.Equal(t, http.StatusUnauthorized, res.StatusCode)
+	})
+
+	t.Run("login with wrong password fails", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]string{
+			"email":    email,
+			"password": "wrong-password",
+		})
+
+		res, err := client.Post(baseURL+"/api/v1/auth/login", "application/json", bytes.NewReader(body))
+		require.NoError(t, err)
+		defer closeBody(t, res)
+
+		require.Equal(t, http.StatusUnauthorized, res.StatusCode)
+	})
+
+	t.Run("register with existing email fails", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]string{
+			"email":    email,
+			"password": password,
+		})
+
+		res, err := client.Post(baseURL+"/api/v1/auth/register", "application/json", bytes.NewReader(body))
+		require.NoError(t, err)
+		defer closeBody(t, res)
+
+		require.Equal(t, http.StatusConflict, res.StatusCode)
+	})
+}
+
+func closeBody(t *testing.T, res *http.Response) {
+	t.Helper()
+	if err := res.Body.Close(); err != nil {
+		slog.Error("error when close body", "error", err)
+	}
 }
