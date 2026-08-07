@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
+	"os"
 	"testing"
 	"time"
 
@@ -15,6 +16,9 @@ import (
 )
 
 func TestRunIntegration_AuthFlow(t *testing.T) {
+	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
+		t.Skip("skipping integration test; set RUN_INTEGRATION_TESTS=1 to run")
+	}
 	cfg := config.Config{
 		LogLevel:        "DEBUG",
 		Port:            "8089",
