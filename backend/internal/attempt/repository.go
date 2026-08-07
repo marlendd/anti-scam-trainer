@@ -10,13 +10,29 @@ import (
 	"github.com/marlendd/anti-scam-trainer/internal/scenario"
 )
 
+type dbExecutor interface {
+	ExecContext(
+		ctx context.Context,
+		query string,
+		args ...any,
+	) (sql.Result, error)
+
+	QueryRowContext(
+		ctx context.Context,
+		query string,
+		args ...any,
+	) *sql.Row
+}
+
 type PgRepository struct {
-	db *sql.DB
+	pool     *sql.DB
+	executor dbExecutor
 }
 
 func NewPgRepository(db *sql.DB) *PgRepository {
 	return &PgRepository{
-		db: db,
+		pool:     db,
+		executor: db,
 	}
 }
 
@@ -45,7 +61,7 @@ func (pg *PgRepository) Create(
 	var attempt Attempt
 	attempt.CurrentNodeID = new(scenario.NodeID)
 
-	if err := pg.db.QueryRowContext(ctx,
+	if err := pg.executor.QueryRowContext(ctx,
 		query,
 		userID,
 		scenarioID,
@@ -101,7 +117,7 @@ func (pg *PgRepository) GetByID(
 		completedAt   sql.NullTime
 	)
 
-	if err := pg.db.QueryRowContext(
+	if err := pg.executor.QueryRowContext(
 		ctx,
 		query,
 		attemptID,
@@ -167,7 +183,7 @@ func (pg *PgRepository) GetActive(
 	var attempt Attempt
 	attempt.CurrentNodeID = new(scenario.NodeID)
 
-	if err := pg.db.QueryRowContext(
+	if err := pg.executor.QueryRowContext(
 		ctx,
 		query,
 		userID,
@@ -206,7 +222,7 @@ func (pg *PgRepository) Abort(
 						AND status = $4
 	`
 
-	result, err := pg.db.ExecContext(
+	result, err := pg.executor.ExecContext(
 		ctx,
 		query,
 		StatusAborted,
@@ -235,7 +251,7 @@ func (pg *PgRepository) Abort(
 
 	var status Status
 
-	if err := pg.db.QueryRowContext(
+	if err := pg.executor.QueryRowContext(
 		ctx,
 		statusQuery,
 		attemptID,
@@ -248,4 +264,36 @@ func (pg *PgRepository) Abort(
 	}
 
 	return ErrAttemptNotInProgress
+}
+
+func (pg *PgRepository) WithinTransaction(
+	ctx context.Context,
+	fn func(AttemptRepository) error,
+) error {
+	tx, err := pg.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin attempt transaction: %w", err)
+	}
+
+	txRepository := &PgRepository{
+		pool:     pg.pool,
+		executor: tx,
+	}
+
+	if err := fn(txRepository); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil &&
+			!errors.Is(rollbackErr, sql.ErrTxDone) {
+			return errors.Join(
+				err,
+				fmt.Errorf("rollback attempt transaction: %w", rollbackErr),
+			)
+		}
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit attempt transaction: %w", err)
+	}
+
+	return nil
 }

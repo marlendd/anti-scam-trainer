@@ -3,6 +3,7 @@ package attempt_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -189,4 +190,42 @@ func TestPgRepository_GetByIDRejectsOtherUser_Integration(t *testing.T) {
 
 	_, err = repository.GetByID(ctx, created.ID, otherUserID)
 	require.ErrorIs(t, err, attempt.ErrAttemptNotFound)
+}
+
+func TestPgRepository_WithinTransactionRollsBack_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	repository := attempt.NewPgRepository(db)
+	callbackErr := errors.New("force transaction rollback")
+
+	var createdAttemptID attempt.AttemptID
+	err := repository.WithinTransaction(ctx, func(txRepository attempt.AttemptRepository) error {
+		created, err := txRepository.Create(
+			ctx,
+			testUserID,
+			testScenarioID,
+			"node-start",
+		)
+		if err != nil {
+			return fmt.Errorf("create attempt inside transaction: %w", err)
+		}
+
+		createdAttemptID = created.ID
+
+		return callbackErr
+	})
+
+	require.ErrorIs(t, err, callbackErr)
+	require.NotEmpty(t, createdAttemptID)
+
+	_, err = repository.GetByID(ctx, createdAttemptID, testUserID)
+	require.ErrorIs(t, err, attempt.ErrAttemptNotFound)
+
+	_, err = repository.GetActive(ctx, testUserID, testScenarioID)
+	require.ErrorIs(t, err, attempt.ErrActiveAttemptNotFound)
 }

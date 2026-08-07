@@ -17,6 +17,10 @@ const (
 )
 
 type attemptRepositoryStub struct {
+	withinTransactionFn func(
+		ctx context.Context,
+		fn func(attempt.AttemptRepository) error,
+	) error
 	createFn func(
 		ctx context.Context,
 		userID string,
@@ -28,6 +32,22 @@ type attemptRepositoryStub struct {
 		userID string,
 		scenarioID scenario.ScenarioID,
 	) (attempt.Attempt, error)
+	abortFn func(
+		ctx context.Context,
+		attemptID attempt.AttemptID,
+		userID string,
+	) error
+}
+
+func (s *attemptRepositoryStub) WithinTransaction(
+	ctx context.Context,
+	fn func(attempt.AttemptRepository) error,
+) error {
+	if s.withinTransactionFn == nil {
+		panic("unexpected WithinTransaction call")
+	}
+
+	return s.withinTransactionFn(ctx, fn)
 }
 
 func (s *attemptRepositoryStub) Create(
@@ -63,11 +83,15 @@ func (s *attemptRepositoryStub) GetActive(
 }
 
 func (s *attemptRepositoryStub) Abort(
-	context.Context,
-	attempt.AttemptID,
-	string,
+	ctx context.Context,
+	attemptID attempt.AttemptID,
+	userID string,
 ) error {
-	panic("unexpected Abort call")
+	if s.abortFn == nil {
+		panic("unexpected Abort call")
+	}
+
+	return s.abortFn(ctx, attemptID, userID)
 }
 
 type scenarioProviderStub struct {
@@ -322,4 +346,225 @@ func TestService_Resume(t *testing.T) {
 		require.ErrorIs(t, err, repositoryErr)
 		require.Equal(t, attempt.Attempt{}, actualAttempt)
 	})
+}
+
+func TestServiceRestart(t *testing.T) {
+	t.Parallel()
+
+	t.Run("aborts active attempt and creates a new one", func(t *testing.T) {
+		t.Parallel()
+
+		currentScenario := testfixture.ValidScenario()
+		currentAttempt := attempt.Attempt{
+			ID:         "attempt-old",
+			UserID:     userID,
+			ScenarioID: currentScenario.ID,
+			Status:     attempt.StatusInProgress,
+		}
+		expectedAttempt := attempt.Attempt{
+			ID:         "attempt-new",
+			UserID:     userID,
+			ScenarioID: currentScenario.ID,
+			Status:     attempt.StatusInProgress,
+		}
+
+		provider := scenarioStub(currentScenario)
+		txRepository := &attemptRepositoryStub{
+			getActiveFn: func(
+				_ context.Context,
+				gotUserID string,
+				gotScenarioID scenario.ScenarioID,
+			) (attempt.Attempt, error) {
+				require.Equal(t, userID, gotUserID)
+				require.Equal(t, currentScenario.ID, gotScenarioID)
+				return currentAttempt, nil
+			},
+			abortFn: func(
+				_ context.Context,
+				gotAttemptID attempt.AttemptID,
+				gotUserID string,
+			) error {
+				require.Equal(t, currentAttempt.ID, gotAttemptID)
+				require.Equal(t, userID, gotUserID)
+				return nil
+			},
+			createFn: func(
+				_ context.Context,
+				gotUserID string,
+				gotScenarioID scenario.ScenarioID,
+				gotStartNodeID scenario.NodeID,
+			) (attempt.Attempt, error) {
+				require.Equal(t, userID, gotUserID)
+				require.Equal(t, currentScenario.ID, gotScenarioID)
+				require.Equal(t, currentScenario.StartNodeID, gotStartNodeID)
+				return expectedAttempt, nil
+			},
+		}
+		repository := transactionStub(txRepository)
+		service := attempt.NewService(repository, provider)
+
+		actualAttempt, err := service.Restart(
+			context.Background(),
+			userID,
+			currentScenario.ID,
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, expectedAttempt, actualAttempt)
+	})
+
+	t.Run("does not start transaction when scenario provider fails", func(t *testing.T) {
+		t.Parallel()
+
+		providerErr := errors.New("scenario provider failed")
+		provider := &scenarioProviderStub{
+			getActiveByIDFn: func(
+				context.Context,
+				scenario.ScenarioID,
+			) (scenario.Scenario, error) {
+				return scenario.Scenario{}, providerErr
+			},
+		}
+		repository := &attemptRepositoryStub{}
+		service := attempt.NewService(repository, provider)
+
+		actualAttempt, err := service.Restart(
+			context.Background(),
+			userID,
+			scenarioID,
+		)
+
+		require.ErrorIs(t, err, providerErr)
+		require.Equal(t, attempt.Attempt{}, actualAttempt)
+	})
+
+	t.Run("preserves get active attempt error", func(t *testing.T) {
+		t.Parallel()
+
+		currentScenario := testfixture.ValidScenario()
+		txRepository := &attemptRepositoryStub{
+			getActiveFn: func(
+				context.Context,
+				string,
+				scenario.ScenarioID,
+			) (attempt.Attempt, error) {
+				return attempt.Attempt{}, attempt.ErrActiveAttemptNotFound
+			},
+		}
+		service := attempt.NewService(
+			transactionStub(txRepository),
+			scenarioStub(currentScenario),
+		)
+
+		actualAttempt, err := service.Restart(
+			context.Background(),
+			userID,
+			currentScenario.ID,
+		)
+
+		require.ErrorIs(t, err, attempt.ErrActiveAttemptNotFound)
+		require.Equal(t, attempt.Attempt{}, actualAttempt)
+	})
+
+	t.Run("preserves abort error and does not create attempt", func(t *testing.T) {
+		t.Parallel()
+
+		currentScenario := testfixture.ValidScenario()
+		abortErr := errors.New("abort failed")
+		txRepository := &attemptRepositoryStub{
+			getActiveFn: func(
+				context.Context,
+				string,
+				scenario.ScenarioID,
+			) (attempt.Attempt, error) {
+				return attempt.Attempt{ID: "attempt-old"}, nil
+			},
+			abortFn: func(
+				context.Context,
+				attempt.AttemptID,
+				string,
+			) error {
+				return abortErr
+			},
+		}
+		service := attempt.NewService(
+			transactionStub(txRepository),
+			scenarioStub(currentScenario),
+		)
+
+		actualAttempt, err := service.Restart(
+			context.Background(),
+			userID,
+			currentScenario.ID,
+		)
+
+		require.ErrorIs(t, err, abortErr)
+		require.Equal(t, attempt.Attempt{}, actualAttempt)
+	})
+
+	t.Run("preserves create error", func(t *testing.T) {
+		t.Parallel()
+
+		currentScenario := testfixture.ValidScenario()
+		createErr := errors.New("create failed")
+		txRepository := &attemptRepositoryStub{
+			getActiveFn: func(
+				context.Context,
+				string,
+				scenario.ScenarioID,
+			) (attempt.Attempt, error) {
+				return attempt.Attempt{ID: "attempt-old"}, nil
+			},
+			abortFn: func(
+				context.Context,
+				attempt.AttemptID,
+				string,
+			) error {
+				return nil
+			},
+			createFn: func(
+				context.Context,
+				string,
+				scenario.ScenarioID,
+				scenario.NodeID,
+			) (attempt.Attempt, error) {
+				return attempt.Attempt{}, createErr
+			},
+		}
+		service := attempt.NewService(
+			transactionStub(txRepository),
+			scenarioStub(currentScenario),
+		)
+
+		actualAttempt, err := service.Restart(
+			context.Background(),
+			userID,
+			currentScenario.ID,
+		)
+
+		require.ErrorIs(t, err, createErr)
+		require.Equal(t, attempt.Attempt{}, actualAttempt)
+	})
+}
+
+func transactionStub(txRepository attempt.AttemptRepository) *attemptRepositoryStub {
+	return &attemptRepositoryStub{
+		withinTransactionFn: func(
+			_ context.Context,
+			fn func(attempt.AttemptRepository) error,
+		) error {
+			return fn(txRepository)
+		},
+	}
+}
+
+func scenarioStub(currentScenario scenario.Scenario) *scenarioProviderStub {
+	return &scenarioProviderStub{
+		getActiveByIDFn: func(
+			context.Context,
+			scenario.ScenarioID,
+		) (scenario.Scenario, error) {
+			return currentScenario, nil
+		},
+	}
 }
