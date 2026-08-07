@@ -8,6 +8,9 @@ import (
 type Repository interface {
 	GetAnswersByAttempt(ctx context.Context, attemptID string) ([]AnswerData, error)
 	GetStatsByRole(ctx context.Context) ([]RoleStats, error)
+	SaveReward(ctx context.Context, userID, fragmentID string) error
+	GetUserFragments(ctx context.Context, userID string) ([]PuzzleFragment, error)
+	GetTotalAvailableFragments(ctx context.Context) (int, error)
 }
 
 type PgRepository struct {
@@ -64,4 +67,41 @@ func (r *PgRepository) GetStatsByRole(ctx context.Context) ([]RoleStats, error) 
 		stats = append(stats, s)
 	}
 	return stats, rows.Err()
+}
+
+func (r *PgRepository) SaveReward(ctx context.Context, userID, fragmentID string) error {
+	const q = `
+		INSERT INTO user_inventory (user_id, fragment_id)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id, fragment_id) DO NOTHING`
+
+	_, err := r.db.ExecContext(ctx, q, userID, fragmentID)
+	return err
+}
+
+func (r *PgRepository) GetUserFragments(ctx context.Context, userID string) ([]PuzzleFragment, error) {
+	const q = `SELECT fragment_id, earned_at FROM user_inventory WHERE user_id = $1`
+
+	rows, err := r.db.QueryContext(ctx, q, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var fragments []PuzzleFragment
+	for rows.Next() {
+		var f PuzzleFragment
+		if err := rows.Scan(&f.FragmentID, &f.EarnedAt); err != nil {
+			return nil, err
+		}
+		fragments = append(fragments, f)
+	}
+	return fragments, rows.Err()
+}
+
+func (r *PgRepository) GetTotalAvailableFragments(ctx context.Context) (int, error) {
+	const q = `SELECT COUNT(DISTINCT reward_fragment_id) FROM scenario_versions WHERE reward_fragment_id IS NOT NULL`
+	var count int
+	err := r.db.QueryRowContext(ctx, q).Scan(&count)
+	return count, err
 }

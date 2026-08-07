@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/marlendd/anti-scam-trainer/internal/auth"
 )
 
 type Handler struct {
@@ -52,4 +54,22 @@ func (h *Handler) respondJSON(w http.ResponseWriter, status int, payload any) {
 
 func (h *Handler) respondError(w http.ResponseWriter, status int, message string) {
 	h.respondJSON(w, status, map[string]string{"error": message})
+}
+
+func (h *Handler) GetMyPuzzleProgress(w http.ResponseWriter, r *http.Request) {
+	// Достаем ID пользователя из контекста
+	userID, ok := auth.UserIDFromContext(r.Context())
+	if !ok {
+		h.respondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	progress, err := h.service.GetUserPuzzleProgress(r.Context(), userID)
+	if err != nil {
+		h.log.Error("failed to get puzzle progress", "user_id", userID, "error", err)
+		h.respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	h.respondJSON(w, http.StatusOK, progress)
 }
