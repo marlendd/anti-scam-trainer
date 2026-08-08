@@ -4,6 +4,7 @@ import "time"
 
 type User struct {
 	ID           string    `json:"id"`
+	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"created_at"`
@@ -21,6 +22,7 @@ type Session struct {
 
 type UserPublic struct {
 	ID        string    `json:"id"`
+	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -28,6 +30,7 @@ type UserPublic struct {
 func (u User) ToPublic() UserPublic {
 	return UserPublic{
 		ID:        u.ID,
+		Name:      u.Name,
 		Email:     u.Email,
 		CreatedAt: u.CreatedAt,
 	}

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 var (
@@ -15,7 +17,7 @@ var (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, email, passwordHash string) (User, error)
+	Create(ctx context.Context, name, email, passwordHash string) (User, error)
 	GetByEmail(ctx context.Context, email string) (User, error)
 	GetByID(ctx context.Context, id string) (User, error)
 	UpdatePassword(ctx context.Context, userID, passwordHash string) error
@@ -42,15 +44,15 @@ func NewPgUserRepository(db *sql.DB) *PgUserRepository {
 	return &PgUserRepository{db: db}
 }
 
-func (r *PgUserRepository) Create(ctx context.Context, email, passwordHash string) (User, error) {
+func (r *PgUserRepository) Create(ctx context.Context, name, email, passwordHash string) (User, error) {
 	const q = `
-		INSERT INTO users (email, password_hash)
+		INSERT INTO users (name, email, password_hash)
 		VALUES ($1, $2)
-		RETURNING id, email, password_hash, created_at, updated_at
+		RETURNING id, name, email, password_hash, created_at, updated_at
 	`
 	var u User
 	err := r.db.QueryRowContext(ctx, q, email, passwordHash).Scan(
-		&u.ID, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt,
+		&u.ID, &u.Name, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt,
 	)
 	if err != nil {
 		if isUniqueViolation(err) {
@@ -63,13 +65,13 @@ func (r *PgUserRepository) Create(ctx context.Context, email, passwordHash strin
 
 func (r *PgUserRepository) GetByEmail(ctx context.Context, email string) (User, error) {
 	const q = `
-		SELECT id, email, password_hash, created_at, updated_at
+		SELECT id, name, email, password_hash, created_at, updated_at
 		FROM users
 		WHERE lower(email) = lower($1)
 	`
 	var u User
 	err := r.db.QueryRowContext(ctx, q, email).Scan(
-		&u.ID, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt,
+		&u.ID, &u.Name, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return User{}, ErrUserNotFound
@@ -82,13 +84,13 @@ func (r *PgUserRepository) GetByEmail(ctx context.Context, email string) (User, 
 
 func (r *PgUserRepository) GetByID(ctx context.Context, id string) (User, error) {
 	const q = `
-		SELECT id, email, password_hash, created_at, updated_at
+		SELECT id, name, email, password_hash, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
 	var u User
 	err := r.db.QueryRowContext(ctx, q, id).Scan(
-		&u.ID, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt,
+		&u.ID, &u.Name, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return User{}, ErrUserNotFound
@@ -114,7 +116,7 @@ func (r *PgSessionRepository) Create(ctx context.Context, userID, userAgent, ip 
 		RETURNING id, user_id, user_agent, ip, expires_at, created_at
 	`
 	var s Session
-	expiresAt := time.Now().Add(ttl)
+	expiresAt := time.Now().UTC().Add(ttl)
 	err := r.db.QueryRowContext(ctx, q, userID, userAgent, ip, expiresAt).Scan(
 		&s.ID, &s.UserID, &s.UserAgent, &s.IP, &s.ExpiresAt, &s.CreatedAt,
 	)
@@ -150,24 +152,14 @@ func (r *PgSessionRepository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *PgSessionRepository) DeleteExpired(ctx context.Context) error {
-	const q = `DELETE FROM sessions WHERE expires_at < now()`
+	const q = `DELETE FROM sessions WHERE expires_at <= now()`
 	_, err := r.db.ExecContext(ctx, q)
 	return err
 }
 
 func isUniqueViolation(err error) bool {
-	return err != nil && errContains(err.Error(), "23505")
-}
-
-func errContains(s, substr string) bool {
-	return len(s) >= len(substr) && (func() bool {
-		for i := 0; i+len(substr) <= len(s); i++ {
-			if s[i:i+len(substr)] == substr {
-				return true
-			}
-		}
-		return false
-	})()
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
 }
 
 type PasswordResetRepository interface {
@@ -191,7 +183,7 @@ func (r *PgPasswordResetRepository) Create(ctx context.Context, userID, tokenHas
 		RETURNING id, user_id, token_hash, expires_at, used_at, created_at
 	`
 	var t PasswordResetToken
-	err := r.db.QueryRowContext(ctx, q, userID, tokenHash, time.Now().Add(ttl)).Scan(
+	err := r.db.QueryRowContext(ctx, q, userID, tokenHash, time.Now().UTC().Add(ttl)).Scan(
 		&t.ID, &t.UserID, &t.TokenHash, &t.ExpiresAt, &t.UsedAt, &t.CreatedAt,
 	)
 	return t, err
@@ -214,7 +206,27 @@ func (r *PgPasswordResetRepository) GetByTokenHash(ctx context.Context, tokenHas
 }
 
 func (r *PgPasswordResetRepository) MarkUsed(ctx context.Context, id string) error {
-	const q = `UPDATE password_reset_tokens SET used_at = now() WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, q, id)
-	return err
+	const q = `
+		UPDATE password_reset_tokens
+		SET used_at = now()
+		WHERE id = $1
+		  AND used_at IS NULL
+		  AND expires_at > now()
+	`
+
+	result, err := r.db.ExecContext(ctx, q, id)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return ErrTokenNotFound
+	}
+
+	return nil
 }
