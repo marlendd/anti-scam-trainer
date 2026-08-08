@@ -12,22 +12,26 @@ type AttemptRepository interface {
 		ctx context.Context,
 		fn func(AttemptRepository) error,
 	) error
+
 	Create(
 		ctx context.Context,
 		userID string,
 		scenarioID scenario.ScenarioID,
 		startNodeID scenario.NodeID,
 	) (Attempt, error)
+
 	GetByID(
 		ctx context.Context,
 		attemptID AttemptID,
 		userID string,
 	) (Attempt, error)
+
 	GetActive(
 		ctx context.Context,
 		userID string,
 		scenarioID scenario.ScenarioID,
 	) (Attempt, error)
+
 	Abort(
 		ctx context.Context,
 		attemptID AttemptID,
@@ -37,6 +41,11 @@ type AttemptRepository interface {
 
 type ScenarioProvider interface {
 	GetActiveByID(
+		ctx context.Context,
+		scenario scenario.ScenarioID,
+	) (scenario.Scenario, error)
+
+	GetByID(
 		ctx context.Context,
 		scenario scenario.ScenarioID,
 	) (scenario.Scenario, error)

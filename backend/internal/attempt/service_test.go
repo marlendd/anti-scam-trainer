@@ -99,6 +99,10 @@ type scenarioProviderStub struct {
 		ctx context.Context,
 		scenarioID scenario.ScenarioID,
 	) (scenario.Scenario, error)
+	getByIDFn func(
+		ctx context.Context,
+		scenarioID scenario.ScenarioID,
+	) (scenario.Scenario, error)
 }
 
 func (s *scenarioProviderStub) GetActiveByID(
@@ -106,6 +110,17 @@ func (s *scenarioProviderStub) GetActiveByID(
 	scenarioID scenario.ScenarioID,
 ) (scenario.Scenario, error) {
 	return s.getActiveByIDFn(ctx, scenarioID)
+}
+
+func (s *scenarioProviderStub) GetByID(
+	ctx context.Context,
+	scenarioID scenario.ScenarioID,
+) (scenario.Scenario, error) {
+	if s.getByIDFn == nil {
+		panic("unexpected GetByID call")
+	}
+
+	return s.getByIDFn(ctx, scenarioID)
 }
 
 func TestServiceStart(t *testing.T) {
