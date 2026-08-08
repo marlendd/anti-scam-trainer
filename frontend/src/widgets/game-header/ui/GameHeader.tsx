@@ -1,16 +1,14 @@
-import {
-    faChevronLeft, faPause,
-} from '@fortawesome/free-solid-svg-icons'
+import { faChevronLeft, faPause } from '@fortawesome/free-solid-svg-icons'
 
-import {Icon} from '@/shared/ui/icon'
+import { Icon } from '@/shared/ui/icon'
 
 import styles from './GameHeader.module.scss'
-import {FragmentCounter} from "@/widgets/header/ui/FragmentCounter.tsx";
-import {PointsCounter} from "@/widgets/header/ui/PointsCounter.tsx";
-import {Button} from "@/shared/ui/button";
-import {useLocation, useNavigate} from "react-router-dom";
-import {faHome} from "@fortawesome/free-regular-svg-icons";
-import {SessionTime} from "@/entities/session-timer/ui/SessionTime.tsx";
+import { FragmentCounter } from '@/widgets/header/ui/FragmentCounter.tsx'
+import { PointsCounter } from '@/widgets/header/ui/PointsCounter.tsx'
+import { Button } from '@/shared/ui/button'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { faHome } from '@fortawesome/free-regular-svg-icons'
+import { SessionTime } from '@/entities/session-timer/ui/SessionTime.tsx'
 
 export type GameHeaderVariant = 'setup' | 'session'
 
@@ -25,16 +23,16 @@ export type GameHeaderProps = {
 }
 
 export function GameHeader({
-                               variant = 'setup',
-                               // lives = 3,
-                               // maxLives = 3,
-                               currentQuestion = 1,
-                               totalQuestions = 10,
-                           }: GameHeaderProps) {
+    variant = 'setup',
+    // lives = 3,
+    // maxLives = 3,
+    currentQuestion = 1,
+    totalQuestions = 10,
+}: GameHeaderProps) {
     const isSession = variant === 'session'
 
     const navigate = useNavigate()
-    const {pathname} = useLocation()
+    const { pathname } = useLocation()
 
     function handlePause() {
         const parentPath = pathname.replace(/\/[^/]+$/, '')
@@ -43,44 +41,39 @@ export function GameHeader({
     }
 
     const handleBack = () => {
-        navigate(-1);
+        navigate(-1)
     }
 
     const handleHome = () => {
-        navigate('/');
+        navigate('/')
     }
 
     return (
         <header className={styles.header}>
             <div className={styles.inner}>
                 <div className={styles.left}>
-
                     <div className={styles.controls}>
-                        <Button variant='ghost' onClick={handleBack}>
-                            <Icon icon={faChevronLeft}/>
+                        <Button variant="ghost" onClick={handleBack}>
+                            <Icon icon={faChevronLeft} />
                         </Button>
-                        {
-                            isSession ?
-                                <Button variant='ghost' onClick={handlePause}>
-                                    <Icon icon={faPause}/>
-                                </Button>
-                                :
-                                <Button variant='ghost' onClick={handleHome}>
-                                    <Icon icon={faHome}/>
-                                </Button>
-                        }
+                        {isSession ? (
+                            <Button variant="ghost" onClick={handlePause}>
+                                <Icon icon={faPause} />
+                            </Button>
+                        ) : (
+                            <Button variant="ghost" onClick={handleHome}>
+                                <Icon icon={faHome} />
+                            </Button>
+                        )}
                     </div>
 
                     {isSession && <SessionTime />}
 
-                    <span
-                        className={styles.separator}
-                        aria-hidden="true"
-                    />
+                    <span className={styles.separator} aria-hidden="true" />
 
                     <div className={styles.stats}>
-                        <FragmentCounter value={0}/>
-                        <PointsCounter value={0}/>
+                        <FragmentCounter value={0} />
+                        <PointsCounter value={0} />
                     </div>
                 </div>
 
@@ -111,9 +104,9 @@ export function GameHeader({
                 <div className={styles.right}>
                     {isSession ? (
                         <>
-              <span className={styles.question}>
-                 {currentQuestion} из {totalQuestions}
-              </span>
+                            <span className={styles.question}>
+                                {currentQuestion} из {totalQuestions}
+                            </span>
 
                             <div
                                 className={styles.progress}
@@ -128,8 +121,8 @@ export function GameHeader({
                                         questionNumber < currentQuestion
                                             ? 'completed'
                                             : questionNumber === currentQuestion
-                                                ? 'current'
-                                                : 'pending'
+                                              ? 'current'
+                                              : 'pending'
 
                                     return (
                                         <span

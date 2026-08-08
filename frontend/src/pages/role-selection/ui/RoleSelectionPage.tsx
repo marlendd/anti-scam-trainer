@@ -1,4 +1,4 @@
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 // import {Button} from '@/shared/ui/button'
 
 import buyerImage from '@/shared/assets/images/buyer-path.webp'
@@ -15,36 +15,17 @@ type RoleCardProps = {
     onSelect: () => void
 }
 
-function RoleCard({
-                      title,
-                      description,
-                      image,
-                      imageAlt,
-                      accent,
-                      onSelect,
-                  }: RoleCardProps) {
+function RoleCard({ title, description, image, imageAlt, accent, onSelect }: RoleCardProps) {
     return (
-        <article
-            onClick={onSelect}
-            className={styles.card}
-            data-accent={accent}
-        >
+        <article onClick={onSelect} className={styles.card} data-accent={accent}>
             <div className={styles.imageWrapper}>
-                <img
-                    className={styles.image}
-                    src={image}
-                    alt={imageAlt}
-                    width={420}
-                    height={420}
-                />
+                <img className={styles.image} src={image} alt={imageAlt} width={420} height={420} />
             </div>
 
             <div className={styles.content}>
                 <h2 className={styles.cardTitle}>{title}</h2>
 
-                <p className={styles.cardDescription}>
-                    {description}
-                </p>
+                <p className={styles.cardDescription}>{description}</p>
 
                 {/*<Button*/}
                 {/*  fullWidth*/}
@@ -71,15 +52,13 @@ export function RoleSelectionPage() {
     return (
         <main className={styles.page}>
             <section className={styles.hero}>
-
                 {/*<h1 className={styles.title}>*/}
                 {/*    С какой стороны начнём?*/}
                 {/*</h1>*/}
 
                 <p className={styles.description}>
-                    Выберите путь, который хотите пройти первым.
-                    У покупателя и продавца свои сценарии, риски и
-                    мошеннические схемы.
+                    Выберите путь, который хотите пройти первым. У покупателя и продавца свои
+                    сценарии, риски и мошеннические схемы.
                 </p>
             </section>
 

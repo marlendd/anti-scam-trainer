@@ -1,92 +1,92 @@
 .chat {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  min-height: 420px;
-  height: 100%;
-  max-height: 100%;
-  flex-direction: column;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 420px;
+    height: 100%;
+    max-height: 100%;
+    flex-direction: column;
 
-  border: 1px solid #e8e8e8;
-  border-radius: 28px;
+    border: 1px solid #e8e8e8;
+    border-radius: 28px;
 
-  background-color: #f7f7f7;
+    background-color: #f7f7f7;
 
-  overflow: hidden;
+    overflow: hidden;
 }
 
 .empty {
-  display: flex;
-  width: 100%;
-  min-height: 420px;
-  padding: 48px 24px;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+    display: flex;
+    width: 100%;
+    min-height: 420px;
+    padding: 48px 24px;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
 
-  text-align: center;
+    text-align: center;
 }
 
 .emptyIcon {
-  display: inline-flex;
-  width: 64px;
-  aspect-ratio: 1 / 1;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
+    width: 64px;
+    aspect-ratio: 1 / 1;
+    align-items: center;
+    justify-content: center;
 
-  border-radius: 20px;
+    border-radius: 20px;
 
-  color: #222;
-  background-color: rgb(71 71 71 / 0.1);
+    color: #222;
+    background-color: rgb(71 71 71 / 0.1);
 
-  font-size: 26px;
+    font-size: 26px;
 }
 
 .emptyContent {
-  max-width: 360px;
+    max-width: 360px;
 }
 
 .emptyTitle {
-  margin: 0;
+    margin: 0;
 
-  color: #111111;
+    color: #111111;
 
-  font-size: 20px;
-  font-weight: 600;
+    font-size: 20px;
+    font-weight: 600;
 }
 
 .emptyDescription {
-  margin: 8px 0 0;
+    margin: 8px 0 0;
 
-  color: #858585;
+    color: #858585;
 
-  font-size: 14px;
-  line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 @media (max-width: 640px) {
-  .chat {
-    min-height: 320px;
+    .chat {
+        min-height: 320px;
 
-    border-radius: 20px;
-  }
+        border-radius: 20px;
+    }
 
-  .empty {
-    min-height: 320px;
-    padding: 32px 20px;
-  }
+    .empty {
+        min-height: 320px;
+        padding: 32px 20px;
+    }
 
-  .emptyIcon {
-    width: 56px;
+    .emptyIcon {
+        width: 56px;
 
-    border-radius: 18px;
+        border-radius: 18px;
 
-    font-size: 22px;
-  }
+        font-size: 22px;
+    }
 
-  .emptyTitle {
-    font-size: 18px;
-  }
+    .emptyTitle {
+        font-size: 18px;
+    }
 }

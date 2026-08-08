@@ -1,3 +1,1 @@
-export {
-  PuzzlePage,
-} from './ui/PuzzlePage'
+export { PuzzlePage } from './ui/PuzzlePage'

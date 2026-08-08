@@ -1,116 +1,116 @@
 .root {
-  position: relative;
+    position: relative;
 
-  display: none;
+    display: none;
 }
 
 .trigger {
-  display: inline-flex;
-  width: 42px;
-  aspect-ratio: 1 / 1;
-  padding: 0;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
+    width: 42px;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
 
-  border: 0;
-  border-radius: 12px;
+    border: 0;
+    border-radius: 12px;
 
-  color: #111111;
-  background-color: #f2f2f2;
+    color: #111111;
+    background-color: #f2f2f2;
 
-  font: inherit;
-  font-size: 19px;
+    font: inherit;
+    font-size: 19px;
 
-  cursor: pointer;
+    cursor: pointer;
 
-  transition:
-    color 150ms ease,
-    background-color 150ms ease;
+    transition:
+        color 150ms ease,
+        background-color 150ms ease;
 
-  &:hover {
-    color: #00aaff;
-    background-color: rgb(0 170 255 / 10%);
-  }
+    &:hover {
+        color: #00aaff;
+        background-color: rgb(0 170 255 / 10%);
+    }
 
-  &:focus-visible {
-    outline: 3px solid rgb(0 170 255 / 25%);
-    outline-offset: 2px;
-  }
+    &:focus-visible {
+        outline: 3px solid rgb(0 170 255 / 25%);
+        outline-offset: 2px;
+    }
 }
 
 .menu {
-  position: absolute;
-  z-index: 100;
-  top: calc(100% + 10px);
-  right: 0;
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 10px);
+    right: 0;
 
-  display: flex;
-  width: min(300px, calc(100vw - 32px));
-  padding: 10px;
-  flex-direction: column;
-  gap: 4px;
+    display: flex;
+    width: min(300px, calc(100vw - 32px));
+    padding: 10px;
+    flex-direction: column;
+    gap: 4px;
 
-  border: 1px solid #ededed;
-  border-radius: 18px;
+    border: 1px solid #ededed;
+    border-radius: 18px;
 
-  background-color: #ffffff;
-  box-shadow: 0 18px 45px rgb(0 0 0 / 12%);
+    background-color: #ffffff;
+    box-shadow: 0 18px 45px rgb(0 0 0 / 12%);
 
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-8px);
-  pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    pointer-events: none;
 
-  transition:
-    opacity 160ms ease,
-    visibility 160ms ease,
-    transform 160ms ease;
+    transition:
+        opacity 160ms ease,
+        visibility 160ms ease,
+        transform 160ms ease;
 
-  &[data-open='true'] {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
+    &[data-open='true'] {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
 }
 
 .link {
-  display: flex;
-  min-height: 46px;
-  padding: 0 14px;
-  align-items: center;
+    display: flex;
+    min-height: 46px;
+    padding: 0 14px;
+    align-items: center;
 
-  border-radius: 12px;
+    border-radius: 12px;
 
-  color: #222222;
+    color: #222222;
 
-  font-size: 15px;
-  font-weight: 500;
-  text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
 
-  transition:
-    color 150ms ease,
-    background-color 150ms ease;
+    transition:
+        color 150ms ease,
+        background-color 150ms ease;
 
-  &:hover {
-    color: #00aaff;
-    background-color: #f5f5f5;
-  }
+    &:hover {
+        color: #00aaff;
+        background-color: #f5f5f5;
+    }
 }
 
 .activeLink {
-  color: #00aaff;
-  background-color: rgb(0 170 255 / 9%);
+    color: #00aaff;
+    background-color: rgb(0 170 255 / 9%);
 }
 
 @media (max-width: 800px) {
-  .root {
-    display: block;
-  }
+    .root {
+        display: block;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .menu {
-    transition: none;
-  }
+    .menu {
+        transition: none;
+    }
 }

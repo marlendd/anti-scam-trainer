@@ -1,19 +1,15 @@
-﻿import {useEffect, useState} from 'react'
-import {
-    faArrowLeft,
-    faArrowRight,
-    faPlay,
-} from '@fortawesome/free-solid-svg-icons'
-import {useNavigate} from 'react-router-dom'
+﻿import { useEffect, useState } from 'react'
+import { faArrowLeft, faArrowRight, faPlay } from '@fortawesome/free-solid-svg-icons'
+import { useNavigate } from 'react-router-dom'
 
-import {Button} from '@/shared/ui/button'
-import {Icon} from '@/shared/ui/icon'
+import { Button } from '@/shared/ui/button'
+import { Icon } from '@/shared/ui/icon'
 
-import {welcomeSlides} from '../model/welcomeSlides'
+import { welcomeSlides } from '../model/welcomeSlides'
 
 import styles from './WelcomePage.module.scss'
 
-import type {CSSProperties} from 'react'
+import type { CSSProperties } from 'react'
 
 type WelcomePageStyle = CSSProperties & {
     '--slide-accent': string
@@ -26,8 +22,7 @@ export function WelcomePage() {
 
     const activeSlide = welcomeSlides[activeSlideIndex]
     const isFirstSlide = activeSlideIndex === 0
-    const isLastSlide =
-        activeSlideIndex === welcomeSlides.length - 1
+    const isLastSlide = activeSlideIndex === welcomeSlides.length - 1
 
     const pageStyle: WelcomePageStyle = {
         '--slide-accent': activeSlide.accent,
@@ -43,9 +38,7 @@ export function WelcomePage() {
     }
 
     function handlePrevious() {
-        setActiveSlideIndex((currentIndex) =>
-            Math.max(currentIndex - 1, 0),
-        )
+        setActiveSlideIndex((currentIndex) => Math.max(currentIndex - 1, 0))
     }
 
     function handleSkip() {
@@ -65,35 +58,19 @@ export function WelcomePage() {
 
     return (
         <main className={styles.page} style={pageStyle}>
-            <button
-                type="button"
-                className={styles.skipButton}
-                onClick={handleSkip}
-            >
+            <button type="button" className={styles.skipButton} onClick={handleSkip}>
                 Пропустить
             </button>
 
-            <section
-                key={activeSlide.id}
-                className={styles.slide}
-                aria-live="polite"
-            >
+            <section key={activeSlide.id} className={styles.slide} aria-live="polite">
                 <div className={styles.content}>
-
                     <div className={styles.top}>
-
-                          <span className={styles.eyebrow}>
-                            {activeSlide.eyebrow}
-                          </span>
+                        <span className={styles.eyebrow}>{activeSlide.eyebrow}</span>
 
                         <div className={styles.text}>
-                            <h1 className={styles.title}>
-                                {activeSlide.title}
-                            </h1>
+                            <h1 className={styles.title}>{activeSlide.title}</h1>
 
-                            <p className={styles.description}>
-                                {activeSlide.description}
-                            </p>
+                            <p className={styles.description}>{activeSlide.description}</p>
                         </div>
                     </div>
 
@@ -102,7 +79,7 @@ export function WelcomePage() {
                             <Button
                                 variant="secondary"
                                 aria-label="Предыдущий слайд"
-                                startIcon={<Icon icon={faArrowLeft}/>}
+                                startIcon={<Icon icon={faArrowLeft} />}
                                 onClick={handlePrevious}
                             >
                                 Назад
@@ -110,11 +87,7 @@ export function WelcomePage() {
                         )}
 
                         <Button
-                            endIcon={
-                                <Icon
-                                    icon={isLastSlide ? faPlay : faArrowRight}
-                                />
-                            }
+                            endIcon={<Icon icon={isLastSlide ? faPlay : faArrowRight} />}
                             onClick={handleNext}
                         >
                             {isLastSlide ? 'Начать игру' : 'Далее'}
@@ -123,10 +96,7 @@ export function WelcomePage() {
                 </div>
 
                 <div className={styles.illustrationWrapper}>
-                    <div
-                        className={styles.illustrationBackground}
-                        aria-hidden="true"
-                    />
+                    <div className={styles.illustrationBackground} aria-hidden="true" />
 
                     <img
                         className={styles.illustration}
@@ -140,10 +110,7 @@ export function WelcomePage() {
                 </div>
             </section>
 
-            <nav
-                className={styles.pagination}
-                aria-label="Слайды знакомства"
-            >
+            <nav className={styles.pagination} aria-label="Слайды знакомства">
                 {welcomeSlides.map((slide, index) => (
                     <button
                         key={slide.id}
@@ -151,9 +118,7 @@ export function WelcomePage() {
                         className={styles.paginationButton}
                         data-active={index === activeSlideIndex}
                         aria-label={`Перейти к слайду ${index + 1}`}
-                        aria-current={
-                            index === activeSlideIndex ? 'step' : undefined
-                        }
+                        aria-current={index === activeSlideIndex ? 'step' : undefined}
                         onClick={() => setActiveSlideIndex(index)}
                     />
                 ))}

@@ -1,24 +1,17 @@
-import {
-    type FormEvent,
-    useState,
-} from 'react'
-import {Link} from 'react-router-dom'
+import { type FormEvent, useState } from 'react'
+import { Link } from 'react-router-dom'
 
-import {Input} from '@/shared/ui/input'
-import {Logo} from '@/shared/ui/logo'
+import { Input } from '@/shared/ui/input'
+import { Logo } from '@/shared/ui/logo'
 
 import styles from './AuthForm.module.scss'
-import {Button} from "@/shared/ui/button";
+import { Button } from '@/shared/ui/button'
 
 export function ForgotPasswordForm() {
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [submittedEmail, setSubmittedEmail] = useState<string | null>(
-        null,
-    )
+    const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
 
-    async function handleSubmit(
-        event: FormEvent<HTMLFormElement>,
-    ) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         const formData = new FormData(event.currentTarget)
@@ -52,35 +45,28 @@ export function ForgotPasswordForm() {
         return (
             <div className={styles.content}>
                 <header className={styles.header}>
-
-                <Link to="/home" className={styles.brand}>
-                    <Logo/>
-                </Link>
+                    <Link to="/home" className={styles.brand}>
+                        <Logo />
+                    </Link>
 
                     <p className={styles.description}>
-                        Готово! Письмо отправили на почту {' '}
-                        <strong>{submittedEmail}</strong>
+                        Готово! Письмо отправили на почту <strong>{submittedEmail}</strong>
                     </p>
                 </header>
 
                 <div className={styles.controls}>
-                    <Button
-                        className={styles.submit}
-                        type="button"
-                        onClick={handleRetry}
-                    >
+                    <Button className={styles.submit} type="button" onClick={handleRetry}>
                         Вернуться
                     </Button>
 
                     <Button
                         className={styles.submit}
                         type="button"
-                        variant='secondary'
+                        variant="secondary"
                         onClick={handleRetry}
                     >
                         Отправить ещё раз
                     </Button>
-
                 </div>
 
                 <p className={styles.footer}>
@@ -97,18 +83,13 @@ export function ForgotPasswordForm() {
         <div className={styles.content}>
             <header className={styles.header}>
                 <Link to="/home" className={styles.brand}>
-                    <Logo/>
+                    <Logo />
                 </Link>
 
-                <p className={styles.description}>
-                    Введите почту, чтобы восстановить аккаунт
-                </p>
+                <p className={styles.description}>Введите почту, чтобы восстановить аккаунт</p>
             </header>
 
-            <form
-                className={styles.form}
-                onSubmit={handleSubmit}
-            >
+            <form className={styles.form} onSubmit={handleSubmit}>
                 <Input
                     label="Электронная почта"
                     name="email"
@@ -120,14 +101,8 @@ export function ForgotPasswordForm() {
                     disabled={isSubmitting}
                 />
 
-                <button
-                    className={styles.submit}
-                    type="submit"
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting
-                        ? 'Отправляем...'
-                        : 'Восстановить пароль'}
+                <button className={styles.submit} type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Отправляем...' : 'Восстановить пароль'}
                 </button>
             </form>
 

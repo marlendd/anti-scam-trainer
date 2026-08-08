@@ -1,213 +1,214 @@
 .header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
 
-  z-index: 100;
+    z-index: 100;
 
-  width: 100%;
-  height: 56px;
+    width: 100%;
+    height: 56px;
 
-  border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
 
-  background-color: #ffffff;
+    background-color: #ffffff;
 }
 
 .inner {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 1480px;
-  height: 100%;
-  margin: 0 auto;
-  padding: 0 48px;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 32px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1480px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 48px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 32px;
 }
 
 .left {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 28px;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 28px;
 }
 
 .timer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .timerIcon {
-  display: inline-flex;
+    display: inline-flex;
 
-  color: #858585;
+    color: #858585;
 
-  font-size: 22px;
+    font-size: 22px;
 }
 
 .stats {
-  display: flex;
+    display: flex;
 }
 
 .timerValue {
-  color: #222222;
+    color: #222222;
 
-  font-family: monospace;
-  font-size: 18px;
-  font-weight: normal;
-  letter-spacing: 0.04em;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: normal;
+    letter-spacing: 0.04em;
 }
 
 .separator {
-  width: 1px;
-  height: 28px;
+    width: 1px;
+    height: 28px;
 
-  background-color: #e6e6e6;
+    background-color: #e6e6e6;
 }
 
 .score,
 .setupScore,
 .productName {
-  color: #222222;
+    color: #222222;
 
-  font-size: 18px;
-  font-weight: 600;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .productName {
-  color: #00aaff;
+    color: #00aaff;
 }
 
 .lives {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
 }
 
 .livesLabel {
-  color: #858585;
+    color: #858585;
 
-  font-size: 18px;
-  font-weight: 600;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .hearts {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .heart {
-  display: inline-flex;
+    display: inline-flex;
 
-  color: #dedede;
+    color: #dedede;
 
-  font-size: 21px;
+    font-size: 21px;
 
-  &[data-active='true'] {
-    color: #111111;
-  }
+    &[data-active='true'] {
+        color: #111111;
+    }
 }
 
 .right {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: end;
-  gap: 16px;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: end;
+    gap: 16px;
 }
 
 .question {
-  color: #1769ff;
+    color: #1769ff;
 
-  font-size: 17px;
-  font-weight: normal;
-  white-space: nowrap;
+    font-size: 17px;
+    font-weight: normal;
+    white-space: nowrap;
 }
 
 .progress {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .progressDot {
-  width: 11px;
-  aspect-ratio: 1 / 1;
+    width: 11px;
+    aspect-ratio: 1 / 1;
 
-  border-radius: 50%;
+    border-radius: 50%;
 
-  background-color: #e4e4e4;
+    background-color: #e4e4e4;
 
-  &[data-state='completed'] {
-    background-color: #04e061;
-  }
+    &[data-state='completed'] {
+        background-color: #04e061;
+    }
 
-  &[data-state='current'] {
-    background-color: #1769ff;
-  }
+    &[data-state='current'] {
+        background-color: #1769ff;
+    }
 }
 
 @media (max-width: 900px) {
-  .inner {
-    padding: 0 24px;
-    grid-template-columns: 1fr auto;
-  }
+    .inner {
+        padding: 0 24px;
+        grid-template-columns: 1fr auto;
+    }
 
-  .lives {
-    display: none;
-  }
+    .lives {
+        display: none;
+    }
 
-  .right {
-    grid-column: 2;
-  }
+    .right {
+        grid-column: 2;
+    }
 }
 
 @media (max-width: 800px) {
-  .header {
-    height: 64px;
-  }
+    .header {
+        height: 64px;
+    }
 
-  .inner {
-    padding: 0 16px;
-    gap: 12px;
-  }
+    .inner {
+        padding: 0 16px;
+        gap: 12px;
+    }
 
-  .timerValue {
-    font-size: 17px;
-  }
+    .timerValue {
+        font-size: 17px;
+    }
 
-  .score,
-  .productName,
-  .setupScore {
-    font-size: 15px;
-  }
+    .score,
+    .productName,
+    .setupScore {
+        font-size: 15px;
+    }
 
-  .separator,
-  .progress {
-    display: none;
-  }
+    .separator,
+    .progress {
+        display: none;
+    }
 
-  .question {
-    font-size: 14px;
-  }
+    .question {
+        font-size: 14px;
+    }
 
-  .timerIcon {
-    font-size: 18px;
-  }
+    .timerIcon {
+        font-size: 18px;
+    }
 }
 @media (max-width: 520px) {
-  .left {
-    justify-content: space-between;
-    width: 100%;
-  }
-  
-  .stats, .question {
-    display: none;
-  }
+    .left {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .stats,
+    .question {
+        display: none;
+    }
 }

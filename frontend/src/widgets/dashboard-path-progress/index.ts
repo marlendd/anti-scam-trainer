@@ -2,7 +2,4 @@
 
 export { DashboardPathProgress } from './ui/DashboardPathProgress'
 
-export type {
-  TrainingPathId,
-  TrainingPathProgress,
-} from './model/pathProgress'
+export type { TrainingPathId, TrainingPathProgress } from './model/pathProgress'

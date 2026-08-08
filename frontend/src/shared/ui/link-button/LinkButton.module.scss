@@ -1,47 +1,45 @@
 .linkButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: var(--bg);
-  color: var(--text-h);
-  text-decoration: none;
-  font-size: 16px;
-  font-family: var(--heading);
-  font-weight: normal;
-  line-height: 1;
-  overflow: hidden;
-  transition:
-    gap 0.5s ease,
-    padding 0.5s ease,
-    box-shadow 0.5s ease,
-    transform 0.5s ease,
-    border-color 0.5s ease;
-
-
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--text-h);
+    text-decoration: none;
+    font-size: 16px;
+    font-family: var(--heading);
+    font-weight: normal;
+    line-height: 1;
+    overflow: hidden;
+    transition:
+        gap 0.5s ease,
+        padding 0.5s ease,
+        box-shadow 0.5s ease,
+        transform 0.5s ease,
+        border-color 0.5s ease;
 }
 
 .label {
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  transform: translateX(-4px);
-  transition:
-    max-width 0.5s ease,
-    opacity 0.5s ease,
-    transform 0.5s ease;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transform: translateX(-4px);
+    transition:
+        max-width 0.5s ease,
+        opacity 0.5s ease,
+        transform 0.5s ease;
 
     max-width: 140px;
-  opacity: 1;
-  transform: translateX(0);
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .linkButton:hover .label,
 .linkButton:focus-visible .label {
-  max-width: 140px;
-  opacity: 1;
-  transform: translateX(0);
+    max-width: 140px;
+    opacity: 1;
+    transform: translateX(0);
 }

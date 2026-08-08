@@ -1,109 +1,109 @@
 // ChatProductHeader.module.scss
 
 .header {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 24px;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 24px;
 
-  border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
 
-  background-color: #ffffff;
+    background-color: #ffffff;
 }
 
 .image {
-  width: 56px;
-  height: 56px;
-  flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
 
-  border-radius: 14px;
+    border-radius: 14px;
 
-  object-fit: cover;
+    object-fit: cover;
 }
 
 .content {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 4px;
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .participant {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  gap: 8px;
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 8px;
 }
 
 .participantName {
-  overflow: hidden;
+    overflow: hidden;
 
-  color: #111111;
+    color: #111111;
 
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.25;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .status {
-  flex-shrink: 0;
+    flex-shrink: 0;
 
-  color: #999999;
+    color: #999999;
 
-  font-size: 14px;
-  font-weight: 400;
+    font-size: 14px;
+    font-weight: 400;
 }
 
 .product {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  gap: 6px;
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 6px;
 }
 
 .productTitle {
-  overflow: hidden;
+    overflow: hidden;
 
-  color: #333333;
+    color: #333333;
 
-  font-size: 14px;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    font-size: 14px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .price {
-  flex-shrink: 0;
+    flex-shrink: 0;
 
-  color: #333333;
+    color: #333333;
 
-  font-size: 14px;
-  font-weight: 500;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 @media (max-width: 640px) {
-  .header {
-    padding: 12px 16px;
-  }
+    .header {
+        padding: 12px 16px;
+    }
 
-  .image {
-    width: 48px;
-    height: 48px;
+    .image {
+        width: 48px;
+        height: 48px;
 
-    border-radius: 12px;
-  }
+        border-radius: 12px;
+    }
 
-  .participantName {
-    font-size: 16px;
-  }
+    .participantName {
+        font-size: 16px;
+    }
 
-  .status,
-  .productTitle,
-  .price {
-    font-size: 13px;
-  }
+    .status,
+    .productTitle,
+    .price {
+        font-size: 13px;
+    }
 }

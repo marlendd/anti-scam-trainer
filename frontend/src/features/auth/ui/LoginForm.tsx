@@ -1,38 +1,36 @@
 // src/features/auth/ui/LoginForm.tsx
 
-import type {FormEvent} from 'react'
-import {Link, useNavigate} from 'react-router-dom'
+import type { FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
-import {
-    Input,
-    PasswordInput,
-} from '@/shared/ui/input'
+import { Input, PasswordInput } from '@/shared/ui/input'
 
 import styles from './AuthForm.module.scss'
-import {Logo} from "@/shared/ui/logo";
-import {useLogin} from "@/features/auth";
-import {ApiError} from "@/shared/api";
+import { Logo } from '@/shared/ui/logo'
+import { useLogin } from '@/features/auth'
+import { ApiError } from '@/shared/api'
 
 export function LoginForm() {
     const login = useLogin()
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         const formData = new FormData(event.currentTarget)
 
-        login.mutate({
+        login.mutate(
+            {
                 email: String(formData.get('email')),
                 password: String(formData.get('password')),
             },
             {
                 onSuccess: () => {
-                    navigate('/home', {replace: true})
+                    navigate('/home', { replace: true })
                 },
-            },)
+            },
+        )
     }
-
 
     let errorMessage: string | undefined
 
@@ -49,16 +47,13 @@ export function LoginForm() {
     return (
         <div className={styles.content}>
             <header className={styles.header}>
-
                 <Link to="/home" className={styles.brand}>
-                    <Logo/>
+                    <Logo />
                 </Link>
 
                 {/*<h1 className={styles.title}>Вход</h1>*/}
 
-                <p className={styles.description}>
-                    Войдите, чтобы продолжить обучение
-                </p>
+                <p className={styles.description}>Войдите, чтобы продолжить обучение</p>
             </header>
 
             <form className={styles.form} onSubmit={handleSubmit}>
@@ -81,19 +76,12 @@ export function LoginForm() {
                 />
 
                 <div className={styles.formActions}>
-                    <Link
-                        to="/forgot-password"
-                        className={styles.secondaryLink}
-                    >
+                    <Link to="/forgot-password" className={styles.secondaryLink}>
                         Забыли пароль?
                     </Link>
                 </div>
 
-                {errorMessage && (
-                    <p className={styles.error}>
-                        {errorMessage}
-                    </p>
-                )}
+                {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
                 <button className={styles.submit} type="submit">
                     Войти

@@ -1,11 +1,11 @@
 // src/shared/ui/chat-composer/ChatComposer.tsx
 
 import {
-  useLayoutEffect,
-  useRef,
-  type ChangeEvent,
-  type FormEvent,
-  type KeyboardEvent,
+    useLayoutEffect,
+    useRef,
+    type ChangeEvent,
+    type FormEvent,
+    type KeyboardEvent,
 } from 'react'
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons'
 
@@ -14,104 +14,88 @@ import { Icon } from '@/shared/ui/icon'
 import styles from './ChatComposer.module.scss'
 
 type ChatComposerProps = {
-  value: string
-  onChange: (value: string) => void
-  onSend: () => void
-  placeholder?: string
-  disabled?: boolean
-  maxLength?: number
-  className?: string
+    value: string
+    onChange: (value: string) => void
+    onSend: () => void
+    placeholder?: string
+    disabled?: boolean
+    maxLength?: number
+    className?: string
 }
 
 export function ChatComposer({
-  value,
-  onChange,
-  onSend,
-  placeholder = 'Сообщение',
-  disabled = false,
-  maxLength = 2000,
-  className,
+    value,
+    onChange,
+    onSend,
+    placeholder = 'Сообщение',
+    disabled = false,
+    maxLength = 2000,
+    className,
 }: ChatComposerProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  useLayoutEffect(() => {
-    const textarea = textareaRef.current
+    useLayoutEffect(() => {
+        const textarea = textareaRef.current
 
-    if (!textarea) {
-      return
+        if (!textarea) {
+            return
+        }
+
+        textarea.style.height = '0px'
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`
+    }, [value])
+
+    function sendMessage() {
+        if (!value.trim() || disabled) {
+            return
+        }
+
+        onSend()
     }
 
-    textarea.style.height = '0px'
-    textarea.style.height = `${Math.min(
-      textarea.scrollHeight,
-      160,
-    )}px`
-  }, [value])
-
-  function sendMessage() {
-    if (!value.trim() || disabled) {
-      return
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        sendMessage()
     }
 
-    onSend()
-  }
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    sendMessage()
-  }
-
-  function handleChange(
-    event: ChangeEvent<HTMLTextAreaElement>,
-  ) {
-    onChange(event.target.value)
-  }
-
-  function handleKeyDown(
-    event: KeyboardEvent<HTMLTextAreaElement>,
-  ) {
-    if (
-      event.key !== 'Enter' ||
-      event.shiftKey ||
-      event.nativeEvent.isComposing
-    ) {
-      return
+    function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
+        onChange(event.target.value)
     }
 
-    event.preventDefault()
-    sendMessage()
-  }
+    function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+        if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) {
+            return
+        }
 
-  const rootClassName = [styles.composer, className]
-    .filter(Boolean)
-    .join(' ')
+        event.preventDefault()
+        sendMessage()
+    }
 
-  return (
-    <form
-      className={rootClassName}
-      onSubmit={handleSubmit}
-    >
-      <textarea
-        ref={textareaRef}
-        className={styles.input}
-        value={value}
-        placeholder={placeholder}
-        disabled={disabled}
-        maxLength={maxLength}
-        rows={1}
-        aria-label="Сообщение"
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-      />
+    const rootClassName = [styles.composer, className].filter(Boolean).join(' ')
 
-      <button
-        className={styles.sendButton}
-        type="submit"
-        disabled={disabled || !value.trim()}
-        aria-label="Отправить сообщение"
-      >
-        <Icon icon={faArrowUp} />
-      </button>
-    </form>
-  )
+    return (
+        <form className={rootClassName} onSubmit={handleSubmit}>
+            <textarea
+                ref={textareaRef}
+                className={styles.input}
+                value={value}
+                placeholder={placeholder}
+                disabled={disabled}
+                maxLength={maxLength}
+                rows={1}
+                aria-label="Сообщение"
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+            />
+
+            <button
+                className={styles.sendButton}
+                type="submit"
+                disabled={disabled || !value.trim()}
+                aria-label="Отправить сообщение"
+            >
+                <Icon icon={faArrowUp} />
+            </button>
+        </form>
+    )
 }

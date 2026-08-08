@@ -1,1 +1,1 @@
-export { DashboardRatingChart } from './ui/DashboardRatingChart.tsx';
+export { DashboardRatingChart } from './ui/DashboardRatingChart.tsx'

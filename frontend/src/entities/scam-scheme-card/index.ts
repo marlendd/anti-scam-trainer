@@ -1,1 +1,1 @@
-export { ScamSchemeCard } from './ui/ScamSchemeCard.tsx';
+export { ScamSchemeCard } from './ui/ScamSchemeCard.tsx'
