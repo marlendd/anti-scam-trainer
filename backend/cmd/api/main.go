@@ -17,6 +17,7 @@ import (
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/health"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
+	"github.com/marlendd/anti-scam-trainer/internal/platform/middleware"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 	"github.com/marlendd/anti-scam-trainer/internal/scenario"
 )
@@ -93,6 +94,8 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.HandleFunc("POST /api/v1/auth/forgot-password", authHandler.ForgotPassword)
 	mux.HandleFunc("POST /api/v1/auth/reset-password", authHandler.ResetPassword)
 
+	handler := middleware.CORS(cfg.AllowedOrigins)(mux)
+
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
 	mux.Handle(
@@ -120,7 +123,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	server := &http.Server{
 		Addr:        addr,
 		ReadTimeout: cfg.Timeout,
-		Handler:     mux,
+		Handler:     handler,
 	}
 
 	// ---------- graceful shutdown ----------

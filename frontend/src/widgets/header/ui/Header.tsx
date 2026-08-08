@@ -3,12 +3,15 @@ import {Logo} from '@/shared/ui/logo'
 import styles from './Header.module.scss'
 import {FragmentCounter} from './FragmentCounter'
 import {PointsCounter} from './PointsCounter'
-// import {Avatar} from "@/shared/ui/avatar";
 import {LoginButton} from "@/features/login-button";
-import {BurgerNavigation} from "@/widgets/header/ui/BurgerNavigation.tsx";
-// import {PlayButton} from "@/features/play-button";
+import {BurgerNavigation} from "@/widgets/header";
+import {useCurrentUser} from "@/entities/user";
+import {Avatar} from "@/shared/ui/avatar";
 
 export const Header = () => {
+
+    const {data: user, isPending, isError} = useCurrentUser()
+
     return (
         <header className={styles.header}>
             <Link to="/">
@@ -21,7 +24,9 @@ export const Header = () => {
                     <Link to='/puzzle'>Магазин</Link>
                     <Link to='/glossary'>Глоссарий</Link>
                     <Link to='/leaderboard'>Лидеры</Link>
-                    <Link to='/dashboard'>Статистика</Link>
+                    {!isPending && !isError && user !== null && (
+                        <Link to='/dashboard'>Статистика</Link>
+                    )}
                 </nav>
 
                 <div className={styles.info}>
@@ -30,13 +35,24 @@ export const Header = () => {
                         <PointsCounter value={0}/>
                     </div>
 
-                    {/*<Link to={'/dashboard'}>*/}
-                    {/*    <Avatar/>*/}
-                    {/*</Link>*/}
 
-                    <LoginButton/>
+                    {isPending && <LoginButton/> }
 
-                    <BurgerNavigation />
+                    {!isPending && !isError && user === null && (
+                        <LoginButton/>
+                    )}
+
+                    {!isPending && !isError && user !== null && (
+                        <Link to={'/dashboard'}>
+                            <Avatar/>
+                        </Link>
+                    )}
+
+                    {isError && (
+                        <LoginButton/>
+                    )}
+
+                    <BurgerNavigation/>
 
                     {/*<PlayButton/>*/}
                 </div>

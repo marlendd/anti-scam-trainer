@@ -4,7 +4,8 @@ import {
     useState,
     type FormEvent,
 } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
+import {ApiError} from "@/shared/api";
 
 import {
     Input,
@@ -13,20 +14,22 @@ import {
 
 import styles from './AuthForm.module.scss'
 import {Logo} from "@/shared/ui/logo";
+import {useRegister} from "@/features/auth";
 
 export function RegisterForm() {
     const [confirmationError, setConfirmationError] =
         useState<string>()
+
+    const register = useRegister()
+    const navigate = useNavigate()
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         const formData = new FormData(event.currentTarget)
 
-        const password = String(
-            formData.get('password') ?? '',
-        )
-
+        const email = String(formData.get('email') ?? '')
+        const password = String(formData.get('password') ?? '')
         const passwordConfirmation = String(
             formData.get('passwordConfirmation') ?? '',
         )
@@ -38,8 +41,29 @@ export function RegisterForm() {
 
         setConfirmationError(undefined)
 
-        // Здесь позже вызывается register mutation.
+        register.mutate({
+                email,
+                password,
+            },
+            {
+                onSuccess: () => {
+                    navigate('/home', {replace: true})
+                },
+            },)
     }
+
+    let errorMessage: string | undefined
+
+    if (register.error instanceof ApiError) {
+        if (register.error.status === 401) {
+            errorMessage = 'Неверная электронная почта или пароль'
+        } else {
+            errorMessage = 'Не удалось войти. Попробуйте ещё раз'
+        }
+    } else if (register.isError) {
+        errorMessage = 'Произошла ошибка. Попробуйте ещё раз'
+    }
+
 
     return (
         <div className={styles.content}>
@@ -103,6 +127,12 @@ export function RegisterForm() {
                 <button className={styles.submit} type="submit">
                     Создать аккаунт
                 </button>
+
+                {errorMessage && (
+                    <p className={styles.error}>
+                        {errorMessage}
+                    </p>
+                )}
             </form>
 
             <p className={styles.footer}>

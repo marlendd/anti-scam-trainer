@@ -352,8 +352,11 @@ components:
   schemas:
     RegisterRequest:
       type: object
-      required: [email, password]
+      required: [name, email, password]
       properties:
+        name:
+          type: string
+          example: Иван Иванов
         email:
           type: string
           format: email
@@ -398,6 +401,8 @@ components:
     UserPublic:
       type: object
       properties:
+        name:
+          type: string
         id:
           type: string
           format: uuid
