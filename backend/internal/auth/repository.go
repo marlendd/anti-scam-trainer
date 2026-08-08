@@ -51,7 +51,7 @@ func (r *PgUserRepository) Create(ctx context.Context, name, email, passwordHash
 		RETURNING id, name, email, password_hash, created_at, updated_at
 	`
 	var u User
-	err := r.db.QueryRowContext(ctx, q, email, passwordHash).Scan(
+	err := r.db.QueryRowContext(ctx, q, name, email, passwordHash).Scan(
 		&u.ID, &u.Name, &u.Email, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt,
 	)
 	if err != nil {
