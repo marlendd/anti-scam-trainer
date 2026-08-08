@@ -37,7 +37,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-	
+
 	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "" {
 		respondError(w, http.StatusBadRequest, "name is required")

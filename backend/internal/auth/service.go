@@ -123,7 +123,7 @@ func (s *Service) RequestPasswordReset(ctx context.Context, email string) error 
 
 	resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.appBaseURL, rawToken)
 
-	if err := s.mailer.SendPasswordReset(u.Email, resetLink); err != nil {
+	if err := s.mailer.SendPasswordReset(ctx, u.Email, resetLink); err != nil {
 		return fmt.Errorf("failed to send reset email: %w", err)
 	}
 

@@ -166,7 +166,7 @@ func (pg *PgRepository) getScenarioData(ctx context.Context, scenarioID Scenario
 func (pg *PgRepository) decodeContent(rawContent json.RawMessage) (Content, error) {
 	var content Content
 	if err := json.Unmarshal(rawContent, &content); err != nil {
-		return Content{}, fmt.Errorf("%w: %v", ErrInvalidScenarioContent, err)
+		return Content{}, fmt.Errorf("%w: %w", ErrInvalidScenarioContent, err)
 	}
 
 	return content, nil
@@ -178,7 +178,7 @@ func (pg *PgRepository) getScenarioFromContent(scenario Scenario, content Conten
 	scenario.Endings = content.Endings
 
 	if err := Validate(scenario); err != nil {
-		return Scenario{}, fmt.Errorf("%w: %v", ErrInvalidScenarioContent, err)
+		return Scenario{}, fmt.Errorf("%w: %w", ErrInvalidScenarioContent, err)
 	}
 
 	return scenario, nil
