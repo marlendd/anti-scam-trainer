@@ -14,11 +14,13 @@ import (
 
 	"github.com/marlendd/anti-scam-trainer/internal/attempt"
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
+	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/health"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/middleware"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
+	"github.com/marlendd/anti-scam-trainer/internal/progress"
 	"github.com/marlendd/anti-scam-trainer/internal/scenario"
 )
 
@@ -83,6 +85,14 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	)
 	attemptHandler := attempt.NewHandler(attemptService, log)
 
+	// ---------- evaluation ----------
+	evaluator := evaluation.NewEvaluator()
+
+	// ---------- progress ----------
+	progressRepo := progress.NewPgRepository(db, log)
+	progressService := progress.NewService(progressRepo, evaluator)
+	progressHandler := progress.NewHandler(progressService, log)
+
 	mux := http.NewServeMux()
 
 	// health/ready
@@ -121,6 +131,17 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		requireAuth(http.HandlerFunc(attemptHandler.SubmitAnswer)),
 	)
 
+	// protected routes
+	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
+
+	// progress not protected routes
+	mux.HandleFunc("GET /api/v1/leaderboard", progressHandler.GetLeaderboard)
+	// progress protected routes
+	mux.Handle("GET /api/v1/profile/role-progress", requireAuth(http.HandlerFunc(progressHandler.GetMyRoleStats)))
+	mux.Handle("GET /api/v1/profile/categories-progress", requireAuth(http.HandlerFunc(progressHandler.GetMyCategoryDashboard)))
+	mux.Handle("GET /api/v1/profile/puzzle", requireAuth(http.HandlerFunc(progressHandler.GetMyPuzzleProgress)))
+	mux.Handle("GET /api/v1/attempts/{id}/result", requireAuth(http.HandlerFunc(progressHandler.GetStatsOfAttempt)))
+	mux.Handle("GET /api/v1/profile/rank-history", requireAuth(http.HandlerFunc(progressHandler.GetMyRankHistory)))
 	addr := ":" + cfg.Port
 	if cfg.Port == "" {
 		addr = ":8080"
