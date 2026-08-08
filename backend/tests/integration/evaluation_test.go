@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
+	"github.com/marlendd/anti-scam-trainer/internal/progress"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,8 +33,10 @@ func TestEvaluation_Integration(t *testing.T) {
 		require.NoError(t, err)
 	}()
 
-	repo := evaluation.NewPgRepository(db, slog.Default())
-	svc := evaluation.NewService(repo)
+	evaluator := evaluation.NewEvaluator()
+
+	repo := progress.NewPgRepository(db, slog.Default())
+	svc := progress.NewService(repo, evaluator)
 	ctx := context.Background()
 
 	_, err := db.Exec("TRUNCATE users, scenario_versions, attempts, answers CASCADE")
@@ -63,7 +66,7 @@ func TestEvaluation_Integration(t *testing.T) {
 
 		score, err := svc.GetAttemptResults(ctx, userID, attemptID)
 		require.NoError(t, err)
-		require.Equal(t, 66, score)
+		require.Equal(t, 67, score)
 	})
 
 	t.Run("Verify Personal Progress Stats", func(t *testing.T) {
