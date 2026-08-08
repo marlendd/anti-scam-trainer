@@ -1,83 +1,79 @@
-export type ScenarioParticipantRole =
-  | 'buyer'
-  | 'seller'
+export type ScenarioParticipantRole = 'buyer' | 'seller'
 
 export type ScenarioParticipant = {
-  id: string
-  name: string
-  role: ScenarioParticipantRole
-  status?: string
+    id: string
+    name: string
+    role: ScenarioParticipantRole
+    status?: string
 }
 
 export type ScenarioProduct = {
-  id: string
-  title: string
-  price: number
-  imageUrl?: string
+    id: string
+    title: string
+    price: number
+    imageUrl?: string
 }
 
 export type ScenarioMessage = {
-  type: 'message'
-  id: string
-  senderId: string
-  text: string
-  delayMs?: number
+    type: 'message'
+    id: string
+    senderId: string
+    text: string
+    delayMs?: number
 }
 
 export type ScenarioAnswerOption = {
-  id: string
-  text: string
-  isCorrect: boolean
+    id: string
+    text: string
+    isCorrect: boolean
 
-  /**
-   * Потом сюда можно добавить объяснение,
-   * изменение score и т.д.
-   */
-  feedback?: string
+    /**
+     * Потом сюда можно добавить объяснение,
+     * изменение score и т.д.
+     */
+    feedback?: string
 }
 
 export type ScenarioChoice = {
-  type: 'choice'
-  id: string
+    type: 'choice'
+    id: string
 
-  options: ScenarioAnswerOption[]
+    options: ScenarioAnswerOption[]
 
-  /**
-   * Какой ответ автоматически показывать
-   * в режиме preview / glossary.
-   */
-  previewOptionId?: string
+    /**
+     * Какой ответ автоматически показывать
+     * в режиме preview / glossary.
+     */
+    previewOptionId?: string
 }
 
-export type ScenarioTimelineItem =
-  | ScenarioMessage
-  | ScenarioChoice
+export type ScenarioTimelineItem = ScenarioMessage | ScenarioChoice
 
 export type ScenarioRedFlag = {
-  id: string
-  title: string
-  description: string
-  accent?: string
+    id: string
+    title: string
+    description: string
+    accent?: string
 }
 
 export type ScenarioAnalysis = {
-  title: string
-  redFlags: ScenarioRedFlag[]
-  safeActions: string[]
-  goldenRule: string
+    title: string
+    redFlags: ScenarioRedFlag[]
+    safeActions: string[]
+    goldenRule: string
 }
 
 export type TrainingScenario = {
-  id: string
-  title: string
-  description: string
+    id: string
+    title: string
+    description: string
 
-  product: ScenarioProduct
+    product: ScenarioProduct
 
-  playerParticipantId: string
-  participants: ScenarioParticipant[]
+    playerParticipantId: string
+    participants: ScenarioParticipant[]
 
-  timeline: ScenarioTimelineItem[]
+    timeline: ScenarioTimelineItem[]
 
-  analysis: ScenarioAnalysis
+    analysis: ScenarioAnalysis
 }

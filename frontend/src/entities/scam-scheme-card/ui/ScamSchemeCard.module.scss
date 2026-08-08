@@ -1,44 +1,49 @@
 .card {
-  padding: 24px;
+    padding: 24px;
 
-  background: #f7f7f7;
-  border-radius: 40px;
+    text-align: left;
 
-  text-align: left;
+    background: #f7f7f7;
+    border-radius: 40px;
 
-  transition: background-color .2s ease;
+    transition: background-color 0.2s ease;
 
-  .header {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-  }
+    .header {
+        display: flex;
 
-  .title {
-    color: #333;
-    font-weight: normal;
-    font-size: 20px;
-    transition: color .2s ease;
-  }
+        flex-flow: row nowrap;
 
-  .description {
-    color: #6b6375;
-    font-size: 16px;
-  }
-
-  &:hover {
-    background: #f1f1f1;
+        align-items: center;
+        justify-content: space-between;
+    }
 
     .title {
-      color: #ff4053;
+        font-size: 20px;
+        font-weight: normal;
+
+        color: #333;
+
+        transition: color 0.2s ease;
     }
-  }
+
+    .description {
+        font-size: 16px;
+
+        color: #6b6375;
+    }
+
+    &:hover {
+        background: #f1f1f1;
+
+        .title {
+            color: #ff4053;
+        }
+    }
 }
 
 .chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
 }

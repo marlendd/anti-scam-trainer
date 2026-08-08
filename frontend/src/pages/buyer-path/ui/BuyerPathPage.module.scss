@@ -1,61 +1,65 @@
 .page {
-  position: relative;
+    position: relative;
 
-  display: grid;
-  width: 100%;
-  min-height: calc(100vh - 120px);
-  grid-template-columns: 3fr 5fr;
-  align-items: stretch;
-  gap: 16px;
+    display: grid;
 
-  overflow: hidden;
+    grid-template-columns: 3fr 5fr;
+
+    gap: 16px;
+    align-items: stretch;
+
+    width: 100%;
+    min-height: calc(100vh - 120px);
+
+    overflow: hidden;
 }
 
 .pathColumn,
 .chatColumn {
-  min-width: 0;
-}
-
-@media (max-width: 1300px) {
-  .page {
-    grid-template-columns: 2fr 3fr;
-  }
-}
-
-@media (max-width: 1100px) {
-  .page {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 1000px) {
-  .page {
-    display: flex;
-    align-items: stretch;
-
-    min-height: calc(100dvh - 120px);
-  }
-
-  .chatColumn {
     min-width: 0;
-    width: 100%;
-  }
+}
 
-  .pathColumn {
-    width: 100%;
-  }
+@media (width <= 1300px) {
+    .page {
+        grid-template-columns: 2fr 3fr;
+    }
+}
 
-  /* /training/path/:pathId */
-  .page[data-session='false'] {
+@media (width <= 1100px) {
+    .page {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (width <= 1000px) {
+    .page {
+        display: flex;
+
+        align-items: stretch;
+
+        min-height: calc(100dvh - 120px);
+    }
+
     .chatColumn {
-      display: none;
+        width: 100%;
+        min-width: 0;
     }
-  }
 
-  /* /training/path/:pathId/:schemeId */
-  .page[data-session='true'] {
     .pathColumn {
-      display: none;
+        width: 100%;
     }
-  }
+
+    /* /training/path/:pathId */
+    .page[data-session='false'] {
+        .chatColumn {
+            display: none;
+        }
+    }
+
+    /* /training/path/:pathId/:schemeId */
+    .page[data-session='true'] {
+        .pathColumn {
+            display: none;
+        }
+    }
 }

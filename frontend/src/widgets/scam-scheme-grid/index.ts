@@ -1,1 +1,1 @@
-export { ScamSchemeGrid } from './ui/ScamSchemeGrid.tsx';
+export { ScamSchemeGrid } from './ui/ScamSchemeGrid.tsx'

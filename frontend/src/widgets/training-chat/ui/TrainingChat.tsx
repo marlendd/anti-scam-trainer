@@ -1,9 +1,6 @@
-import type {TrainingScenario} from '@/entities/training-scenario'
-import {
-    ScenarioPlayer,
-    type ScenarioPlaybackMode,
-} from '@/features/scenario-player'
-import {ChatProductHeader} from '@/shared/ui/chat-product-header'
+import type { TrainingScenario } from '@/entities/training-scenario'
+import { ScenarioPlayer, type ScenarioPlaybackMode } from '@/features/scenario-player'
+import { ChatProductHeader } from '@/shared/ui/chat-product-header'
 
 import styles from './TrainingChat.module.scss'
 
@@ -14,17 +11,15 @@ type TrainingChatProps = {
 }
 
 export function TrainingChat({
-                                 scenario,
-                                 mode = 'preview',
-                                 onScenarioComplete,
-                             }: TrainingChatProps) {
+    scenario,
+    mode = 'preview',
+    onScenarioComplete,
+}: TrainingChatProps) {
     if (!scenario) {
         return (
             <section className={styles.chat}>
                 <div className={styles.empty}>
-                    <h2 className={styles.emptyTitle}>
-                        Выберите сценарий
-                    </h2>
+                    <h2 className={styles.emptyTitle}>Выберите сценарий</h2>
 
                     <p className={styles.emptyDescription}>
                         Выберите доступный сценарий, чтобы начать тренировку.
@@ -34,12 +29,8 @@ export function TrainingChat({
         )
     }
 
-    // здесь TypeScript уже знает,
-    // что scenario — TrainingScenario
-
     const interlocutor = scenario.participants.find(
-        (participant) =>
-            participant.id !== scenario.playerParticipantId,
+        (participant) => participant.id !== scenario.playerParticipantId,
     )
 
     return (
@@ -52,11 +43,7 @@ export function TrainingChat({
                 imageUrl={scenario.product.imageUrl}
             />
 
-            <ScenarioPlayer
-                scenario={scenario}
-                mode={mode}
-                onComplete={onScenarioComplete}
-            />
+            <ScenarioPlayer scenario={scenario} mode={mode} onComplete={onScenarioComplete} />
         </section>
     )
 }

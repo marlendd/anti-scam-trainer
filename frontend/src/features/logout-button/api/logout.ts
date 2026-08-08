@@ -1,7 +1,7 @@
-import { apiRequest } from '@/shared/api';
+import { apiRequest } from '@/shared/api'
 
 export function logout() {
-  return apiRequest<void>('/auth/logout', {
-    method: 'POST',
-  });
+    return apiRequest<void>('/auth/logout', {
+        method: 'POST',
+    })
 }

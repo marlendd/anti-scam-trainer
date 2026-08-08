@@ -1,176 +1,196 @@
-// src/shared/ui/chat-message/ChatMessage.module.scss
-
 .message {
-  display: flex;
-  width: 100%;
-  align-items: flex-end;
-  text-align: left;
+    display: flex;
+
+    align-items: flex-end;
+
+    width: 100%;
+
+    text-align: left;
 }
 
 .incoming {
-  justify-content: flex-start;
+    justify-content: flex-start;
 }
 
 .outgoing {
-  justify-content: flex-end;
+    justify-content: flex-end;
 }
 
 .avatarSlot {
-  display: flex;
-  width: 44px;
-  min-width: 44px;
-  align-items: flex-end;
-  justify-content: flex-start;
-  margin-right: 8px;
+    display: flex;
+
+    align-items: flex-end;
+    justify-content: flex-start;
+
+    width: 44px;
+    min-width: 44px;
+
+    margin-right: 8px;
 }
 
 .avatar {
-  display: flex;
-  width: 36px;
-  height: 36px;
-  align-items: center;
-  justify-content: center;
+    display: flex;
 
-  border-radius: 50%;
+    align-items: center;
+    justify-content: center;
 
-  color: #ffffff;
-  background-color: #858585;
+    width: 36px;
+    height: 36px;
 
-  font-size: 12px;
-  font-weight: 600;
-  user-select: none;
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #fff;
+
+    user-select: none;
+
+    background-color: #858585;
+    border-radius: 50%;
 }
 
 .messageLine {
-  display: flex;
-  max-width: min(82%, 720px);
-  align-items: flex-end;
-  gap: 10px;
+    display: flex;
+
+    gap: 10px;
+    align-items: flex-end;
+
+    max-width: min(82%, 720px);
 }
 
 .bubble {
-  min-width: 64px;
-  padding: 14px 20px;
+    min-width: 64px;
 
-  border-radius: 28px;
+    padding: 14px 20px;
 
-  color: #111111;
-  background-color: #f1f1f1;
+    color: #111;
 
-  overflow-wrap: anywhere;
+    overflow-wrap: anywhere;
+
+    background-color: #f1f1f1;
+    border-radius: 28px;
 }
 
 .bubble[data-direction='outgoing'] {
-  background-color: #e3f4ff;
+    background-color: #e3f4ff;
 }
 
 /* Одиночное сообщение */
 
 .bubble[data-position='single'] {
-  border-radius: 28px;
+    border-radius: 28px;
 }
 
 /* Группа входящих сообщений */
 
 .bubble[data-direction='incoming'][data-position='first'] {
-  border-bottom-left-radius: 8px;
+    border-bottom-left-radius: 8px;
 }
 
 .bubble[data-direction='incoming'][data-position='middle'] {
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
 }
 
 .bubble[data-direction='incoming'][data-position='last'] {
-  border-top-left-radius: 8px;
+    border-top-left-radius: 8px;
 }
 
 /* Группа исходящих сообщений */
 
 .bubble[data-direction='outgoing'][data-position='first'] {
-  border-bottom-right-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .bubble[data-direction='outgoing'][data-position='middle'] {
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .bubble[data-direction='outgoing'][data-position='last'] {
-  border-top-right-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .text {
-  margin: 0;
+    margin: 0;
 
-  font-size: 17px;
-  line-height: 1.35;
-  white-space: pre-wrap;
+    font-size: 17px;
+
+    line-height: 1.35;
+
+    white-space: pre-wrap;
 }
 
 .meta {
-  display: inline-flex;
-  min-width: max-content;
-  align-items: center;
-  gap: 4px;
-  padding-bottom: 5px;
+    display: inline-flex;
 
-  color: #7a7a7a;
+    gap: 4px;
+    align-items: center;
 
-  font-size: 13px;
+    min-width: max-content;
+
+    padding-bottom: 5px;
+
+    font-size: 13px;
+
+    color: #7a7a7a;
 }
 
 .time {
-  color: inherit;
-  font: inherit;
+    font: inherit;
+
+    color: inherit;
 }
 
 .status {
-  display: inline-flex;
-  align-items: center;
+    display: inline-flex;
 
-  color: #858585;
+    align-items: center;
 
-  font-size: 13px;
+    font-size: 13px;
+
+    color: #858585;
 }
 
 .status[data-status='read'] {
-  color: #00aaff;
+    color: #0af;
 }
 
 .status[data-status='failed'] {
-  color: #ff4053;
+    color: #ff4053;
 }
 
-@media (max-width: 640px) {
-  .avatarSlot {
-    width: 36px;
-    min-width: 36px;
-    margin-right: 6px;
-  }
+@media (width <= 640px) {
+    .avatarSlot {
+        width: 36px;
+        min-width: 36px;
 
-  .avatar {
-    width: 30px;
-    height: 30px;
+        margin-right: 6px;
+    }
 
-    font-size: 10px;
-  }
+    .avatar {
+        width: 30px;
+        height: 30px;
 
-  .messageLine {
-    max-width: 92%;
-    gap: 6px;
-  }
+        font-size: 10px;
+    }
 
-  .bubble {
-    padding: 11px 15px;
-  }
+    .messageLine {
+        gap: 6px;
 
-  .text {
-    font-size: 15px;
-  }
+        max-width: 92%;
+    }
 
-  .meta {
-    padding-bottom: 3px;
-    font-size: 11px;
-  }
+    .bubble {
+        padding: 11px 15px;
+    }
+
+    .text {
+        font-size: 15px;
+    }
+
+    .meta {
+        padding-bottom: 3px;
+
+        font-size: 11px;
+    }
 }

@@ -1,122 +1,137 @@
-// src/app/layouts/auth-layout/AuthLayout.module.scss
-
 .page {
-  position: relative;
+    position: relative;
 
-  display: flex;
-  min-height: 100vh;
-  align-items: center;
-  justify-content: center;
-  padding: 72px 24px 40px;
+    display: flex;
 
-  overflow: hidden;
+    align-items: center;
+    justify-content: center;
 
-  background-color: #f7f7f7;
+    min-height: 100vh;
+
+    padding: 72px 24px 40px;
+
+    overflow: hidden;
+
+    background-color: #f7f7f7;
 }
 
 .brand {
-  position: absolute;
-  top: 28px;
-  left: 32px;
+    position: absolute;
+    top: 28px;
+    left: 32px;
 
-  color: #242424;
+    font-size: 20px;
+    font-weight: 600;
 
-  font-size: 20px;
-  font-weight: 600;
-  text-decoration: none;
-
-  &:visited {
     color: #242424;
-  }
 
-  &:focus-visible {
-    border-radius: 4px;
-    outline: 2px solid #ff4053;
-    outline-offset: 4px;
-  }
+    text-decoration: none;
+
+    &:visited {
+        color: #242424;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #ff4053;
+        outline-offset: 4px;
+
+        border-radius: 4px;
+    }
 }
 
 .card {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 
-  width: 100%;
-  max-width: 460px;
-  padding: 36px;
+    width: 100%;
+    max-width: 460px;
 
-  border: 1px solid #ededed;
-  border-radius: 28px;
+    padding: 36px;
 
-  background-color: #ffffff;
+    background-color: #fff;
+    border: 1px solid #ededed;
+    border-radius: 28px;
 }
 
 .decoration {
-  position: absolute;
-  inset: 0;
-
-  pointer-events: none;
-
-  span {
     position: absolute;
-    border-radius: 50%;
-    filter: blur(20px);
-  }
+    inset: 0;
+
+    pointer-events: none;
+
+    span {
+        position: absolute;
+
+        border-radius: 50%;
+
+        filter: blur(20px);
+    }
 }
 
 .redDot {
-  top: 16%;
-  left: 12%;
-  width: 184px;
-  height: 184px;
-  background-color: #ff4053;
+    top: 16%;
+    left: 12%;
+
+    width: 184px;
+    height: 184px;
+
+    background-color: #ff4053;
 }
 
 .blueDot {
-  right: 13%;
-  bottom: 17%;
-  width: 168px;
-  height: 168px;
-  background-color: #2f70ff;
+    right: 13%;
+    bottom: 17%;
+
+    width: 168px;
+    height: 168px;
+
+    background-color: #2f70ff;
 }
 
 .greenDot {
-  top: 20%;
-  right: 18%;
-  width: 134px;
-  height: 134px;
-  background-color: #97cf26;
+    top: 20%;
+    right: 18%;
+
+    width: 134px;
+    height: 134px;
+
+    background-color: #97cf26;
 }
 
 .purpleDot {
-  bottom: 12%;
-  left: 19%;
-  width: 144px;
-  height: 144px;
-  background-color: #a169f7;
+    bottom: 12%;
+    left: 19%;
+
+    width: 144px;
+    height: 144px;
+
+    background-color: #a169f7;
 }
 
-@media (max-width: 640px) {
-  .page {
-    align-items: flex-start;
-    padding: 64px 16px 24px;
+@media (width <= 640px) {
+    .page {
+        align-items: flex-start;
 
-    background-color: #ffffff;
-  }
+        padding: 64px 16px 24px;
 
-  .brand {
-    top: 24px;
-    left: 20px;
-  }
+        background-color: #fff;
+    }
 
-  .card {
-    max-width: none;
-    padding: 24px 4px;
+    .brand {
+        top: 24px;
+        left: 20px;
+    }
 
-    border: 0;
-    border-radius: 0;
-  }
+    .card {
+        max-width: none;
 
-  .decoration {
-    display: none;
-  }
+        padding: 24px 4px;
+
+        border: 0;
+        border-radius: 0;
+    }
+
+    .decoration {
+        display: none;
+    }
 }

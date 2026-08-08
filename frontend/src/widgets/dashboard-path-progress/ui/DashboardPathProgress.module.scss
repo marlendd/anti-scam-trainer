@@ -1,209 +1,220 @@
-// src/widgets/dashboard-path-progress/ui/DashboardPathProgress.module.scss
-
 .card {
-  width: 100%;
-  max-width: 800px;
-  padding: 24px;
+    width: 100%;
+    max-width: 800px;
 
-  border-radius: 24px;
+    padding: 24px;
 
-  background-color: #f7f7f7;
+    background-color: #f7f7f7;
+    border-radius: 24px;
 }
 
 .header {
-  margin-bottom: 24px;
-  padding-left: 16px;
-  text-align: left;
+    padding-left: 16px;
+    margin-bottom: 24px;
+
+    text-align: left;
 }
 
 .title {
-  margin: 0;
+    margin: 0;
 
-  color: #222222;
+    font-size: 22px;
+    font-weight: 600;
 
-  font-size: 22px;
-  font-weight: 600;
+    color: #222;
 }
 
 .description {
-  margin: 6px 0 0;
+    margin: 6px 0 0;
 
-  color: #858585;
+    font-size: 14px;
 
-  font-size: 14px;
+    color: #858585;
 }
 
 .paths {
-  display: grid;
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+    display: grid;
+
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
 }
 
 .path {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 20px;
-  padding: 22px;
+    display: flex;
 
-  border-radius: 20px;
+    gap: 20px;
+    align-items: center;
 
-  text-align: left;
-  
-  background-color: #f7f7f7;
+    min-width: 0;
+
+    padding: 22px;
+
+    text-align: left;
+
+    background-color: #f7f7f7;
+    border-radius: 20px;
 }
 
 .progressRing {
-  display: grid;
-  width: 104px;
-  min-width: 104px;
-  aspect-ratio: 1 / 1;
-  place-items: center;
+    display: grid;
 
-  border-radius: 50%;
+    place-items: center;
 
-  background:
-    conic-gradient(
-      var(--progress-color) var(--progress),
-      #ebebeb var(--progress)
-    );
+    width: 104px;
+    min-width: 104px;
+    aspect-ratio: 1 / 1;
 
-  transform: rotate(-90deg);
+    background: conic-gradient(var(--progress-color) var(--progress), #ebebeb var(--progress));
+    border-radius: 50%;
+
+    transform: rotate(-90deg);
 }
 
 .progressRingInner {
-  display: grid;
-  width: 78px;
-  aspect-ratio: 1 / 1;
-  place-items: center;
+    display: grid;
 
-  border-radius: 50%;
+    place-items: center;
 
-  background-color: #ffffff;
+    width: 78px;
+    aspect-ratio: 1 / 1;
 
-  transform: rotate(90deg);
+    background-color: #fff;
+    border-radius: 50%;
+
+    transform: rotate(90deg);
 }
 
 .progressValue {
-  color: #222222;
+    font-size: 22px;
+    font-weight: 600;
 
-  font-size: 22px;
-  font-weight: 600;
+    color: #222;
 }
 
 .pathContent {
-  min-width: 0;
-  flex: 1;
+    flex: 1;
+
+    min-width: 0;
 }
 
 .pathHeading {
-  display: flex;
-  align-items: center;
-  gap: 9px;
+    display: flex;
+
+    gap: 9px;
+    align-items: center;
 }
 
 .pathIcon {
-  display: inline-flex;
-  width: 22px;
-  height: 22px;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
 
-  font-size: 17px;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+
+    font-size: 17px;
 }
 
 .pathTitle {
-  margin: 0;
+    margin: 0;
 
-  color: #222222;
+    font-size: 18px;
+    font-weight: 600;
 
-  font-size: 18px;
-  font-weight: 600;
+    color: #222;
 }
 
 .pathDescription {
-  margin: 8px 0 0;
+    margin: 8px 0 0;
 
-  color: #858585;
+    font-size: 13px;
 
-  font-size: 13px;
-  line-height: 1.4;
+    line-height: 1.4;
+
+    color: #858585;
 }
 
 .pathStatistics {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 18px;
+    display: flex;
 
-  color: #858585;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
 
-  font-size: 13px;
+    margin-top: 18px;
 
-  strong {
-    color: #333333;
-    font-weight: 600;
-  }
+    font-size: 13px;
+
+    color: #858585;
+
+    strong {
+        font-weight: 600;
+
+        color: #333;
+    }
 }
 
 .progressTrack {
-  width: 100%;
-  height: 8px;
-  margin-top: 8px;
+    width: 100%;
+    height: 8px;
 
-  border-radius: 999px;
+    margin-top: 8px;
 
-  background-color: #ebebeb;
+    overflow: hidden;
 
-  overflow: hidden;
+    background-color: #ebebeb;
+    border-radius: 999px;
 }
 
 .progressFill {
-  display: block;
-  height: 100%;
+    display: block;
 
-  border-radius: inherit;
+    height: 100%;
 
-  transition: width 400ms ease;
+    border-radius: inherit;
+
+    transition: width 400ms ease;
 }
 
-@media (max-width: 760px) {
-  .paths {
-    grid-template-columns: 1fr;
-  }
+@media (width <= 760px) {
+    .paths {
+        grid-template-columns: 1fr;
+    }
 }
 
-@media (max-width: 480px) {
-  .card {
-    padding: 18px;
-  }
+@media (width <= 480px) {
+    .card {
+        padding: 18px;
+    }
 
-  .header {
-    padding-left: 0;
-  }
+    .header {
+        padding-left: 0;
+    }
 
-  .path {
-    align-items: flex-start;
-    padding: 18px;
-  }
+    .path {
+        align-items: flex-start;
 
-  .progressRing {
-    width: 82px;
-    min-width: 82px;
-  }
+        padding: 18px;
+    }
 
-  .progressRingInner {
-    width: 62px;
-  }
+    .progressRing {
+        width: 82px;
+        min-width: 82px;
+    }
 
-  .progressValue {
-    font-size: 18px;
-  }
+    .progressRingInner {
+        width: 62px;
+    }
+
+    .progressValue {
+        font-size: 18px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progressFill {
-    transition: none;
-  }
+    .progressFill {
+        transition: none;
+    }
 }

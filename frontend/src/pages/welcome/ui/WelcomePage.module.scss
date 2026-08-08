@@ -1,533 +1,548 @@
 .page {
-  --slide-accent: #00aaff;
-  --header-height: 80px;
+    --slide-accent: #0af;
+    --header-height: 80px;
 
-  position: absolute;
-  inset: var(--header-height) 0 0;
+    position: absolute;
+    inset: var(--header-height) 0 0;
 
-  display: flex;
-  width: min(100%, 1480px);
-  height: calc(100dvh - var(--header-height));
-  min-height: 0;
-  margin: 0 auto;
-  padding: clamp(28px, 4vw, 48px) clamp(24px, 5vw, 64px) 28px;
-  flex-direction: column;
+    box-sizing: border-box;
+    display: flex;
 
-  box-sizing: border-box;
+    flex-direction: column;
 
-  background: radial-gradient(
-          circle at 70% 45%,
-          color-mix(
-                  in srgb,
-                  var(--slide-accent) 14%,
-                  transparent
-          ),
-          transparent 36%
-  ),
-  #ffffff;
+    width: min(100%, 1480px);
+    height: calc(100dvh - var(--header-height));
+    min-height: 0;
+    max-height: 800px;
 
-  overflow-x: hidden;
-  overflow-y: auto;
+    padding: clamp(28px, 4vw, 48px) clamp(24px, 5vw, 64px) 28px;
+    margin: 0 auto;
+
+    overflow: hidden auto;
+
+    background:
+        radial-gradient(
+            circle at 70% 45%,
+            color-mix(in srgb, var(--slide-accent) 14%, transparent),
+            transparent 36%
+        ),
+        #fff;
 }
 
 .skipButton {
-  position: absolute;
-  z-index: 5;
-  top: clamp(20px, 3vw, 48px);
-  right: clamp(20px, 4vw, 48px);
+    position: absolute;
+    top: clamp(20px, 3vw, 48px);
+    right: clamp(20px, 4vw, 48px);
+    z-index: 5;
 
-  padding: 10px 14px;
+    padding: 10px 14px;
 
-  border: 0;
-  border-radius: 12px;
+    font: inherit;
+    font-size: 14px;
 
-  color: #858585;
-  background-color: transparent;
+    color: #858585;
 
-  font: inherit;
-  font-size: 14px;
+    cursor: pointer;
 
-  cursor: pointer;
+    background-color: transparent;
+    border: 0;
+    border-radius: 12px;
 
-  transition: color 150ms ease,
-  background-color 150ms ease;
+    transition:
+        color 150ms ease,
+        background-color 150ms ease;
 
-  &:hover {
-    color: #111111;
-    background-color: #f2f2f2;
-  }
+    &:hover {
+        color: #111;
 
-  &:focus-visible {
-    outline: 3px solid color-mix(
-            in srgb,
-            var(--slide-accent) 25%,
-            transparent
-    );
-    outline-offset: 2px;
-  }
+        background-color: #f2f2f2;
+    }
+
+    &:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--slide-accent) 25%, transparent);
+        outline-offset: 2px;
+    }
 }
 
 .slide {
-  display: grid;
-  width: 100%;
-  min-width: 0;
-  min-height: 0;
-  margin: auto;
-  grid-template-columns:
-    minmax(0, 0.9fr)
-    minmax(340px, 1.1fr);
-  align-items: center;
-  gap: clamp(32px, 5vw, 72px);
+    display: grid;
 
-  animation: slideAppear 350ms ease;
+    grid-template-columns:
+        minmax(0, 0.9fr)
+        minmax(340px, 1.1fr);
 
-  > * {
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+
+    width: 100%;
     min-width: 0;
-  }
+    min-height: 0;
+
+    margin: auto;
+
+    animation: slide-appear 350ms ease;
+
+    > * {
+        min-width: 0;
+    }
 }
 
 .content {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 
-  display: flex;
-  min-width: 0;
-  max-width: 650px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: clamp(28px, 4vh, 48px);
+    display: flex;
 
-  text-align: left;
+    flex-direction: column;
+
+    gap: clamp(28px, 4vh, 48px);
+    align-items: flex-start;
+    justify-content: center;
+
+    min-width: 0;
+    max-width: 650px;
+
+    text-align: left;
 }
 
 .text {
-  min-width: 0;
+    min-width: 0;
 }
 
 .eyebrow {
-  display: inline-flex;
-  padding: 8px 14px;
+    display: inline-flex;
 
-  border-radius: 999px;
+    padding: 8px 14px;
 
-  color: var(--slide-accent);
-  background-color: color-mix(
-          in srgb,
-          var(--slide-accent) 12%,
-          white
-  );
+    font-size: 14px;
+    font-weight: 600;
 
-  font-size: 14px;
-  font-weight: 600;
+    color: var(--slide-accent);
+
+    background-color: color-mix(in srgb, var(--slide-accent) 12%, white);
+    border-radius: 999px;
 }
 
 .title {
-  max-width: 680px;
-  margin: 24px 0 0;
+    max-width: 680px;
 
-  color: #111111;
+    margin: 24px 0 0;
 
-  font-size: clamp(40px, 4.6vw, 72px);
-  font-weight: 700;
-  line-height: 1.04;
-  letter-spacing: -0.04em;
+    font-size: clamp(40px, 4.6vw, 72px);
+    font-weight: 700;
 
-  text-wrap: balance;
+    line-height: 1.04;
+
+    color: #111;
+
+    letter-spacing: -0.04em;
+    text-wrap: balance;
 }
 
 .description {
-  max-width: 590px;
-  margin: 24px 0 0;
+    max-width: 590px;
 
-  color: #707070;
+    margin: 24px 0 0;
 
-  font-size: clamp(16px, 1.4vw, 21px);
-  line-height: 1.55;
+    font-size: clamp(16px, 1.4vw, 21px);
 
-  text-wrap: pretty;
+    line-height: 1.55;
+
+    color: #707070;
+
+    text-wrap: pretty;
 }
 
 .controls {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  gap: 12px;
+    display: flex;
+
+    gap: 12px;
+    align-items: center;
+
+    width: 100%;
 }
 
 .illustrationWrapper {
-  position: relative;
+    position: relative;
 
-  display: grid;
-  min-width: 0;
-  min-height: 0;
-  place-items: center;
+    display: grid;
+
+    place-items: center;
+
+    min-width: 0;
+    min-height: 0;
 }
 
 .illustrationBackground {
-  position: absolute;
+    position: absolute;
 
-  width: min(85%, 620px);
-  aspect-ratio: 1 / 1;
+    width: min(85%, 620px);
+    aspect-ratio: 1 / 1;
 
-  border-radius: 42% 58% 52% 48% /
-    50% 44% 56% 50%;
+    background-color: color-mix(in srgb, var(--slide-accent) 10%, white);
+    border-radius: 42% 58% 52% 48% / 50% 44% 56% 50%;
 
-  background-color: color-mix(
-          in srgb,
-          var(--slide-accent) 10%,
-          white
-  );
+    transform: rotate(-6deg);
 
-  transform: rotate(-6deg);
-
-  transition: background-color 250ms ease;
+    transition: background-color 250ms ease;
 }
 
 .illustration {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 
-  display: block;
-  width: min(100%, 680px);
-  height: clamp(300px, 52vh, 520px);
+    display: block;
 
-  object-fit: contain;
+    width: min(100%, 680px);
+    height: clamp(300px, 52vh, 520px);
 
-  filter: drop-shadow(
-          0 28px 40px rgb(0 0 0 / 8%)
-  );
+    object-fit: contain;
+
+    filter: drop-shadow(0 28px 40px rgb(0 0 0 / 8%));
 }
 
 .pagination {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding-top: 24px;
+    display: flex;
+
+    flex-shrink: 0;
+
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+
+    padding-top: 24px;
 }
 
 .paginationButton {
-  width: 10px;
-  height: 10px;
-  padding: 0;
+    width: 10px;
+    height: 10px;
 
-  border: 0;
-  border-radius: 999px;
+    padding: 0;
 
-  background-color: #d9d9d9;
+    cursor: pointer;
 
-  cursor: pointer;
+    background-color: #d9d9d9;
+    border: 0;
+    border-radius: 999px;
 
-  transition: width 200ms ease,
-  background-color 200ms ease;
+    transition:
+        width 200ms ease,
+        background-color 200ms ease;
 
-  &[data-active='true'] {
-    width: 32px;
-    background-color: var(--slide-accent);
-  }
+    &[data-active='true'] {
+        width: 32px;
+
+        background-color: var(--slide-accent);
+    }
 }
 
-@keyframes slideAppear {
-  from {
-    opacity: 0;
-    transform: translateX(24px);
-  }
+@keyframes slide-appear {
+    from {
+        opacity: 0;
 
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+        transform: translateX(24px);
+    }
+
+    to {
+        opacity: 1;
+
+        transform: translateX(0);
+    }
 }
 
 /* Ноутбуки */
 
-@media (max-width: 1200px) {
-  .page {
-    padding-right: 36px;
-    padding-left: 36px;
-  }
+@media (width <= 1200px) {
+    .page {
+        padding-right: 36px;
+        padding-left: 36px;
+    }
 
-  .slide {
-    grid-template-columns:
-      minmax(0, 1fr)
-      minmax(320px, 0.9fr);
-    gap: 36px;
-  }
+    .slide {
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(320px, 0.9fr);
 
-  .title {
-    font-size: clamp(38px, 4.6vw, 56px);
-  }
+        gap: 36px;
+    }
 
-  .illustration {
-    height: clamp(300px, 45vh, 460px);
-  }
+    .title {
+        font-size: clamp(38px, 4.6vw, 56px);
+    }
+
+    .illustration {
+        height: clamp(300px, 45vh, 460px);
+    }
 }
 
 /* Планшеты */
 
-@media (max-width: 960px) {
-  .page {
-    padding: 72px 28px 24px;
-  }
+@media (width <= 960px) {
+    .page {
+        padding: 72px 28px 24px;
+    }
 
-  .slide {
-    margin: 0 auto;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(260px, 1fr);
-    gap: 24px;
+    .slide {
+        grid-template-rows: auto minmax(260px, 1fr);
+        grid-template-columns: 1fr;
 
+        gap: 24px;
+
+        margin: 0 auto;
+
+        .content {
+            order: 2;
+        }
+
+        .illustrationWrapper {
+            order: 1;
+        }
+    }
 
     .content {
-      order: 2;
+        gap: 28px;
+        align-items: center;
+
+        max-width: 720px;
+
+        margin: 0 auto;
+
+        text-align: center;
+    }
+
+    .description {
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .controls {
+        justify-content: center;
     }
 
     .illustrationWrapper {
-      order: 1;
+        width: 100%;
     }
-  }
 
-  .content {
-    max-width: 720px;
-    margin: 0 auto;
-    align-items: center;
-    gap: 28px;
+    .illustrationBackground {
+        width: min(70vw, 460px);
+    }
 
-    text-align: center;
-  }
+    .illustration {
+        width: min(76vw, 520px);
+        height: clamp(250px, 38vh, 400px);
+    }
 
-  .description {
-    margin-right: auto;
-    margin-left: auto;
-  }
+    .pagination {
+        padding-top: 20px;
+    }
 
-  .controls {
-    justify-content: center;
-  }
-
-  .illustrationWrapper {
-    width: 100%;
-  }
-
-  .illustrationBackground {
-    width: min(70vw, 460px);
-  }
-
-  .illustration {
-    width: min(76vw, 520px);
-    height: clamp(250px, 38vh, 400px);
-  }
-
-  .pagination {
-    padding-top: 20px;
-  }
-
-  .eyebrow {
-    display: none;
-  }
+    .eyebrow {
+        display: none;
+    }
 }
 
 /* Мобильные устройства */
 
-@media (max-width: 640px) {
-  .page {
-    --header-height: 64px;
+@media (width <= 640px) {
+    .page {
+        --header-height: 64px;
 
-    padding: 64px 16px 20px;
-  }
+        padding: 64px 16px 20px;
+    }
 
-  .skipButton {
-    top: 16px;
-    right: 16px;
+    .skipButton {
+        top: 16px;
+        right: 16px;
 
-    padding: 8px 10px;
+        padding: 8px 10px;
 
-    font-size: 13px;
-  }
+        font-size: 13px;
+    }
 
-  .slide {
-    grid-template-rows: auto minmax(220px, 1fr);
-    gap: 18px;
+    .slide {
+        grid-template-rows: auto minmax(220px, 1fr);
+
+        gap: 18px;
+
+        .content {
+            order: 2;
+        }
+
+        .illustrationWrapper {
+            order: 1;
+        }
+    }
 
     .content {
-      order: 2;
+        gap: 22px;
     }
 
-    .illustrationWrapper {
-      order: 1;
+    .eyebrow {
+        display: none;
     }
-  }
 
-  .content {
-    gap: 22px;
-  }
+    .title {
+        margin-top: 16px;
 
-  .eyebrow {
-    display: none;
+        font-size: clamp(30px, 9vw, 38px);
 
-  }
+        line-height: 1.08;
 
-  .title {
-    margin-top: 16px;
-
-    font-size: clamp(30px, 9vw, 38px);
-    line-height: 1.08;
-    letter-spacing: -0.035em;
-  }
-
-  .description {
-    margin-top: 16px;
-
-    font-size: 15px;
-    line-height: 1.45;
-  }
-
-  .controls {
-    gap: 8px;
-
-    > * {
-      min-width: 0;
-      flex: 1;
+        letter-spacing: -0.035em;
     }
-  }
 
-  .illustrationBackground {
-    width: min(80vw, 340px);
-  }
+    .description {
+        margin-top: 16px;
 
-  .illustration {
-    width: min(88vw, 400px);
-    height: clamp(220px, 34vh, 320px);
+        font-size: 15px;
 
-    filter: drop-shadow(
-            0 16px 24px rgb(0 0 0 / 7%)
-    );
-  }
+        line-height: 1.45;
+    }
 
-  .pagination {
-    padding-top: 16px;
-  }
+    .controls {
+        gap: 8px;
+
+        > * {
+            flex: 1;
+
+            min-width: 0;
+        }
+    }
+
+    .illustrationBackground {
+        width: min(80vw, 340px);
+    }
+
+    .illustration {
+        width: min(88vw, 400px);
+        height: clamp(220px, 34vh, 320px);
+
+        filter: drop-shadow(0 16px 24px rgb(0 0 0 / 7%));
+    }
+
+    .pagination {
+        padding-top: 16px;
+    }
 }
 
 /* Очень узкие экраны */
 
-@media (max-width: 400px) {
-  .page {
-    padding-right: 12px;
-    padding-left: 12px;
-  }
-
-  .title {
-    font-size: 29px;
-  }
-
-  .description {
-    font-size: 14px;
-  }
-
-  .controls {
-    > * {
-      width: 100%;
+@media (width <= 400px) {
+    .page {
+        padding-right: 12px;
+        padding-left: 12px;
     }
-  }
 
-  .illustration {
-    height: 220px;
-  }
+    .title {
+        font-size: 29px;
+    }
+
+    .description {
+        font-size: 14px;
+    }
+
+    .controls {
+        > * {
+            width: 100%;
+        }
+    }
+
+    .illustration {
+        height: 220px;
+    }
 }
 
 /* Низкие ноутбуки и небольшая высота окна */
 
-@media (min-width: 961px) and (max-height: 760px) {
-  .page {
-    padding-top: 24px;
-    padding-bottom: 16px;
-  }
+@media (width >= 961px) and (height <= 760px) {
+    .page {
+        padding-top: 24px;
+        padding-bottom: 16px;
+    }
 
-  .skipButton {
-    top: 18px;
-  }
+    .skipButton {
+        top: 18px;
+    }
 
-  .slide {
-    gap: 36px;
-  }
+    .slide {
+        gap: 36px;
+    }
 
+    .content {
+        gap: 22px;
+    }
 
-  .content {
-    gap: 22px;
-  }
+    .title {
+        margin-top: 16px;
 
-  .title {
-    margin-top: 16px;
+        font-size: clamp(36px, 4vw, 52px);
+    }
 
-    font-size: clamp(36px, 4vw, 52px);
-  }
+    .description {
+        margin-top: 16px;
 
-  .description {
-    margin-top: 16px;
+        font-size: 16px;
+    }
 
-    font-size: 16px;
-  }
+    .illustration {
+        height: clamp(280px, 56vh, 410px);
+    }
 
-  .illustration {
-    height: clamp(280px, 56vh, 410px);
-  }
-
-  .pagination {
-    padding-top: 12px;
-  }
+    .pagination {
+        padding-top: 12px;
+    }
 }
 
 /* Планшеты и телефоны в горизонтальном режиме */
 
-@media (max-width: 960px) and (orientation: landscape) and (max-height: 600px) {
-  .page {
-    padding: 52px 24px 14px;
-  }
+@media (width <= 960px) and (orientation: landscape) and (height <= 600px) {
+    .page {
+        padding: 52px 24px 14px;
+    }
 
-  .slide {
-    grid-template-columns:
-      minmax(0, 1fr)
-      minmax(260px, 0.8fr);
-    grid-template-rows: 1fr;
-    gap: 24px;
-  }
+    .slide {
+        grid-template-rows: 1fr;
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(260px, 0.8fr);
 
-  .content {
-    align-items: flex-start;
-    gap: 18px;
+        gap: 24px;
+    }
 
-    text-align: left;
-  }
+    .content {
+        gap: 18px;
+        align-items: flex-start;
 
-  .description {
-    margin-left: 0;
+        text-align: left;
+    }
 
-    font-size: 14px;
-  }
+    .description {
+        margin-left: 0;
 
-  .controls {
-    justify-content: flex-start;
-  }
+        font-size: 14px;
+    }
 
-  .illustration {
-    width: 100%;
-    height: min(58vh, 300px);
-  }
+    .controls {
+        justify-content: flex-start;
+    }
 
-  .pagination {
-    padding-top: 8px;
-  }
+    .illustration {
+        width: 100%;
+        height: min(58vh, 300px);
+    }
+
+    .pagination {
+        padding-top: 8px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  //.slide {
-  //  animation: none;
-  //}
+    // .slide {
+    //  animation: none;
+    // }
 
-  .paginationButton,
-  .illustrationBackground {
-    transition: none;
-  }
+    .paginationButton,
+    .illustrationBackground {
+        transition: none;
+    }
 }

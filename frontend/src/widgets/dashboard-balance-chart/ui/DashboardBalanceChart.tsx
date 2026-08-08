@@ -10,147 +10,136 @@ const DECREASE_COLOR = '#ff4053'
 const NEUTRAL_COLOR = '#858585'
 
 export function DashboardBalanceChart() {
-  const currentBalance =
-    balanceHistory[balanceHistory.length - 1]?.balance
+    const currentBalance = balanceHistory[balanceHistory.length - 1]?.balance
 
-  const previousBalance =
-    balanceHistory[balanceHistory.length - 2]?.balance
+    const previousBalance = balanceHistory[balanceHistory.length - 2]?.balance
 
-  const balanceDifference =
-    previousBalance !== undefined && currentBalance !== undefined
-      ? currentBalance - previousBalance
-      : 0
+    const balanceDifference =
+        previousBalance !== undefined && currentBalance !== undefined
+            ? currentBalance - previousBalance
+            : 0
 
-  const chartColor =
-    balanceDifference > 0
-      ? INCREASE_COLOR
-      : balanceDifference < 0
-        ? DECREASE_COLOR
-        : NEUTRAL_COLOR
+    const chartColor =
+        balanceDifference > 0
+            ? INCREASE_COLOR
+            : balanceDifference < 0
+              ? DECREASE_COLOR
+              : NEUTRAL_COLOR
 
-  const options: AgChartOptions = {
-    data: balanceHistory,
+    const options: AgChartOptions = {
+        data: balanceHistory,
 
-    background: {
-      fill: 'transparent',
-    },
-
-    padding: {
-      top: 16,
-      right: 0,
-      bottom: 0,
-      left: 0,
-    },
-
-    legend: {
-      enabled: false,
-    },
-
-    axes: {
-      x: {
-        type: 'category',
-        position: 'bottom',
-
-        title: {
-          enabled: false,
+        background: {
+            fill: 'transparent',
         },
 
-        gridLine: {
-          enabled: false,
-        },
-      },
-
-      y: {
-        type: 'number',
-        position: 'left',
-        nice: false,
-
-        label: {
-          formatter: ({ value }) => `${value} ₽`,
+        padding: {
+            top: 16,
+            right: 0,
+            bottom: 0,
+            left: 0,
         },
 
-        gridLine: {
-          enabled: true,
-          style: [
-            {
-              lineDash: [4, 6],
+        legend: {
+            enabled: false,
+        },
+
+        axes: {
+            x: {
+                type: 'category',
+                position: 'bottom',
+
+                title: {
+                    enabled: false,
+                },
+
+                gridLine: {
+                    enabled: false,
+                },
             },
-          ],
-        },
-      },
-    },
 
-    series: [
-      {
-        type: 'line',
-        xKey: 'date',
-        yKey: 'balance',
-        yName: 'Баланс',
+            y: {
+                type: 'number',
+                position: 'left',
+                nice: false,
 
-        interpolation: {
-          type: 'smooth',
-        },
+                label: {
+                    formatter: ({ value }) => `${value} ₽`,
+                },
 
-        stroke: chartColor,
-        strokeWidth: 3,
-        lineDash: [10, 7],
-
-        marker: {
-          enabled: true,
-          size: 7,
-          fill: '#f7f7f7',
-          stroke: chartColor,
-          strokeWidth: 3,
+                gridLine: {
+                    enabled: true,
+                    style: [
+                        {
+                            lineDash: [4, 6],
+                        },
+                    ],
+                },
+            },
         },
 
-        tooltip: {
-          renderer: ({ datum }) => ({
-            data: [
-              {
-                label: 'Остаток',
-                value: `${datum.balance} ₽`,
-              },
-            ],
-          }),
-        },
-      },
-    ],
-  }
+        series: [
+            {
+                type: 'line',
+                xKey: 'date',
+                yKey: 'balance',
+                yName: 'Баланс',
 
-  return (
-    <section className={styles.card}>
-      <header className={styles.header}>
-        <div className={styles.text}>
-          <h2 className={styles.title}>Ваш баланс</h2>
+                interpolation: {
+                    type: 'smooth',
+                },
 
-          <p className={styles.description}>
-            История изменения баланса
-          </p>
-        </div>
+                stroke: chartColor,
+                strokeWidth: 3,
+                lineDash: [10, 7],
 
-        <div className={styles.currentBalance}>
-          <span className={styles.balance}>
-            {currentBalance} ₽
-          </span>
+                marker: {
+                    enabled: true,
+                    size: 7,
+                    fill: '#f7f7f7',
+                    stroke: chartColor,
+                    strokeWidth: 3,
+                },
 
-          {balanceDifference !== 0 && (
-            <span
-              className={
-                balanceDifference > 0
-                  ? styles.improvement
-                  : styles.decline
-              }
-            >
-              {balanceDifference > 0 ? '↑' : '↓'}{' '}
-              {Math.abs(balanceDifference)} ₽
-            </span>
-          )}
-        </div>
-      </header>
+                tooltip: {
+                    renderer: ({ datum }) => ({
+                        data: [
+                            {
+                                label: 'Остаток',
+                                value: `${datum.balance} ₽`,
+                            },
+                        ],
+                    }),
+                },
+            },
+        ],
+    }
 
-      <div className={styles.chart}>
-        <AgCharts options={options} />
-      </div>
-    </section>
-  )
+    return (
+        <section className={styles.card}>
+            <header className={styles.header}>
+                <div className={styles.text}>
+                    <h2 className={styles.title}>Ваш баланс</h2>
+
+                    <p className={styles.description}>История изменения баланса</p>
+                </div>
+
+                <div className={styles.currentBalance}>
+                    <span className={styles.balance}>{currentBalance} ₽</span>
+
+                    {balanceDifference !== 0 && (
+                        <span
+                            className={balanceDifference > 0 ? styles.improvement : styles.decline}
+                        >
+                            {balanceDifference > 0 ? '↑' : '↓'} {Math.abs(balanceDifference)} ₽
+                        </span>
+                    )}
+                </div>
+            </header>
+
+            <div className={styles.chart}>
+                <AgCharts options={options} />
+            </div>
+        </section>
+    )
 }
