@@ -21,7 +21,6 @@ type CatalogItem struct {
 	Title       string
 	Description string
 	Status      ProgressStatus
-	BestScore   *int
 }
 
 type CatalogRepository interface {

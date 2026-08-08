@@ -35,7 +35,6 @@ type catalogItemResponse struct {
 	Title       string            `json:"title"`
 	Description string            `json:"description"`
 	Status      ProgressStatus    `json:"status"`
-	BestScore   *int              `json:"best_score,omitempty"`
 }
 
 type catalogResponse struct {

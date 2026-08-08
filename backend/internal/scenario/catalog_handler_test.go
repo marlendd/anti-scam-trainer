@@ -38,7 +38,6 @@ func (stub *catalogServiceStub) ListActiveByRole(
 func TestCatalogHandler_List(t *testing.T) {
 	t.Parallel()
 
-	bestScore := 85
 	service := &catalogServiceStub{items: []scenario.CatalogItem{
 		{
 			ID:          "scenario-1",
@@ -48,7 +47,6 @@ func TestCatalogHandler_List(t *testing.T) {
 			Title:       "Safe delivery",
 			Description: "Recognize a fake delivery link",
 			Status:      scenario.ProgressCompleted,
-			BestScore:   &bestScore,
 		},
 	}}
 	handler := scenario.NewCatalogHandler(service, catalogDiscardLogger())
@@ -65,18 +63,13 @@ func TestCatalogHandler_List(t *testing.T) {
 	require.Equal(t, scenario.RoleBuyer, service.gotRole)
 
 	var payload struct {
-		Items []struct {
-			ID        string `json:"id"`
-			Status    string `json:"status"`
-			BestScore *int   `json:"best_score"`
-		} `json:"items"`
+		Items []map[string]any `json:"items"`
 	}
 	require.NoError(t, json.NewDecoder(response.Body).Decode(&payload))
 	require.Len(t, payload.Items, 1)
-	require.Equal(t, "scenario-1", payload.Items[0].ID)
-	require.Equal(t, "completed", payload.Items[0].Status)
-	require.NotNil(t, payload.Items[0].BestScore)
-	require.Equal(t, 85, *payload.Items[0].BestScore)
+	require.Equal(t, "scenario-1", payload.Items[0]["id"])
+	require.Equal(t, "completed", payload.Items[0]["status"])
+	require.NotContains(t, payload.Items[0], "best_score")
 }
 
 func TestCatalogHandler_ListRejectsUnauthorizedRequest(t *testing.T) {

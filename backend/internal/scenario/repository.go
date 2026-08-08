@@ -40,8 +40,7 @@ func (pg *PgRepository) ListActiveByRole(
 		           WHEN bool_or(a.status = 'in_progress') THEN 'in_progress'
 		           WHEN bool_or(a.status = 'completed') THEN 'completed'
 		           ELSE 'not_started'
-		       END AS progress_status,
-		       max(a.score) FILTER (WHERE a.status = 'completed') AS best_score
+		       END AS progress_status
 		FROM scenario_versions AS active
 		LEFT JOIN scenario_versions AS history
 		       ON history.logical_id = active.logical_id
@@ -65,7 +64,6 @@ func (pg *PgRepository) ListActiveByRole(
 	items := make([]CatalogItem, 0)
 	for rows.Next() {
 		var item CatalogItem
-		var bestScore sql.NullInt64
 		if err := rows.Scan(
 			&item.ID,
 			&item.LogicalID,
@@ -74,14 +72,8 @@ func (pg *PgRepository) ListActiveByRole(
 			&item.Title,
 			&item.Description,
 			&item.Status,
-			&bestScore,
 		); err != nil {
 			return nil, fmt.Errorf("scan scenario catalog item: %w", err)
-		}
-
-		if bestScore.Valid {
-			score := int(bestScore.Int64)
-			item.BestScore = &score
 		}
 
 		items = append(items, item)

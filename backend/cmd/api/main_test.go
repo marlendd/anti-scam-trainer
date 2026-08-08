@@ -37,9 +37,8 @@ type submitAnswerAPIResponse struct {
 }
 
 type scenarioCatalogAPIItem struct {
-	ID        string `json:"id"`
-	Status    string `json:"status"`
-	BestScore *int   `json:"best_score"`
+	ID     string `json:"id"`
+	Status string `json:"status"`
 }
 
 type scenarioCatalogAPIResponse struct {
@@ -173,7 +172,6 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 	t.Run("completes scenario through HTTP API", func(t *testing.T) {
 		catalogItem := getScenarioCatalogItem(t, client, baseURL, scenarioID)
 		require.Equal(t, "not_started", catalogItem.Status)
-		require.Nil(t, catalogItem.BestScore)
 
 		startResponse, err := client.Post(
 			baseURL+"/api/v1/scenarios/"+scenarioID+"/attempts",
@@ -249,8 +247,6 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 
 		catalogItem = getScenarioCatalogItem(t, client, baseURL, scenarioID)
 		require.Equal(t, "completed", catalogItem.Status)
-		require.NotNil(t, catalogItem.BestScore)
-		require.Equal(t, 100, *catalogItem.BestScore)
 	})
 
 	t.Run("logout clears session", func(t *testing.T) {

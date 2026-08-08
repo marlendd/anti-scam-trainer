@@ -165,7 +165,7 @@ paths:
     get:
       tags: [scenarios]
       summary: Получить каталог активных сценариев для роли
-      description: Статус и лучший результат вычисляются по всем версиям одного logical scenario.
+      description: Статус вычисляется по всем версиям одного logical scenario.
       security:
         - cookieAuth: []
       parameters:
@@ -510,11 +510,6 @@ components:
         status:
           type: string
           enum: [not_started, in_progress, completed]
-        best_score:
-          type: integer
-          minimum: 0
-          maximum: 100
-
     SubmitAnswerRequest:
       type: object
       additionalProperties: false

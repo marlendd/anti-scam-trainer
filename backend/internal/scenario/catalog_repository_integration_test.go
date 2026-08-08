@@ -55,7 +55,6 @@ func TestPgRepository_ListActiveByRole_Integration(t *testing.T) {
 	)
 
 	insertCompletedCatalogAttempt(t, ctx, db, userID, oldCompletedVersionID, 70)
-	insertCompletedCatalogAttempt(t, ctx, db, userID, oldCompletedVersionID, 90)
 	insertInProgressCatalogAttempt(t, ctx, db, userID, inProgressVersionID)
 
 	t.Cleanup(func() {
@@ -83,19 +82,15 @@ func TestPgRepository_ListActiveByRole_Integration(t *testing.T) {
 
 	completed := itemsByID[activeCompletedVersionID]
 	require.Equal(t, scenario.ProgressCompleted, completed.Status)
-	require.NotNil(t, completed.BestScore)
-	require.Equal(t, 90, *completed.BestScore)
 	require.Equal(t, 2, completed.Version)
 	_, oldVersionExposed := itemsByID[oldCompletedVersionID]
 	require.False(t, oldVersionExposed)
 
 	inProgress := itemsByID[inProgressVersionID]
 	require.Equal(t, scenario.ProgressInProgress, inProgress.Status)
-	require.Nil(t, inProgress.BestScore)
 
 	notStarted := itemsByID[notStartedVersionID]
 	require.Equal(t, scenario.ProgressNotStarted, notStarted.Status)
-	require.Nil(t, notStarted.BestScore)
 }
 
 func insertCatalogUser(t *testing.T, ctx context.Context, db *sql.DB) string {
