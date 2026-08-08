@@ -45,6 +45,7 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM=EgorEmil@yandex.ru
       - APP_BASE_URL=http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000
     networks:
       - antiscam_net
 
