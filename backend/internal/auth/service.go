@@ -22,13 +22,13 @@ var (
 	ErrTokenAlreadyUsed   = errors.New("reset token already used")
 )
 
-func (s *Service) Register(ctx context.Context, email, password string) (User, error) {
+func (s *Service) Register(ctx context.Context, name, email, password string) (User, error) {
 	hash, err := HashPassword(password)
 	if err != nil {
 		return User{}, err
 	}
 
-	u, err := s.users.Create(ctx, email, hash)
+	u, err := s.users.Create(ctx, name, email, hash)
 	if err != nil {
 		if errors.Is(err, ErrUserExists) {
 			return User{}, ErrEmailTaken
@@ -123,7 +123,7 @@ func (s *Service) RequestPasswordReset(ctx context.Context, email string) error 
 
 	resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.appBaseURL, rawToken)
 
-	if err := s.mailer.SendPasswordReset(u.Email, resetLink); err != nil {
+	if err := s.mailer.SendPasswordReset(ctx, u.Email, resetLink); err != nil {
 		return fmt.Errorf("failed to send reset email: %w", err)
 	}
 

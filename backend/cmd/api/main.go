@@ -12,11 +12,16 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/marlendd/anti-scam-trainer/internal/attempt"
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
+	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/health"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
+	"github.com/marlendd/anti-scam-trainer/internal/platform/middleware"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
+	"github.com/marlendd/anti-scam-trainer/internal/progress"
+	"github.com/marlendd/anti-scam-trainer/internal/scenario"
 )
 
 func main() {
@@ -50,6 +55,12 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
+	seedCount, err := scenario.ApplySeedFiles(context.Background(), db, cfg.SeedsPath)
+	if err != nil {
+		return fmt.Errorf("failed to load scenario seeds: %w", err)
+	}
+	log.Info("scenario seeds loaded successfully", "count", seedCount)
+
 	// ---------- wiring mailer ----------
 	m := mailer.New(mailer.Config{
 		Host:     cfg.SMTPHost,
@@ -68,6 +79,26 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	authHandler := auth.NewHandler(authService, log, cfg.SecureCookies)
 	requireAuth := auth.RequireAuth(authService, log)
 
+	// ---------- wiring attempts ----------
+	scenarioRepository := scenario.NewPgRepository(db)
+	scenarioCatalogService := scenario.NewCatalogService(&scenarioRepository)
+	scenarioCatalogHandler := scenario.NewCatalogHandler(scenarioCatalogService, log)
+	attemptRepository := attempt.NewPgRepository(db)
+	attemptService := attempt.NewService(
+		attemptRepository,
+		attemptRepository,
+		&scenarioRepository,
+	)
+	attemptHandler := attempt.NewHandler(attemptService, log)
+
+	// ---------- evaluation ----------
+	evaluator := evaluation.NewEvaluator()
+
+	// ---------- progress ----------
+	progressRepo := progress.NewPgRepository(db, log)
+	progressService := progress.NewService(progressRepo, evaluator)
+	progressHandler := progress.NewHandler(progressService, log)
+
 	mux := http.NewServeMux()
 
 	// health/ready
@@ -81,9 +112,46 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.HandleFunc("POST /api/v1/auth/forgot-password", authHandler.ForgotPassword)
 	mux.HandleFunc("POST /api/v1/auth/reset-password", authHandler.ResetPassword)
 
+	handler := middleware.CORS(cfg.AllowedOrigins)(mux)
+
+	// protected routes
+	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
+	mux.Handle(
+		"GET /api/v1/scenarios",
+		requireAuth(http.HandlerFunc(scenarioCatalogHandler.List)),
+	)
+	mux.Handle(
+		"POST /api/v1/scenarios/{scenarioID}/attempts",
+		requireAuth(http.HandlerFunc(attemptHandler.Start)),
+	)
+	mux.Handle(
+		"GET /api/v1/scenarios/{scenarioID}/attempts/active",
+		requireAuth(http.HandlerFunc(attemptHandler.Resume)),
+	)
+	mux.Handle(
+		"POST /api/v1/scenarios/{scenarioID}/attempts/restart",
+		requireAuth(http.HandlerFunc(attemptHandler.Restart)),
+	)
+	mux.Handle(
+		"POST /api/v1/attempts/{attemptID}/answers",
+		requireAuth(http.HandlerFunc(attemptHandler.SubmitAnswer)),
+	)
+	mux.Handle(
+		"GET /api/v1/attempts/{attemptID}",
+		requireAuth(http.HandlerFunc(attemptHandler.GetState)),
+	)
+
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
 
+	// progress not protected routes
+	mux.HandleFunc("GET /api/v1/leaderboard", progressHandler.GetLeaderboard)
+	// progress protected routes
+	mux.Handle("GET /api/v1/profile/role-progress", requireAuth(http.HandlerFunc(progressHandler.GetMyRoleStats)))
+	mux.Handle("GET /api/v1/profile/categories-progress", requireAuth(http.HandlerFunc(progressHandler.GetMyCategoryDashboard)))
+	mux.Handle("GET /api/v1/profile/puzzle", requireAuth(http.HandlerFunc(progressHandler.GetMyPuzzleProgress)))
+	mux.Handle("GET /api/v1/attempts/{id}/result", requireAuth(http.HandlerFunc(progressHandler.GetStatsOfAttempt)))
+	mux.Handle("GET /api/v1/profile/rank-history", requireAuth(http.HandlerFunc(progressHandler.GetMyRankHistory)))
 	addr := ":" + cfg.Port
 	if cfg.Port == "" {
 		addr = ":8080"
@@ -92,7 +160,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	server := &http.Server{
 		Addr:        addr,
 		ReadTimeout: cfg.Timeout,
-		Handler:     mux,
+		Handler:     handler,
 	}
 
 	// ---------- graceful shutdown ----------

@@ -27,3 +27,20 @@ type Attempt struct {
 	UpdatedAt     time.Time
 	CompletedAt   *time.Time // nullable
 }
+
+type ChoiceOption struct {
+	ID   scenario.ChoiceID
+	Text string
+}
+
+type CurrentNode struct {
+	ID      scenario.NodeID
+	Author  scenario.AuthorID
+	Text    string
+	Choices []ChoiceOption
+}
+
+type State struct {
+	Attempt     Attempt
+	CurrentNode *CurrentNode
+}

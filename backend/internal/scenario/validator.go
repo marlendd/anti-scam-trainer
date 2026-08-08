@@ -145,7 +145,8 @@ func isKnownRiskCategory(category RiskCategory) bool {
 		RiskOffPlatformPayment,
 		RiskFakePaymentDelivery,
 		RiskUrgencyPressure,
-		RiskDisableProtection:
+		RiskDisableProtection,
+		RiskUnverifiedEvidence:
 		return true
 	default:
 		return false

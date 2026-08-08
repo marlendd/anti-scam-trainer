@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Anti-Scam Trainer API
-  description: Backend API для антискам-тренажёра — авторизация, сессии, восстановление пароля
+  description: Backend API для антискам-тренажёра – авторизация и прохождение сценариев
   version: "1.0"
 
 servers:
@@ -13,6 +13,10 @@ servers:
 tags:
   - name: auth
     description: Регистрация, вход, выход, восстановление пароля
+  - name: attempts
+    description: Запуск, продолжение и прохождение сценариев
+  - name: scenarios
+    description: Каталог активных сценариев
   - name: system
     description: Health и readiness проверки
 
@@ -157,6 +161,200 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/v1/scenarios:
+    get:
+      tags: [scenarios]
+      summary: Получить каталог активных сценариев для роли
+      description: Статус вычисляется по всем версиям одного logical scenario.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: role
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [buyer, seller]
+      responses:
+        '200':
+          description: Каталог сценариев
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioCatalogResponse'
+        '400':
+          description: Роль не указана или не поддерживается
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/scenarios/{scenarioID}/attempts:
+    post:
+      tags: [attempts]
+      summary: Начать новую попытку
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '201':
+          description: Попытка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Сценарий не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Сценарий неактивен или уже есть активная попытка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/scenarios/{scenarioID}/attempts/active:
+    get:
+      tags: [attempts]
+      summary: Получить активную попытку
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '200':
+          description: Активная попытка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Активная попытка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/scenarios/{scenarioID}/attempts/restart:
+    post:
+      tags: [attempts]
+      summary: Прервать текущую и начать новую попытку
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '201':
+          description: Новая попытка создана, предыдущая прервана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Сценарий или активная попытка не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Сценарий неактивен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/attempts/{attemptID}/answers:
+    post:
+      tags: [attempts]
+      summary: Отправить ответ в текущем узле
+      description: Ответ, переход к следующему узлу или завершение попытки сохраняются в одной транзакции. Повтор с тем же ключом и payload возвращает прежний результат.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AttemptID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAnswerRequest'
+      responses:
+        '200':
+          description: Ответ принят или возвращён прежний идемпотентный результат
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitAnswerResponse'
+        '400':
+          description: Невалидное тело или выбор не найден в текущем узле
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Попытка или версия сценария не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Конфликт ключа идемпотентности, узел уже отвечен или попытка не может принять ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/attempts/{attemptID}:
+    get:
+      tags: [attempts]
+      summary: Получить состояние попытки
+      description: Для активной попытки возвращает текущий узел и безопасные поля вариантов. Внутренние переходы, оценки, веса, последствия и объяснения не раскрываются.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AttemptID'
+      responses:
+        '200':
+          description: Состояние принадлежащей пользователю попытки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptStateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Попытка не найдена или принадлежит другому пользователю
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /health:
     get:
       tags: [system]
@@ -182,11 +380,44 @@ components:
       in: cookie
       name: session_id
 
+  parameters:
+    ScenarioID:
+      name: scenarioID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AttemptID:
+      name: attemptID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    Unauthorized:
+      description: Нет действующей сессии
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
   schemas:
     RegisterRequest:
       type: object
-      required: [email, password]
+      required: [name, email, password]
       properties:
+        name:
+          type: string
+          example: Иван Иванов
         email:
           type: string
           format: email
@@ -231,6 +462,8 @@ components:
     UserPublic:
       type: object
       properties:
+        name:
+          type: string
         id:
           type: string
           format: uuid
@@ -240,6 +473,141 @@ components:
         created_at:
           type: string
           format: date-time
+
+    AttemptResponse:
+      type: object
+      required: [id, scenario_id, status, started_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        scenario_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [in_progress, completed, aborted]
+        current_node_id:
+          type: string
+        ending_id:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        started_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+
+    AttemptStateResponse:
+      allOf:
+        - $ref: '#/components/schemas/AttemptResponse'
+        - type: object
+          properties:
+            current_node:
+              $ref: '#/components/schemas/CurrentNode'
+
+    CurrentNode:
+      type: object
+      required: [id, author, text, choices]
+      properties:
+        id:
+          type: string
+        author:
+          type: string
+        text:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChoiceOption'
+
+    ChoiceOption:
+      type: object
+      additionalProperties: false
+      required: [id, text]
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+
+    ScenarioCatalogResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioCatalogItem'
+
+    ScenarioCatalogItem:
+      type: object
+      required: [id, logical_id, version, role, title, description, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        logical_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+        role:
+          type: string
+          enum: [buyer, seller]
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [not_started, in_progress, completed]
+    SubmitAnswerRequest:
+      type: object
+      additionalProperties: false
+      required: [node_id, choice_id, idempotency_key]
+      properties:
+        node_id:
+          type: string
+          minLength: 1
+        choice_id:
+          type: string
+          minLength: 1
+        idempotency_key:
+          type: string
+          format: uuid
+
+    SubmitAnswerResponse:
+      type: object
+      required: [attempt_id, node_id, choice_id, consequence, completed]
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        node_id:
+          type: string
+        choice_id:
+          type: string
+        consequence:
+          type: string
+        next_node_id:
+          type: string
+        ending_id:
+          type: string
+        completed:
+          type: boolean
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
 
     MessageResponse:
       type: object

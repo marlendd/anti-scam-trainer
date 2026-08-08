@@ -16,6 +16,7 @@ WORKDIR /app
 
 COPY --from=build /api /app/api
 COPY migrations ./migrations
+COPY seeds ./seeds
 
 EXPOSE 8080
 

@@ -38,6 +38,7 @@ services:
       - API_TIMEOUT=5s
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/antiscam?sslmode=disable
       - MIGRATIONS_PATH=migrations
+      - SEEDS_PATH=seeds
       - SECURE_COOKIES=false
       - SMTP_HOST=smtp.yandex.ru
       - SMTP_PORT=465
@@ -45,6 +46,7 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM=EgorEmil@yandex.ru
       - APP_BASE_URL=http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000
     networks:
       - antiscam_net
 
@@ -61,10 +63,24 @@ services:
       - "3000:80"
     networks:
       - antiscam_net
-
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: unless-stopped
+    ports:
+      - "18888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@test.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_DISABLE_POSTFIX: "true"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres
 networks:
   antiscam_net:
     driver: bridge
 
 volumes:
   antiscam_data:
+  pgadmin:

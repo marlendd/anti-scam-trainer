@@ -24,6 +24,10 @@ type dbExecutor interface {
 	) *sql.Row
 }
 
+type rowScanner interface {
+	Scan(dest ...any) error
+}
+
 type PgRepository struct {
 	pool     *sql.DB
 	executor dbExecutor
@@ -57,7 +61,7 @@ func (pg *PgRepository) Create(
 			  current_node_id,
 			  started_at,
 			  updated_at;
-			`
+	`
 	var attempt Attempt
 	attempt.CurrentNodeID = new(scenario.NodeID)
 
@@ -108,6 +112,24 @@ func (pg *PgRepository) GetByID(
 					FROM attempts
 					WHERE id = $1 AND user_id = $2
 	`
+
+	attempt, err := scanAttempt(pg.executor.QueryRowContext(
+		ctx,
+		query,
+		attemptID,
+		userID,
+	))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Attempt{}, ErrAttemptNotFound
+		}
+		return Attempt{}, fmt.Errorf("get attempt by id: %w", err)
+	}
+
+	return attempt, nil
+}
+
+func scanAttempt(row rowScanner) (Attempt, error) {
 	var attempt Attempt
 
 	var (
@@ -117,12 +139,7 @@ func (pg *PgRepository) GetByID(
 		completedAt   sql.NullTime
 	)
 
-	if err := pg.executor.QueryRowContext(
-		ctx,
-		query,
-		attemptID,
-		userID,
-	).Scan(
+	if err := row.Scan(
 		&attempt.ID,
 		&attempt.UserID,
 		&attempt.ScenarioID,
@@ -134,10 +151,7 @@ func (pg *PgRepository) GetByID(
 		&attempt.UpdatedAt,
 		&completedAt,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return Attempt{}, ErrAttemptNotFound
-		}
-		return Attempt{}, fmt.Errorf("get attempt by id: %w", err)
+		return Attempt{}, err
 	}
 
 	if currentNodeID.Valid {
@@ -269,6 +283,15 @@ func (pg *PgRepository) Abort(
 func (pg *PgRepository) WithinTransaction(
 	ctx context.Context,
 	fn func(AttemptRepository) error,
+) error {
+	return pg.withinTransaction(ctx, func(txRepository *PgRepository) error {
+		return fn(txRepository)
+	})
+}
+
+func (pg *PgRepository) withinTransaction(
+	ctx context.Context,
+	fn func(*PgRepository) error,
 ) error {
 	tx, err := pg.pool.BeginTx(ctx, nil)
 	if err != nil {
