@@ -33,10 +33,14 @@ func RequireAuth(service *Service, log *slog.Logger) func(http.Handler) http.Han
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), userIDContextKey, user.ID)
+			ctx := ContextWithUserID(r.Context(), user.ID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func ContextWithUserID(ctx context.Context, userID string) context.Context {
+	return context.WithValue(ctx, userIDContextKey, userID)
 }
 
 func UserIDFromContext(ctx context.Context) (string, bool) {

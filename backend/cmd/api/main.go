@@ -12,12 +12,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/marlendd/anti-scam-trainer/internal/attempt"
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/health"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/middleware"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
+	"github.com/marlendd/anti-scam-trainer/internal/scenario"
 )
 
 func main() {
@@ -69,6 +71,16 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	authHandler := auth.NewHandler(authService, log, cfg.SecureCookies)
 	requireAuth := auth.RequireAuth(authService, log)
 
+	// ---------- wiring attempts ----------
+	scenarioRepository := scenario.NewPgRepository(db)
+	attemptRepository := attempt.NewPgRepository(db)
+	attemptService := attempt.NewService(
+		attemptRepository,
+		attemptRepository,
+		&scenarioRepository,
+	)
+	attemptHandler := attempt.NewHandler(attemptService, log)
+
 	mux := http.NewServeMux()
 
 	// health/ready
@@ -86,6 +98,22 @@ func run(cfg *config.Config, log *slog.Logger) error {
 
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
+	mux.Handle(
+		"POST /api/v1/scenarios/{scenarioID}/attempts",
+		requireAuth(http.HandlerFunc(attemptHandler.Start)),
+	)
+	mux.Handle(
+		"GET /api/v1/scenarios/{scenarioID}/attempts/active",
+		requireAuth(http.HandlerFunc(attemptHandler.Resume)),
+	)
+	mux.Handle(
+		"POST /api/v1/scenarios/{scenarioID}/attempts/restart",
+		requireAuth(http.HandlerFunc(attemptHandler.Restart)),
+	)
+	mux.Handle(
+		"POST /api/v1/attempts/{attemptID}/answers",
+		requireAuth(http.HandlerFunc(attemptHandler.SubmitAnswer)),
+	)
 
 	addr := ":" + cfg.Port
 	if cfg.Port == "" {

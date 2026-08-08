@@ -99,6 +99,10 @@ type scenarioProviderStub struct {
 		ctx context.Context,
 		scenarioID scenario.ScenarioID,
 	) (scenario.Scenario, error)
+	getByIDFn func(
+		ctx context.Context,
+		scenarioID scenario.ScenarioID,
+	) (scenario.Scenario, error)
 }
 
 func (s *scenarioProviderStub) GetActiveByID(
@@ -106,6 +110,17 @@ func (s *scenarioProviderStub) GetActiveByID(
 	scenarioID scenario.ScenarioID,
 ) (scenario.Scenario, error) {
 	return s.getActiveByIDFn(ctx, scenarioID)
+}
+
+func (s *scenarioProviderStub) GetByID(
+	ctx context.Context,
+	scenarioID scenario.ScenarioID,
+) (scenario.Scenario, error) {
+	if s.getByIDFn == nil {
+		panic("unexpected GetByID call")
+	}
+
+	return s.getByIDFn(ctx, scenarioID)
 }
 
 func TestServiceStart(t *testing.T) {
@@ -146,7 +161,7 @@ func TestServiceStart(t *testing.T) {
 			},
 		}
 
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		actualAttempt, err := service.Start(context.Background(), userID, currentScenario.ID)
 
@@ -179,7 +194,7 @@ func TestServiceStart(t *testing.T) {
 			},
 		}
 
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		_, err := service.Start(context.Background(), userID, "scenario-v1")
 
@@ -213,7 +228,7 @@ func TestServiceStart(t *testing.T) {
 			},
 		}
 
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		_, err := service.Start(context.Background(), userID, invalidScenario.ID)
 
@@ -244,7 +259,7 @@ func TestServiceStart(t *testing.T) {
 			},
 		}
 
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		_, err := service.Start(context.Background(), userID, currentScenario.ID)
 
@@ -281,7 +296,7 @@ func TestService_Resume(t *testing.T) {
 		}
 
 		provider := &scenarioProviderStub{}
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		actualAttempt, err := service.Resume(
 			context.Background(),
@@ -308,7 +323,7 @@ func TestService_Resume(t *testing.T) {
 
 		provider := &scenarioProviderStub{}
 
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		actualAttempt, err := service.Resume(
 			context.Background(),
@@ -335,7 +350,7 @@ func TestService_Resume(t *testing.T) {
 		}
 
 		provider := &scenarioProviderStub{}
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		actualAttempt, err := service.Resume(
 			context.Background(),
@@ -401,7 +416,7 @@ func TestServiceRestart(t *testing.T) {
 			},
 		}
 		repository := transactionStub(txRepository)
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		actualAttempt, err := service.Restart(
 			context.Background(),
@@ -426,7 +441,7 @@ func TestServiceRestart(t *testing.T) {
 			},
 		}
 		repository := &attemptRepositoryStub{}
-		service := attempt.NewService(repository, provider)
+		service := attempt.NewService(repository, nil, provider)
 
 		actualAttempt, err := service.Restart(
 			context.Background(),
@@ -453,6 +468,7 @@ func TestServiceRestart(t *testing.T) {
 		}
 		service := attempt.NewService(
 			transactionStub(txRepository),
+			nil,
 			scenarioStub(currentScenario),
 		)
 
@@ -489,6 +505,7 @@ func TestServiceRestart(t *testing.T) {
 		}
 		service := attempt.NewService(
 			transactionStub(txRepository),
+			nil,
 			scenarioStub(currentScenario),
 		)
 
@@ -533,6 +550,7 @@ func TestServiceRestart(t *testing.T) {
 		}
 		service := attempt.NewService(
 			transactionStub(txRepository),
+			nil,
 			scenarioStub(currentScenario),
 		)
 

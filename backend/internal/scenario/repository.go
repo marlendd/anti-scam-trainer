@@ -76,7 +76,7 @@ func (pg *PgRepository) getScenarioData(ctx context.Context, scenarioID Scenario
 						  content
 					FROM scenario_versions
 					WHERE id = $1
-			    `
+	`
 	var result scenarioRow
 	if err := pg.db.QueryRowContext(
 		ctx,
