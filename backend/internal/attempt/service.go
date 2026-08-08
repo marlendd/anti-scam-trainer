@@ -53,15 +53,18 @@ type ScenarioProvider interface {
 
 type Service struct {
 	attempts  AttemptRepository
+	answers   AnswerRepository
 	scenarios ScenarioProvider
 }
 
 func NewService(
 	attempts AttemptRepository,
+	answers AnswerRepository,
 	scenario ScenarioProvider,
 ) *Service {
 	return &Service{
 		attempts:  attempts,
+		answers:   answers,
 		scenarios: scenario,
 	}
 }
