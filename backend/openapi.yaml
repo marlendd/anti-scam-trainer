@@ -1,0 +1,254 @@
+openapi: 3.0.3
+info:
+  title: Anti-Scam Trainer API
+  description: Backend API для антискам-тренажёра — авторизация, сессии, восстановление пароля
+  version: "1.0"
+
+servers:
+  - url: http://localhost:18080
+    description: Local Docker
+  - url: http://localhost:8080
+    description: Local go run
+
+tags:
+  - name: auth
+    description: Регистрация, вход, выход, восстановление пароля
+  - name: system
+    description: Health и readiness проверки
+
+paths:
+  /api/v1/auth/register:
+    post:
+      tags: [auth]
+      summary: Регистрация нового пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublic'
+        '400':
+          description: Невалидный email или пароль короче 8 символов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email уже зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Вход по email и паролю
+      description: При успехе устанавливает HttpOnly cookie `session_id`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешный вход
+          headers:
+            Set-Cookie:
+              description: "session_id=<uuid>; HttpOnly; SameSite=Lax"
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublic'
+        '401':
+          description: Неверный email или пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: Выход из системы
+      description: Удаляет сессию на сервере и очищает cookie
+      security:
+        - cookieAuth: []
+      responses:
+        '204':
+          description: Успешный выход, тело ответа отсутствует
+
+  /api/v1/auth/forgot-password:
+    post:
+      tags: [auth]
+      summary: Запрос на восстановление пароля
+      description: Отправляет письмо со ссылкой на сброс пароля, если email зарегистрирован. Всегда возвращает 200, чтобы не раскрывать существование email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Запрос принят
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Невалидный email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/reset-password:
+    post:
+      tags: [auth]
+      summary: Сброс пароля по токену из письма
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Пароль обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Токен невалиден, истёк, уже использован, или пароль короче 8 символов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users/me:
+    get:
+      tags: [auth]
+      summary: Текущий авторизованный пользователь
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPublic'
+        '401':
+          description: Не авторизован (нет/истекла сессия)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      tags: [system]
+      summary: Процесс жив
+      responses:
+        '200':
+          description: OK
+
+  /ready:
+    get:
+      tags: [system]
+      summary: Готовность принимать трафик (проверяет соединение с БД)
+      responses:
+        '200':
+          description: Готов
+        '503':
+          description: БД недоступна
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: password123
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required: [token, new_password]
+      properties:
+        token:
+          type: string
+          description: Токен из ссылки в письме
+        new_password:
+          type: string
+          format: password
+          minLength: 8
+
+    UserPublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
