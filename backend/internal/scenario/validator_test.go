@@ -28,6 +28,7 @@ func TestValidate_KnownRiskCategories(t *testing.T) {
 		scenario.RiskFakePaymentDelivery,
 		scenario.RiskUrgencyPressure,
 		scenario.RiskDisableProtection,
+		scenario.RiskUnverifiedEvidence,
 	}
 
 	for _, category := range categories {

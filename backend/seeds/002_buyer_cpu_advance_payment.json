@@ -41,7 +41,7 @@
             "explanation": "Видео можно взять из чужого объявления или снять с другим товаром; оно не заменяет безопасную проверку и оплату.",
             "weight": 2,
             "score": 50,
-            "risk_categories": ["external_messenger"],
+            "risk_categories": ["unverified_evidence"],
             "next_node_id": "n2_fake_evidence"
           },
           {

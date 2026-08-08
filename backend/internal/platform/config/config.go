@@ -15,6 +15,7 @@ type Config struct {
 	LogLevel       string        `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
 	DatabaseURL    string        `yaml:"database_url" env:"DATABASE_URL" env-required:"true"`
 	MigrationsPath string        `yaml:"migrations_path" env:"MIGRATIONS_PATH" env-default:"migrations"`
+	SeedsPath      string        `yaml:"seeds_path" env:"SEEDS_PATH" env-default:"seeds"`
 	// Connection pool
 	MaxOpenConns    int           `yaml:"max_open_conns" env:"DB_MAX_OPEN_CONNS" env-default:"50"`
 	MaxIdleConns    int           `yaml:"max_idle_conns" env:"DB_MAX_IDLE_CONNS" env-default:"25"`

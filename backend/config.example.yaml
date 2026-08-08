@@ -5,6 +5,7 @@ timeout: "5s"
 log_level: "DEBUG"
 
 migrations_path: "migrations"
+seeds_path: "seeds"
 
 max_open_conns: 50
 max_idle_conns: 25

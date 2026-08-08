@@ -53,6 +53,12 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
+	seedCount, err := scenario.ApplySeedFiles(context.Background(), db, cfg.SeedsPath)
+	if err != nil {
+		return fmt.Errorf("failed to load scenario seeds: %w", err)
+	}
+	log.Info("scenario seeds loaded successfully", "count", seedCount)
+
 	// ---------- wiring mailer ----------
 	m := mailer.New(mailer.Config{
 		Host:     cfg.SMTPHost,

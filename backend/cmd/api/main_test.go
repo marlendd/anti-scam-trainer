@@ -61,6 +61,7 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 		Timeout:         2 * time.Second,
 		DatabaseURL:     databaseURL,
 		MigrationsPath:  "../../migrations",
+		SeedsPath:       "../../seeds",
 		MaxOpenConns:    5,
 		MaxIdleConns:    5,
 		ConnMaxLifetime: 1 * time.Minute,

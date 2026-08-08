@@ -239,7 +239,7 @@
             "explanation": "Подмена символов в домене – типичный признак фишинга; данные карты нельзя вводить по ссылке из переписки.",
             "weight": 3,
             "score": 0,
-            "risk_categories": ["external_link", "sms_code", "fake_payment_delivery"],
+            "risk_categories": ["external_link", "fake_payment_delivery"],
             "next_node_id": "n4_danger"
           }
         ]
