@@ -34,3 +34,15 @@ type DashboardData struct {
 	TotalCompleted int            `json:"total_completed"`
 	Stats          []CategoryStat `json:"stats"`
 }
+
+type LeaderboardEntry struct {
+	Rank       int    `json:"rank"`
+	Player     string `json:"player"`
+	Fragments  int    `json:"fragments"`
+	Score      int    `json:"score"`
+	RankChange *int   `json:"rank_change"`
+}
+
+type LeaderboardResponse struct {
+	Entries []LeaderboardEntry `json:"entries"`
+}

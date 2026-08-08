@@ -89,13 +89,14 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.HandleFunc("POST /api/v1/auth/forgot-password", authHandler.ForgotPassword)
 	mux.HandleFunc("POST /api/v1/auth/reset-password", authHandler.ResetPassword)
 	// eval routes
-	mux.HandleFunc("GET  /api/v1/attempts/{id}/result", evalHandler.GetStatsOfAttempt)
-	mux.HandleFunc("GET  /api/v1/profile/progress", evalHandler.GetGlobalStatsHandler)
-	mux.HandleFunc("GET /api/v1/evaluation/categories", evalHandler.GetCategoryStats)
-
+	mux.HandleFunc("GET /api/v1/leaderboard", evalHandler.GetLeaderboard)
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
+	mux.Handle("GET /api/v1/profile/role-progress", requireAuth(http.HandlerFunc(evalHandler.GetMyRoleStats)))
+	mux.Handle("GET /api/v1/profile/categories-progress", requireAuth(http.HandlerFunc(evalHandler.GetMyCategoryDashboard)))
 	mux.Handle("GET /api/v1/profile/puzzle", requireAuth(http.HandlerFunc(evalHandler.GetMyPuzzleProgress)))
+	mux.Handle("GET /api/v1/attempts/{id}/result", requireAuth(http.HandlerFunc(evalHandler.GetStatsOfAttempt)))
+
 	addr := ":" + cfg.Port
 	if cfg.Port == "" {
 		addr = ":8080"

@@ -34,6 +34,9 @@ func TestEvaluation_Integration(t *testing.T) {
 	_, err := db.Exec("TRUNCATE users, scenario_versions, attempts, answers CASCADE")
 	require.NoError(t, err)
 
+	userID := "00000000-0000-0000-0000-000000000001"
+	attemptID := "120b7935-62bf-4fd8-828a-6bbe7ef7a19a"
+
 	t.Run("Seed and Calculate Score", func(t *testing.T) {
 		seedSQL := `
 			INSERT INTO users (id, email, password_hash) VALUES ('00000000-0000-0000-0000-000000000001', 'test@test.com', 'hash');
@@ -53,19 +56,27 @@ func TestEvaluation_Integration(t *testing.T) {
 		_, err := db.Exec(seedSQL)
 		require.NoError(t, err)
 
-		score, err := svc.GetAttemptResults(ctx, "120b7935-62bf-4fd8-828a-6bbe7ef7a19a")
+		score, err := svc.GetAttemptResults(ctx, userID, attemptID)
 		require.NoError(t, err)
 		require.Equal(t, 66, score)
 	})
 
-	t.Run("Verify Global Progress Stats", func(t *testing.T) {
-		stats, err := repo.GetStatsByRole(ctx)
+	t.Run("Verify Personal Progress Stats", func(t *testing.T) {
+		stats, err := repo.GetUserStatsByRole(ctx, userID)
 		require.NoError(t, err)
 		require.NotEmpty(t, stats)
+
 		require.Len(t, stats, 1)
 
 		require.Equal(t, "buyer", stats[0].Role)
 		require.Equal(t, int64(1), stats[0].InProgressCount)
 		require.Equal(t, int64(0), stats[0].CompletedCount)
+	})
+
+	t.Run("Verify Leaderboard Empty State", func(t *testing.T) {
+		resp, err := svc.GetLeaderboard(ctx, 10, 0)
+		require.NoError(t, err)
+
+		require.Empty(t, resp.Entries)
 	})
 }

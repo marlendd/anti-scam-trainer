@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
 )
@@ -20,25 +21,32 @@ func NewHandler(service *Service, log *slog.Logger) *Handler {
 func (h *Handler) GetStatsOfAttempt(w http.ResponseWriter, r *http.Request) {
 	attemptID := r.PathValue("id")
 
-	res, err := h.service.GetAttemptResults(r.Context(), attemptID)
+	userID, ok := auth.UserIDFromContext(r.Context())
+	if !ok {
+		h.respondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	res, err := h.service.GetAttemptResults(r.Context(), userID, attemptID)
 	if err != nil {
 		h.log.Error("failed to get attempt stats", "attempt_id", attemptID, "error", err)
-
 		h.respondError(w, http.StatusInternalServerError, "database error")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
 	h.respondJSON(w, http.StatusOK, map[string]int{"score": res})
 }
 
-func (h *Handler) GetGlobalStatsHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+func (h *Handler) GetMyRoleStats(w http.ResponseWriter, r *http.Request) {
+	userID, ok := auth.UserIDFromContext(r.Context())
+	if !ok {
+		h.respondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
 
-	stats, err := h.service.GetGlobalStats(ctx)
+	stats, err := h.service.GetUserRoleStats(r.Context(), userID)
 	if err != nil {
-		h.log.Error("failed to get stats", "error", err)
+		h.log.Error("failed to get personal role stats", "error", err)
 		h.respondError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
@@ -46,10 +54,16 @@ func (h *Handler) GetGlobalStatsHandler(w http.ResponseWriter, r *http.Request) 
 	h.respondJSON(w, http.StatusOK, stats)
 }
 
-func (h *Handler) GetCategoryStats(w http.ResponseWriter, r *http.Request) {
-	data, err := h.service.GetCategoryDashboard(r.Context())
+func (h *Handler) GetMyCategoryDashboard(w http.ResponseWriter, r *http.Request) {
+	userID, ok := auth.UserIDFromContext(r.Context())
+	if !ok {
+		h.respondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	data, err := h.service.GetUserCategoryDashboard(r.Context(), userID)
 	if err != nil {
-		h.log.Error("failed to get dashboard stats", "error", err)
+		h.log.Error("failed to get personal dashboard stats", "error", err)
 		h.respondError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
@@ -58,7 +72,6 @@ func (h *Handler) GetCategoryStats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMyPuzzleProgress(w http.ResponseWriter, r *http.Request) {
-	// Достаем ID пользователя из контекста
 	userID, ok := auth.UserIDFromContext(r.Context())
 	if !ok {
 		h.respondError(w, http.StatusUnauthorized, "unauthorized")
@@ -73,6 +86,21 @@ func (h *Handler) GetMyPuzzleProgress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.respondJSON(w, http.StatusOK, progress)
+}
+
+func (h *Handler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	limit, _ := strconv.Atoi(query.Get("limit"))
+	offset, _ := strconv.Atoi(query.Get("offset"))
+
+	data, err := h.service.GetLeaderboard(r.Context(), limit, offset)
+	if err != nil {
+		h.log.Error("failed to get leaderboard", "error", err)
+		h.respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	h.respondJSON(w, http.StatusOK, data)
 }
 
 func (h *Handler) respondJSON(w http.ResponseWriter, status int, payload any) {

@@ -10,8 +10,8 @@ func NewService(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) GetAttemptResults(ctx context.Context, attemptID string) (int, error) {
-	dbRes, err := s.repo.GetAnswersByAttempt(ctx, attemptID)
+func (s *Service) GetAttemptResults(ctx context.Context, userID, attemptID string) (int, error) {
+	dbRes, err := s.repo.GetAnswersByAttempt(ctx, userID, attemptID)
 	if err != nil {
 		return -1, err
 	}
@@ -32,8 +32,8 @@ func (s *Service) GetAttemptResults(ctx context.Context, attemptID string) (int,
 	return res, nil
 }
 
-func (s *Service) GetGlobalStats(ctx context.Context) ([]RoleStats, error) {
-	return s.repo.GetStatsByRole(ctx)
+func (s *Service) GetUserRoleStats(ctx context.Context, userID string) ([]RoleStats, error) {
+	return s.repo.GetUserStatsByRole(ctx, userID)
 }
 
 func (s *Service) GetUserPuzzleProgress(ctx context.Context, userID string) (PuzzleProgress, error) {
@@ -62,13 +62,13 @@ func (s *Service) GrantRewardIfEligible(ctx context.Context, userID, fragmentID 
 	return s.repo.SaveReward(ctx, userID, fragmentID)
 }
 
-func (s *Service) GetCategoryDashboard(ctx context.Context) (DashboardData, error) {
-	stats, err := s.repo.GetStatsByCategory(ctx)
+func (s *Service) GetUserCategoryDashboard(ctx context.Context, userID string) (DashboardData, error) {
+	stats, err := s.repo.GetUserStatsByCategory(ctx, userID)
 	if err != nil {
 		return DashboardData{}, err
 	}
 
-	total, err := s.repo.GetTotalCompletedCount(ctx)
+	total, err := s.repo.GetUserTotalCompletedCount(ctx, userID)
 	if err != nil {
 		return DashboardData{}, err
 	}
@@ -77,4 +77,24 @@ func (s *Service) GetCategoryDashboard(ctx context.Context) (DashboardData, erro
 		TotalCompleted: total,
 		Stats:          stats,
 	}, nil
+}
+
+func (s *Service) GetLeaderboard(ctx context.Context, limit, offset int) (LeaderboardResponse, error) {
+	if limit <= 0 || limit > 100 {
+		limit = 50 // дефолт
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	entries, err := s.repo.GetLeaderboard(ctx, limit, offset)
+	if err != nil {
+		return LeaderboardResponse{}, err
+	}
+
+	if entries == nil {
+		entries = []LeaderboardEntry{}
+	}
+
+	return LeaderboardResponse{Entries: entries}, nil
 }
