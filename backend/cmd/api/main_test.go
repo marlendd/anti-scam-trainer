@@ -68,6 +68,7 @@ func TestRunIntegration_AuthFlow(t *testing.T) {
 
 	t.Run("register", func(t *testing.T) {
 		body, _ := json.Marshal(map[string]string{
+			"name":     "Test User",
 			"email":    email,
 			"password": password,
 		})
@@ -165,6 +166,7 @@ func TestRunIntegration_AuthFlow(t *testing.T) {
 
 	t.Run("register with existing email fails", func(t *testing.T) {
 		body, _ := json.Marshal(map[string]string{
+			"name":     "Test User",
 			"email":    email,
 			"password": password,
 		})
