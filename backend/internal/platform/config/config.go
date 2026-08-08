@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -34,8 +35,16 @@ type Config struct {
 
 func MustLoad(configPath string) Config {
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config %q: %s", configPath, err)
+	if _, err := os.Stat(configPath); err == nil {
+		if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+			log.Fatalf("cannot read config %q: %s", configPath, err)
+		}
+		return cfg
+	}
+
+	// файла нет — читаем конфигурацию только из переменных окружения
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		log.Fatalf("cannot read config from environment: %s", err)
 	}
 	return cfg
 }
