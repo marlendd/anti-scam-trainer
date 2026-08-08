@@ -15,6 +15,8 @@ tags:
     description: Регистрация, вход, выход, восстановление пароля
   - name: attempts
     description: Запуск, продолжение и прохождение сценариев
+  - name: scenarios
+    description: Каталог активных сценариев
   - name: system
     description: Health и readiness проверки
 
@@ -158,6 +160,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/scenarios:
+    get:
+      tags: [scenarios]
+      summary: Получить каталог активных сценариев для роли
+      description: Статус и лучший результат вычисляются по всем версиям одного logical scenario.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: role
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [buyer, seller]
+      responses:
+        '200':
+          description: Каталог сценариев
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioCatalogResponse'
+        '400':
+          description: Роль не указана или не поддерживается
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /api/v1/scenarios/{scenarioID}/attempts:
     post:
@@ -443,6 +477,43 @@ components:
         completed_at:
           type: string
           format: date-time
+
+    ScenarioCatalogResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioCatalogItem'
+
+    ScenarioCatalogItem:
+      type: object
+      required: [id, logical_id, version, role, title, description, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        logical_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+        role:
+          type: string
+          enum: [buyer, seller]
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [not_started, in_progress, completed]
+        best_score:
+          type: integer
+          minimum: 0
+          maximum: 100
 
     SubmitAnswerRequest:
       type: object
