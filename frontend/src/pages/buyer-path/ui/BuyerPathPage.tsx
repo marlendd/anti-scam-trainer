@@ -1,41 +1,47 @@
-import {buyerSchemesMock} from "@/entities/training-path";
-import {TrainingSchemeList} from "@/widgets/training-scheme-list";
-import styles from './BuyerPathPage.module.scss';
+import { useMatch } from 'react-router-dom'
 
-import {useState} from 'react'
-
+import { buyerSchemesMock } from '@/entities/training-path'
 import {
-    fakeDeliveryScenario,
-    type TrainingScenario,
+  fakeDeliveryScenario,
+  type TrainingScenario,
 } from '@/entities/training-scenario'
-import {useDocumentTitle} from '@/shared/lib/use-document-title'
-import {TrainingChat} from '@/widgets/training-chat'
-import {useMatch} from "react-router-dom";
+import { useDocumentTitle } from '@/shared/lib/use-document-title'
+import { TrainingChat } from '@/widgets/training-chat'
+import { TrainingSchemeList } from '@/widgets/training-scheme-list'
 
+import styles from './BuyerPathPage.module.scss'
 
 export function BuyerPathPage() {
-    const [scenario] = useState<TrainingScenario>(fakeDeliveryScenario)
+  const scenario: TrainingScenario =
+    fakeDeliveryScenario
 
-    const sessionMatch = useMatch({
-        path: '/training/path/:pathId/:schemeId',
-        end: true,
-    })
+  const sessionMatch = useMatch({
+    path: '/training/path/:pathId/:schemeId',
+    end: true,
+  })
 
-    useDocumentTitle(scenario.title)
+  const isSession = Boolean(sessionMatch)
 
-    return (
-        <main className={styles.page}>
-            <TrainingSchemeList
-                schemes={buyerSchemesMock}
-            />
+  useDocumentTitle(scenario.title)
 
-            <TrainingChat
-                mode='interactive'
-                scenario={sessionMatch ? scenario : null}
-                onScenarioComplete={() => {
+  return (
+    <main
+      className={styles.page}
+      data-session={isSession}
+    >
+      <div className={styles.pathColumn}>
+        <TrainingSchemeList
+          schemes={buyerSchemesMock}
+        />
+      </div>
 
-                }}
-            />
-        </main>
-    )
+      <div className={styles.chatColumn}>
+        <TrainingChat
+          mode="interactive"
+          scenario={isSession ? scenario : null}
+          onScenarioComplete={() => {}}
+        />
+      </div>
+    </main>
+  )
 }
