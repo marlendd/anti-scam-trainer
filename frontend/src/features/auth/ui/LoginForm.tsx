@@ -1,7 +1,7 @@
 // src/features/auth/ui/LoginForm.tsx
 
 import type {FormEvent} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 
 import {
     Input,
@@ -10,12 +10,40 @@ import {
 
 import styles from './AuthForm.module.scss'
 import {Logo} from "@/shared/ui/logo";
+import {useLogin} from "@/features/auth";
+import {ApiError} from "@/shared/api";
 
 export function LoginForm() {
+    const login = useLogin()
+    const navigate = useNavigate();
+
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
-        // Здесь позже вызывается login mutation.
+        const formData = new FormData(event.currentTarget)
+
+        login.mutate({
+                email: String(formData.get('email')),
+                password: String(formData.get('password')),
+            },
+            {
+                onSuccess: () => {
+                    navigate('/home', {replace: true})
+                },
+            },)
+    }
+
+
+    let errorMessage: string | undefined
+
+    if (login.error instanceof ApiError) {
+        if (login.error.status === 401) {
+            errorMessage = 'Неверная электронная почта или пароль'
+        } else {
+            errorMessage = 'Не удалось войти. Попробуйте ещё раз'
+        }
+    } else if (login.isError) {
+        errorMessage = 'Произошла ошибка. Попробуйте ещё раз'
     }
 
     return (
@@ -60,6 +88,12 @@ export function LoginForm() {
                         Забыли пароль?
                     </Link>
                 </div>
+
+                {errorMessage && (
+                    <p className={styles.error}>
+                        {errorMessage}
+                    </p>
+                )}
 
                 <button className={styles.submit} type="submit">
                     Войти

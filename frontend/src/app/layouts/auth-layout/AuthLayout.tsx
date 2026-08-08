@@ -1,8 +1,8 @@
 // src/app/layouts/auth-layout/AuthLayout.tsx
 
 import { Outlet } from 'react-router-dom'
-
 import styles from './AuthLayout.module.scss'
+
 
 export function AuthLayout() {
   return (
