@@ -24,8 +24,6 @@ export type GameHeaderProps = {
 
 export function GameHeader({
     variant = 'setup',
-    // lives = 3,
-    // maxLives = 3,
     currentQuestion = 1,
     totalQuestions = 10,
 }: GameHeaderProps) {
@@ -76,30 +74,6 @@ export function GameHeader({
                         <PointsCounter value={0} />
                     </div>
                 </div>
-
-                {/*<div*/}
-                {/*  className={styles.lives}*/}
-                {/*  aria-label={`Жизни: ${lives} из ${maxLives}`}*/}
-                {/*>*/}
-                {/*  <span className={styles.livesLabel}>*/}
-                {/*    Жизни:*/}
-                {/*  </span>*/}
-
-                {/*  <span className={styles.hearts}>*/}
-                {/*    {Array.from({ length: maxLives }).map(*/}
-                {/*      (_, index) => (*/}
-                {/*        <span*/}
-                {/*          key={index}*/}
-                {/*          className={styles.heart}*/}
-                {/*          data-active={index < lives}*/}
-                {/*          aria-hidden="true"*/}
-                {/*        >*/}
-                {/*          <Icon icon={faHeart} />*/}
-                {/*        </span>*/}
-                {/*      ),*/}
-                {/*    )}*/}
-                {/*  </span>*/}
-                {/*</div>*/}
 
                 <div className={styles.right}>
                     {isSession ? (

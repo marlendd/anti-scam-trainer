@@ -19,9 +19,6 @@ const TOTAL_PIECES = 9
 export function PuzzleCollectionCard({ collection, onClaimReward }: PuzzleCollectionCardProps) {
     const unlockedCount = collection.unlockedPieces.length
 
-    // const progress =
-    //   (unlockedCount / TOTAL_PIECES) * 100
-
     const isCompleted = unlockedCount === TOTAL_PIECES
 
     const piecesLeft = TOTAL_PIECES - unlockedCount
@@ -49,37 +46,12 @@ export function PuzzleCollectionCard({ collection, onClaimReward }: PuzzleCollec
                     <p className={styles.description}>{collection.description}</p>
                 </div>
 
-                {/*<div className={styles.progress}>*/}
-                {/*  <div className={styles.progressHeader}>*/}
-                {/*    <span>*/}
-                {/*      {unlockedCount} из {TOTAL_PIECES}*/}
-                {/*    </span>*/}
-
-                {/*    <span>*/}
-                {/*      {Math.round(progress)}%*/}
-                {/*    </span>*/}
-                {/*  </div>*/}
-
-                {/*  <div className={styles.progressTrack}>*/}
-                {/*    <span*/}
-                {/*      className={styles.progressFill}*/}
-                {/*      style={{*/}
-                {/*        width: `${progress}%`,*/}
-                {/*      }}*/}
-                {/*    />*/}
-                {/*  </div>*/}
-                {/*</div>*/}
-
                 <div className={styles.reward}>
                     <div className={styles.rewardIcon}>
                         <Icon icon={faGift} />
                     </div>
 
                     <div className={styles.rewardContent}>
-                        {/*<span className={styles.rewardLabel}>*/}
-                        {/*  Награда*/}
-                        {/*</span>*/}
-
                         <strong className={styles.rewardTitle}>{collection.reward.title}</strong>
 
                         {collection.reward.description && (

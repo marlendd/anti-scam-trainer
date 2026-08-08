@@ -1,5 +1,5 @@
-import {Button} from '@/shared/ui/button'
-import {useNavigate} from 'react-router-dom'
+import { Button } from '@/shared/ui/button'
+import { useNavigate } from 'react-router-dom'
 
 export function LoginButton() {
     const navigate = useNavigate()

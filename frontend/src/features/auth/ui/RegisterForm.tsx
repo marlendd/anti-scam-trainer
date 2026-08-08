@@ -62,8 +62,6 @@ export function RegisterForm() {
                     <Logo />
                 </Link>
 
-                {/*<h1 className={styles.title}>Регистрация</h1>*/}
-
                 <p className={styles.description}>Создайте аккаунт для сохранения прогресса</p>
             </header>
 

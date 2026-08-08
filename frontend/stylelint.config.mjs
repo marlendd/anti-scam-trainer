@@ -8,8 +8,7 @@ export default {
     rules: {
         'declaration-empty-line-before': null,
 
-        'selector-class-pattern':
-            '^(?:[a-z][a-zA-Z0-9]*|ag-[a-z0-9-]+)$',
+        'selector-class-pattern': '^(?:[a-z][a-zA-Z0-9]*|ag-[a-z0-9-]+)$',
 
         'selector-pseudo-class-no-unknown': [
             true,

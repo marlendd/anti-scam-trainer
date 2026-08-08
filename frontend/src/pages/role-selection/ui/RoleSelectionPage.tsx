@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-// import {Button} from '@/shared/ui/button'
 
 import buyerImage from '@/shared/assets/images/buyer-path.webp'
 import sellerImage from '@/shared/assets/images/seller-path.webp'
@@ -26,13 +25,6 @@ function RoleCard({ title, description, image, imageAlt, accent, onSelect }: Rol
                 <h2 className={styles.cardTitle}>{title}</h2>
 
                 <p className={styles.cardDescription}>{description}</p>
-
-                {/*<Button*/}
-                {/*  fullWidth*/}
-                {/*  onClick={onSelect}*/}
-                {/*>*/}
-                {/*  Выбрать*/}
-                {/*</Button>*/}
             </div>
         </article>
     )
@@ -52,10 +44,6 @@ export function RoleSelectionPage() {
     return (
         <main className={styles.page}>
             <section className={styles.hero}>
-                {/*<h1 className={styles.title}>*/}
-                {/*    С какой стороны начнём?*/}
-                {/*</h1>*/}
-
                 <p className={styles.description}>
                     Выберите путь, который хотите пройти первым. У покупателя и продавца свои
                     сценарии, риски и мошеннические схемы.

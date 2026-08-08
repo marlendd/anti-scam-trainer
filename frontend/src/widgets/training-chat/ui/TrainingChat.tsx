@@ -29,9 +29,6 @@ export function TrainingChat({
         )
     }
 
-    // здесь TypeScript уже знает,
-    // что scenario — TrainingScenario
-
     const interlocutor = scenario.participants.find(
         (participant) => participant.id !== scenario.playerParticipantId,
     )

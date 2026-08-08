@@ -64,15 +64,8 @@ export function ChatMessage({
     position = 'single',
     avatarText,
     showAvatar = false,
-    // className,
 }: ChatMessageProps) {
-    const rootClassName = [
-        styles.message,
-        styles[direction],
-        // className,
-    ]
-        .filter(Boolean)
-        .join(' ')
+    const rootClassName = [styles.message, styles[direction]].filter(Boolean).join(' ')
 
     const meta = (
         <div className={styles.meta}>

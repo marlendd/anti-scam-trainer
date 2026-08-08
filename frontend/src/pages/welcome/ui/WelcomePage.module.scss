@@ -20,12 +20,13 @@
 
     overflow: hidden auto;
 
-    background: radial-gradient(
+    background:
+        radial-gradient(
             circle at 70% 45%,
             color-mix(in srgb, var(--slide-accent) 14%, transparent),
             transparent 36%
-    ),
-    #fff;
+        ),
+        #fff;
 }
 
 .skipButton {
@@ -47,8 +48,9 @@
     border: 0;
     border-radius: 12px;
 
-    transition: color 150ms ease,
-    background-color 150ms ease;
+    transition:
+        color 150ms ease,
+        background-color 150ms ease;
 
     &:hover {
         color: #111;
@@ -223,8 +225,9 @@
     border: 0;
     border-radius: 999px;
 
-    transition: width 200ms ease,
-    background-color 200ms ease;
+    transition:
+        width 200ms ease,
+        background-color 200ms ease;
 
     &[data-active='true'] {
         width: 32px;

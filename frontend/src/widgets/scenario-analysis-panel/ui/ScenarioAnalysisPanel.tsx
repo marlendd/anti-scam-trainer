@@ -49,8 +49,6 @@ export function ScenarioAnalysisPanel({
 
     return (
         <aside className={rootClassName}>
-            {/*<h2 className={styles.title}>{analysis.title}</h2>*/}
-
             <div className={styles.redFlags}>
                 {analysis.redFlags.map((redFlag) => (
                     <section key={redFlag.id} className={styles.redFlag}>
@@ -62,33 +60,6 @@ export function ScenarioAnalysisPanel({
                     </section>
                 ))}
             </div>
-
-            {/*<div className={styles.divider} />*/}
-
-            {/*<section className={styles.safeSection}>*/}
-            {/*  <h3 className={styles.safeTitle}>*/}
-            {/*    Как действовать безопасно*/}
-            {/*  </h3>*/}
-
-            {/*  <ul className={styles.safeActions}>*/}
-            {/*    {analysis.safeActions.map((action) => (*/}
-            {/*      <li key={action} className={styles.safeAction}>*/}
-            {/*        <span className={styles.check} aria-hidden="true">*/}
-            {/*          <Icon icon={faCheck} />*/}
-            {/*        </span>*/}
-
-            {/*        <span>{action}</span>*/}
-            {/*      </li>*/}
-            {/*    ))}*/}
-            {/*  </ul>*/}
-            {/*</section>*/}
-
-            {/*<div className={styles.goldenRule}>*/}
-            {/*  <strong className={styles.goldenRuleTitle}>*/}
-            {/*    Золотое правило:*/}
-            {/*  </strong>{' '}*/}
-            {/*  {analysis.goldenRule}*/}
-            {/*</div>*/}
         </aside>
     )
 }

@@ -1,5 +1,3 @@
-// widgets/training-scheme-list/ui/TrainingSchemeList.tsx
-
 import { useState } from 'react'
 import { faCheck, faChevronDown, faLock, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from 'react-router-dom'
