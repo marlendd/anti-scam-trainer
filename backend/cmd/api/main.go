@@ -120,6 +120,10 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		"POST /api/v1/attempts/{attemptID}/answers",
 		requireAuth(http.HandlerFunc(attemptHandler.SubmitAnswer)),
 	)
+	mux.Handle(
+		"GET /api/v1/attempts/{attemptID}",
+		requireAuth(http.HandlerFunc(attemptHandler.GetState)),
+	)
 
 	addr := ":" + cfg.Port
 	if cfg.Port == "" {

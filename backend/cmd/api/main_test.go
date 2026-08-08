@@ -26,6 +26,19 @@ type attemptAPIResponse struct {
 	CurrentNodeID *string `json:"current_node_id"`
 }
 
+type attemptStateAPIResponse struct {
+	attemptAPIResponse
+	CurrentNode *struct {
+		ID      string `json:"id"`
+		Author  string `json:"author"`
+		Text    string `json:"text"`
+		Choices []struct {
+			ID   string `json:"id"`
+			Text string `json:"text"`
+		} `json:"choices"`
+	} `json:"current_node"`
+}
+
 type submitAnswerAPIResponse struct {
 	AttemptID  string  `json:"attempt_id"`
 	NodeID     string  `json:"node_id"`
@@ -189,6 +202,13 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 		require.NotNil(t, started.CurrentNodeID)
 		require.Equal(t, string(testfixture.StartNodeID), *started.CurrentNodeID)
 
+		state := getAttemptStateThroughAPI(t, client, baseURL, started.ID)
+		require.Equal(t, started.ID, state.ID)
+		require.NotNil(t, state.CurrentNode)
+		require.Equal(t, string(testfixture.StartNodeID), state.CurrentNode.ID)
+		require.NotEmpty(t, state.CurrentNode.Choices)
+		require.Equal(t, string(testfixture.StartChoiceID), state.CurrentNode.Choices[0].ID)
+
 		first := submitAnswerThroughAPI(
 			t,
 			client,
@@ -201,6 +221,10 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 		require.False(t, first.Completed)
 		require.NotNil(t, first.NextNodeID)
 		require.Equal(t, string(testfixture.MiddleNodeID), *first.NextNodeID)
+
+		state = getAttemptStateThroughAPI(t, client, baseURL, started.ID)
+		require.NotNil(t, state.CurrentNode)
+		require.Equal(t, string(testfixture.MiddleNodeID), state.CurrentNode.ID)
 
 		second := submitAnswerThroughAPI(
 			t,
@@ -247,6 +271,10 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 
 		catalogItem = getScenarioCatalogItem(t, client, baseURL, scenarioID)
 		require.Equal(t, "completed", catalogItem.Status)
+
+		state = getAttemptStateThroughAPI(t, client, baseURL, started.ID)
+		require.Equal(t, "completed", state.Status)
+		require.Nil(t, state.CurrentNode)
 	})
 
 	t.Run("logout clears session", func(t *testing.T) {
@@ -303,6 +331,25 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 
 		require.Equal(t, http.StatusConflict, res.StatusCode)
 	})
+}
+
+func getAttemptStateThroughAPI(
+	t *testing.T,
+	client *http.Client,
+	baseURL string,
+	attemptID string,
+) attemptStateAPIResponse {
+	t.Helper()
+
+	response, err := client.Get(baseURL + "/api/v1/attempts/" + attemptID)
+	require.NoError(t, err)
+	defer closeBody(t, response)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+
+	var state attemptStateAPIResponse
+	require.NoError(t, json.NewDecoder(response.Body).Decode(&state))
+
+	return state
 }
 
 func getScenarioCatalogItem(

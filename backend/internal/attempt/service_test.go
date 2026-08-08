@@ -37,6 +37,11 @@ type attemptRepositoryStub struct {
 		attemptID attempt.AttemptID,
 		userID string,
 	) error
+	getByIDFn func(
+		ctx context.Context,
+		attemptID attempt.AttemptID,
+		userID string,
+	) (attempt.Attempt, error)
 }
 
 func (s *attemptRepositoryStub) WithinTransaction(
@@ -63,11 +68,15 @@ func (s *attemptRepositoryStub) Create(
 }
 
 func (s *attemptRepositoryStub) GetByID(
-	context.Context,
-	attempt.AttemptID,
-	string,
+	ctx context.Context,
+	attemptID attempt.AttemptID,
+	userID string,
 ) (attempt.Attempt, error) {
-	panic("unexpected GetByID call")
+	if s.getByIDFn == nil {
+		panic("unexpected GetByID call")
+	}
+
+	return s.getByIDFn(ctx, attemptID, userID)
 }
 
 func (s *attemptRepositoryStub) GetActive(
@@ -121,6 +130,127 @@ func (s *scenarioProviderStub) GetByID(
 	}
 
 	return s.getByIDFn(ctx, scenarioID)
+}
+
+func TestServiceGetState(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns current node with safe choice fields", func(t *testing.T) {
+		t.Parallel()
+
+		fixture := testfixture.ValidScenario()
+		currentNodeID := fixture.StartNodeID
+		currentAttempt := attempt.Attempt{
+			ID:            "attempt-1",
+			UserID:        userID,
+			ScenarioID:    fixture.ID,
+			Status:        attempt.StatusInProgress,
+			CurrentNodeID: &currentNodeID,
+		}
+
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(
+				_ context.Context,
+				gotAttemptID attempt.AttemptID,
+				gotUserID string,
+			) (attempt.Attempt, error) {
+				require.Equal(t, currentAttempt.ID, gotAttemptID)
+				require.Equal(t, userID, gotUserID)
+				return currentAttempt, nil
+			},
+		}
+		provider := &scenarioProviderStub{
+			getByIDFn: func(
+				_ context.Context,
+				gotScenarioID scenario.ScenarioID,
+			) (scenario.Scenario, error) {
+				require.Equal(t, fixture.ID, gotScenarioID)
+				return fixture, nil
+			},
+		}
+		service := attempt.NewService(repository, nil, provider)
+
+		state, err := service.GetState(context.Background(), userID, currentAttempt.ID)
+
+		require.NoError(t, err)
+		require.Equal(t, currentAttempt, state.Attempt)
+		require.NotNil(t, state.CurrentNode)
+		require.Equal(t, fixture.StartNodeID, state.CurrentNode.ID)
+		require.Equal(t, fixture.Nodes[0].Author, state.CurrentNode.Author)
+		require.Equal(t, fixture.Nodes[0].Text, state.CurrentNode.Text)
+		require.Len(t, state.CurrentNode.Choices, len(fixture.Nodes[0].Choices))
+		require.Equal(t, attempt.ChoiceOption{
+			ID:   fixture.Nodes[0].Choices[0].ID,
+			Text: fixture.Nodes[0].Choices[0].Text,
+		}, state.CurrentNode.Choices[0])
+	})
+
+	t.Run("does not load scenario for completed attempt", func(t *testing.T) {
+		t.Parallel()
+
+		currentAttempt := attempt.Attempt{
+			ID:         "attempt-1",
+			UserID:     userID,
+			ScenarioID: scenarioID,
+			Status:     attempt.StatusCompleted,
+		}
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(
+				context.Context,
+				attempt.AttemptID,
+				string,
+			) (attempt.Attempt, error) {
+				return currentAttempt, nil
+			},
+		}
+		service := attempt.NewService(repository, nil, &scenarioProviderStub{})
+
+		state, err := service.GetState(context.Background(), userID, currentAttempt.ID)
+
+		require.NoError(t, err)
+		require.Equal(t, currentAttempt, state.Attempt)
+		require.Nil(t, state.CurrentNode)
+	})
+
+	t.Run("preserves repository error", func(t *testing.T) {
+		t.Parallel()
+
+		repositoryErr := errors.New("repository failed")
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(
+				context.Context,
+				attempt.AttemptID,
+				string,
+			) (attempt.Attempt, error) {
+				return attempt.Attempt{}, repositoryErr
+			},
+		}
+		service := attempt.NewService(repository, nil, &scenarioProviderStub{})
+
+		state, err := service.GetState(context.Background(), userID, "attempt-1")
+
+		require.ErrorIs(t, err, repositoryErr)
+		require.Equal(t, attempt.State{}, state)
+	})
+
+	t.Run("rejects missing current node", func(t *testing.T) {
+		t.Parallel()
+
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(
+				context.Context,
+				attempt.AttemptID,
+				string,
+			) (attempt.Attempt, error) {
+				return attempt.Attempt{Status: attempt.StatusInProgress}, nil
+			},
+		}
+		service := attempt.NewService(repository, nil, &scenarioProviderStub{})
+
+		_, err := service.GetState(context.Background(), userID, "attempt-1")
+
+		require.ErrorIs(t, err, attempt.ErrInvalidAttemptState)
+	})
 }
 
 func TestServiceStart(t *testing.T) {

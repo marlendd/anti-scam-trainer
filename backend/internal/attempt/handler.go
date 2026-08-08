@@ -16,6 +16,12 @@ import (
 )
 
 type handlerService interface {
+	GetState(
+		ctx context.Context,
+		userID string,
+		attemptID AttemptID,
+	) (State, error)
+
 	Start(
 		ctx context.Context,
 		userID string,
@@ -38,6 +44,23 @@ type handlerService interface {
 		ctx context.Context,
 		input SubmitAnswerInput,
 	) (SubmitAnswerResult, error)
+}
+
+type choiceOptionResponse struct {
+	ID   scenario.ChoiceID `json:"id"`
+	Text string            `json:"text"`
+}
+
+type currentNodeResponse struct {
+	ID      scenario.NodeID        `json:"id"`
+	Author  scenario.AuthorID      `json:"author"`
+	Text    string                 `json:"text"`
+	Choices []choiceOptionResponse `json:"choices"`
+}
+
+type attemptStateResponse struct {
+	attemptResponse
+	CurrentNode *currentNodeResponse `json:"current_node,omitempty"`
 }
 
 type Handler struct {
@@ -76,6 +99,52 @@ func newAttemptResponse(currentAttempt Attempt) attemptResponse {
 		UpdatedAt:     currentAttempt.UpdatedAt,
 		CompletedAt:   currentAttempt.CompletedAt,
 	}
+}
+
+func newAttemptStateResponse(state State) attemptStateResponse {
+	response := attemptStateResponse{
+		attemptResponse: newAttemptResponse(state.Attempt),
+	}
+
+	if state.CurrentNode == nil {
+		return response
+	}
+
+	choices := make([]choiceOptionResponse, 0, len(state.CurrentNode.Choices))
+	for _, choice := range state.CurrentNode.Choices {
+		choices = append(choices, choiceOptionResponse(choice))
+	}
+
+	response.CurrentNode = &currentNodeResponse{
+		ID:      state.CurrentNode.ID,
+		Author:  state.CurrentNode.Author,
+		Text:    state.CurrentNode.Text,
+		Choices: choices,
+	}
+
+	return response
+}
+
+func (h *Handler) GetState(w http.ResponseWriter, r *http.Request) {
+	userID, ok := auth.UserIDFromContext(r.Context())
+	if !ok || userID == "" {
+		respondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	attemptID := AttemptID(r.PathValue("attemptID"))
+	if attemptID == "" {
+		respondError(w, http.StatusBadRequest, "attempt_id is required")
+		return
+	}
+
+	state, err := h.service.GetState(r.Context(), userID, attemptID)
+	if err != nil {
+		h.respondAttemptError(w, err)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, newAttemptStateResponse(state))
 }
 
 func (h *Handler) Start(w http.ResponseWriter, r *http.Request) {

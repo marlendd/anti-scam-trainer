@@ -328,6 +328,33 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /api/v1/attempts/{attemptID}:
+    get:
+      tags: [attempts]
+      summary: Получить состояние попытки
+      description: Для активной попытки возвращает текущий узел и безопасные поля вариантов. Внутренние переходы, оценки, веса, последствия и объяснения не раскрываются.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AttemptID'
+      responses:
+        '200':
+          description: Состояние принадлежащей пользователю попытки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptStateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Попытка не найдена или принадлежит другому пользователю
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /health:
     get:
       tags: [system]
@@ -477,6 +504,39 @@ components:
         completed_at:
           type: string
           format: date-time
+
+    AttemptStateResponse:
+      allOf:
+        - $ref: '#/components/schemas/AttemptResponse'
+        - type: object
+          properties:
+            current_node:
+              $ref: '#/components/schemas/CurrentNode'
+
+    CurrentNode:
+      type: object
+      required: [id, author, text, choices]
+      properties:
+        id:
+          type: string
+        author:
+          type: string
+        text:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChoiceOption'
+
+    ChoiceOption:
+      type: object
+      additionalProperties: false
+      required: [id, text]
+      properties:
+        id:
+          type: string
+        text:
+          type: string
 
     ScenarioCatalogResponse:
       type: object
