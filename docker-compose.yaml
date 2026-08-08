@@ -63,10 +63,24 @@ services:
       - "3000:80"
     networks:
       - antiscam_net
-
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: unless-stopped
+    ports:
+      - "18888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@test.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_DISABLE_POSTFIX: "true"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres
 networks:
   antiscam_net:
     driver: bridge
 
 volumes:
   antiscam_data:
+  pgadmin:
