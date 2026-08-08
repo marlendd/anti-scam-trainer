@@ -82,3 +82,4 @@ networks:
 
 volumes:
   antiscam_data:
+  pgadmin:
