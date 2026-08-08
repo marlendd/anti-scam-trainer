@@ -186,12 +186,17 @@ func cleanupTestDatabase(t *testing.T, databaseURL string) {
 
 	db, err := sql.Open("postgres", databaseURL)
 	require.NoError(t, err)
-	defer db.Close()
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			t.Errorf("failed to close test database: %v", err)
+		}
+	}()
 
 	require.NoError(t, db.Ping())
 
 	_, err = db.Exec(`
-		TRUNCATE TABLE attempts, sessions, users CASCADE
+		TRUNCATE TABLE attempts, sessions CASCADE
 	`)
 	require.NoError(t, err)
 }
