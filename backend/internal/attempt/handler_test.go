@@ -29,6 +29,20 @@ type answerSubmitterStub struct {
 	gotOperation  string
 	gotUserID     string
 	gotScenarioID scenario.ScenarioID
+	stateResult   attempt.State
+	stateErr      error
+	gotAttemptID  attempt.AttemptID
+}
+
+func (stub *answerSubmitterStub) GetState(
+	_ context.Context,
+	userID string,
+	attemptID attempt.AttemptID,
+) (attempt.State, error) {
+	stub.gotOperation = "get_state"
+	stub.gotUserID = userID
+	stub.gotAttemptID = attemptID
+	return stub.stateResult, stub.stateErr
 }
 
 func (stub *answerSubmitterStub) Start(
