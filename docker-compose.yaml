@@ -38,6 +38,7 @@ services:
       - API_TIMEOUT=5s
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/antiscam?sslmode=disable
       - MIGRATIONS_PATH=migrations
+      - SEEDS_PATH=seeds
       - SECURE_COOKIES=false
       - SMTP_HOST=smtp.yandex.ru
       - SMTP_PORT=465

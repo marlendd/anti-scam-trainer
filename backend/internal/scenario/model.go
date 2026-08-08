@@ -30,6 +30,7 @@ const (
 	RiskFakePaymentDelivery RiskCategory = "fake_payment_delivery"
 	RiskUrgencyPressure     RiskCategory = "urgency_pressure"
 	RiskDisableProtection   RiskCategory = "disable_protection"
+	RiskUnverifiedEvidence  RiskCategory = "unverified_evidence"
 )
 
 type Role string
