@@ -3,6 +3,7 @@ package evaluation_test
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 	"os"
 	"testing"
 
@@ -25,9 +26,13 @@ func setupTestDB(t *testing.T) *sql.DB {
 
 func TestEvaluation_Integration(t *testing.T) {
 	db := setupTestDB(t)
-	defer db.Close()
 
-	repo := evaluation.NewPgRepository(db)
+	defer func() {
+		err := db.Close()
+		require.NoError(t, err)
+	}()
+
+	repo := evaluation.NewPgRepository(db, slog.Default())
 	svc := evaluation.NewService(repo)
 	ctx := context.Background()
 

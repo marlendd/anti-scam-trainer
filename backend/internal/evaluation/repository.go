@@ -3,6 +3,7 @@ package evaluation
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 )
 
 type Repository interface {
@@ -17,11 +18,12 @@ type Repository interface {
 }
 
 type PgRepository struct {
-	db *sql.DB
+	db  *sql.DB
+	log *slog.Logger
 }
 
-func NewPgRepository(db *sql.DB) *PgRepository {
-	return &PgRepository{db: db}
+func NewPgRepository(db *sql.DB, log *slog.Logger) *PgRepository {
+	return &PgRepository{db: db, log: log}
 }
 
 func (r *PgRepository) GetAnswersByAttempt(ctx context.Context, userID, attemptID string) ([]AnswerData, error) {
@@ -35,7 +37,12 @@ func (r *PgRepository) GetAnswersByAttempt(ctx context.Context, userID, attemptI
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.log.Error("error when close rows", "error", err)
+		}
+	}()
 
 	var res []AnswerData
 	for rows.Next() {
@@ -63,7 +70,12 @@ func (r *PgRepository) GetUserStatsByRole(ctx context.Context, userID string) ([
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.log.Error("error when close rows", "error", err)
+		}
+	}()
 
 	var stats []RoleStats
 	for rows.Next() {
@@ -93,7 +105,12 @@ func (r *PgRepository) GetUserFragments(ctx context.Context, userID string) ([]P
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.log.Error("error when close rows", "error", err)
+		}
+	}()
 
 	var fragments []PuzzleFragment
 	for rows.Next() {
@@ -133,7 +150,12 @@ func (r *PgRepository) GetUserStatsByCategory(ctx context.Context, userID string
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.log.Error("error when close rows", "error", err)
+		}
+	}()
 
 	var res []CategoryStat
 	for rows.Next() {
@@ -212,7 +234,12 @@ func (r *PgRepository) GetLeaderboard(ctx context.Context, limit, offset int) ([
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.log.Error("error when close rows", "error", err)
+		}
+	}()
 
 	var entries []LeaderboardEntry
 	for rows.Next() {

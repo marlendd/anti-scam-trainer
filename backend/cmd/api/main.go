@@ -68,7 +68,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	authHandler := auth.NewHandler(authService, log, cfg.SecureCookies)
 	requireAuth := auth.RequireAuth(authService, log)
 	// evaluation
-	evalRepo := evaluation.NewPgRepository(db)
+	evalRepo := evaluation.NewPgRepository(db, log)
 	evalService := evaluation.NewService(evalRepo)
 	evalHandler := evaluation.NewHandler(evalService, log)
 
