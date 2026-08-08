@@ -36,6 +36,15 @@ type submitAnswerAPIResponse struct {
 	Score      *int    `json:"score"`
 }
 
+type scenarioCatalogAPIItem struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+}
+
+type scenarioCatalogAPIResponse struct {
+	Items []scenarioCatalogAPIItem `json:"items"`
+}
+
 func TestRunIntegration_APIFlow(t *testing.T) {
 	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
 		t.Skip("skipping integration test; set RUN_INTEGRATION_TESTS=1 to run")
@@ -161,6 +170,9 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 	})
 
 	t.Run("completes scenario through HTTP API", func(t *testing.T) {
+		catalogItem := getScenarioCatalogItem(t, client, baseURL, scenarioID)
+		require.Equal(t, "not_started", catalogItem.Status)
+
 		startResponse, err := client.Post(
 			baseURL+"/api/v1/scenarios/"+scenarioID+"/attempts",
 			"application/json",
@@ -232,6 +244,9 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 		require.Equal(t, "completed", status)
 		require.Equal(t, 100, score)
 		require.Equal(t, 3, answerCount)
+
+		catalogItem = getScenarioCatalogItem(t, client, baseURL, scenarioID)
+		require.Equal(t, "completed", catalogItem.Status)
 	})
 
 	t.Run("logout clears session", func(t *testing.T) {
@@ -288,6 +303,31 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 
 		require.Equal(t, http.StatusConflict, res.StatusCode)
 	})
+}
+
+func getScenarioCatalogItem(
+	t *testing.T,
+	client *http.Client,
+	baseURL string,
+	scenarioID string,
+) scenarioCatalogAPIItem {
+	t.Helper()
+
+	response, err := client.Get(baseURL + "/api/v1/scenarios?role=buyer")
+	require.NoError(t, err)
+	defer closeBody(t, response)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+
+	var catalog scenarioCatalogAPIResponse
+	require.NoError(t, json.NewDecoder(response.Body).Decode(&catalog))
+	for _, item := range catalog.Items {
+		if item.ID == scenarioID {
+			return item
+		}
+	}
+
+	t.Fatalf("scenario %s not found in catalog", scenarioID)
+	return scenarioCatalogAPIItem{}
 }
 
 func insertAPITestScenario(t *testing.T, db interface {

@@ -73,6 +73,8 @@ func run(cfg *config.Config, log *slog.Logger) error {
 
 	// ---------- wiring attempts ----------
 	scenarioRepository := scenario.NewPgRepository(db)
+	scenarioCatalogService := scenario.NewCatalogService(&scenarioRepository)
+	scenarioCatalogHandler := scenario.NewCatalogHandler(scenarioCatalogService, log)
 	attemptRepository := attempt.NewPgRepository(db)
 	attemptService := attempt.NewService(
 		attemptRepository,
@@ -98,6 +100,10 @@ func run(cfg *config.Config, log *slog.Logger) error {
 
 	// protected routes
 	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
+	mux.Handle(
+		"GET /api/v1/scenarios",
+		requireAuth(http.HandlerFunc(scenarioCatalogHandler.List)),
+	)
 	mux.Handle(
 		"POST /api/v1/scenarios/{scenarioID}/attempts",
 		requireAuth(http.HandlerFunc(attemptHandler.Start)),
