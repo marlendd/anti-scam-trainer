@@ -1,123 +1,109 @@
 .board {
-  position: relative;
+    position: relative;
 
-  width: 100%;
-  aspect-ratio: 1 / 1;
+    box-sizing: border-box;
 
-  border-radius: 32px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
 
-  box-sizing: border-box;
-  overflow: hidden;
+    overflow: hidden;
+
+    border-radius: 32px;
 }
 
 .svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+    display: block;
 
-  filter:
-    drop-shadow(
-      0 20px 30px rgb(0 0 0 / 6%)
-    );
+    width: 100%;
+    height: 100%;
+
+    filter: drop-shadow(0 20px 30px rgb(0 0 0 / 6%));
 }
 
 .background {
-  fill: #eeeeee;
+    fill: #eee;
 }
 
 .piece {
-  transform-box: fill-box;
-  transform-origin: center;
+    transform-origin: center;
+    transform-box: fill-box;
 
-  transition:
-    opacity 180ms ease,
-    filter 180ms ease;
+    transition:
+        opacity 180ms ease,
+        filter 180ms ease;
 
-  &[data-unlocked='true'] {
-    cursor: pointer;
+    &[data-unlocked='true'] {
+        cursor: pointer;
 
-    &:hover {
-      filter:
-        brightness(1.03)
-        drop-shadow(
-          0 5px 8px rgb(0 0 0 / 10%)
-        );
+        &:hover {
+            filter: brightness(1.03) drop-shadow(0 5px 8px rgb(0 0 0 / 10%));
+        }
     }
-  }
 
-  &[data-highlighted='true'] {
-    animation:
-      pieceHighlight 1.4s ease-in-out infinite;
-  }
+    &[data-highlighted='true'] {
+        animation: piece-highlight 1.4s ease-in-out infinite;
+    }
 }
 
 .image {
-  pointer-events: none;
+    pointer-events: none;
 }
 
 .unlockedOutline {
-  fill: transparent;
+    pointer-events: none;
 
-  stroke: rgb(255 255 255 / 80%);
-  stroke-width: 2;
-
-  pointer-events: none;
+    fill: transparent;
+    stroke: rgb(255 255 255 / 80%);
+    stroke-width: 2;
 }
 
 .lockedPiece {
-  fill: #e8eaed;
+    fill: #e8eaed;
+    stroke: #fff;
+    stroke-width: 2;
 
-  stroke: #ffffff;
-  stroke-width: 2;
-
-  transition:
-    fill 180ms ease,
-    stroke 180ms ease;
+    transition:
+        fill 180ms ease,
+        stroke 180ms ease;
 }
 
 .question {
-  fill: #afb3b8;
+    font-size: 20px;
+    font-weight: 700;
 
-  font-size: 20px;
-  font-weight: 700;
+    pointer-events: none;
+    user-select: none;
 
-  pointer-events: none;
-  user-select: none;
+    fill: #afb3b8;
 }
 
-@keyframes pieceHighlight {
-  0%,
-  100% {
-    filter:
-      drop-shadow(
-        0 0 0 rgb(0 170 255 / 0%)
-      );
-  }
+@keyframes piece-highlight {
+    0%,
+    100% {
+        filter: drop-shadow(0 0 0 rgb(0 170 255 / 0%));
+    }
 
-  50% {
-    filter:
-      drop-shadow(
-        0 0 12px rgb(0 170 255 / 55%)
-      );
-  }
+    50% {
+        filter: drop-shadow(0 0 12px rgb(0 170 255 / 55%));
+    }
 }
 
-@media (max-width: 640px) {
-  .board {
-    border-radius: 28px;
-  }
+@media (width <= 640px) {
+    .board {
+        border-radius: 28px;
+    }
 
-  .question {
-    font-size: 17px;
-  }
+    .question {
+        font-size: 17px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .piece {
-    transition: none;
-  }
+    .piece {
+        transition: none;
+    }
 
-  .piece[data-highlighted='true'] {
-    animation: none;
-  }
+    .piece[data-highlighted='true'] {
+        animation: none;
+    }
 }

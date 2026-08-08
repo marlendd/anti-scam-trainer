@@ -1,24 +1,15 @@
-// src/features/auth/ui/RegisterForm.tsx
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ApiError } from '@/shared/api'
 
-import {
-    useState,
-    type FormEvent,
-} from 'react'
-import {Link, useNavigate} from 'react-router-dom'
-import {ApiError} from "@/shared/api";
-
-import {
-    Input,
-    PasswordInput,
-} from '@/shared/ui/input'
+import { Input, PasswordInput } from '@/shared/ui/input'
 
 import styles from './AuthForm.module.scss'
-import {Logo} from "@/shared/ui/logo";
-import {useRegister} from "@/features/auth";
+import { Logo } from '@/shared/ui/logo'
+import { useRegister } from '@/features/auth'
 
 export function RegisterForm() {
-    const [confirmationError, setConfirmationError] =
-        useState<string>()
+    const [confirmationError, setConfirmationError] = useState<string>()
 
     const register = useRegister()
     const navigate = useNavigate()
@@ -30,9 +21,7 @@ export function RegisterForm() {
 
         const email = String(formData.get('email') ?? '')
         const password = String(formData.get('password') ?? '')
-        const passwordConfirmation = String(
-            formData.get('passwordConfirmation') ?? '',
-        )
+        const passwordConfirmation = String(formData.get('passwordConfirmation') ?? '')
 
         if (password !== passwordConfirmation) {
             setConfirmationError('Пароли не совпадают')
@@ -41,15 +30,17 @@ export function RegisterForm() {
 
         setConfirmationError(undefined)
 
-        register.mutate({
+        register.mutate(
+            {
                 email,
                 password,
             },
             {
                 onSuccess: () => {
-                    navigate('/home', {replace: true})
+                    navigate('/home', { replace: true })
                 },
-            },)
+            },
+        )
     }
 
     let errorMessage: string | undefined
@@ -64,20 +55,14 @@ export function RegisterForm() {
         errorMessage = 'Произошла ошибка. Попробуйте ещё раз'
     }
 
-
     return (
         <div className={styles.content}>
             <header className={styles.header}>
-
                 <Link to="/home" className={styles.brand}>
-                    <Logo/>
+                    <Logo />
                 </Link>
 
-                {/*<h1 className={styles.title}>Регистрация</h1>*/}
-
-                <p className={styles.description}>
-                    Создайте аккаунт для сохранения прогресса
-                </p>
+                <p className={styles.description}>Создайте аккаунт для сохранения прогресса</p>
             </header>
 
             <form className={styles.form} onSubmit={handleSubmit}>
@@ -128,11 +113,7 @@ export function RegisterForm() {
                     Создать аккаунт
                 </button>
 
-                {errorMessage && (
-                    <p className={styles.error}>
-                        {errorMessage}
-                    </p>
-                )}
+                {errorMessage && <p className={styles.error}>{errorMessage}</p>}
             </form>
 
             <p className={styles.footer}>

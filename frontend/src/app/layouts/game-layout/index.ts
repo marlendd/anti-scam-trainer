@@ -1,1 +1,1 @@
-export { GameLayout } from './GameLayout';
+export { GameLayout } from './GameLayout'

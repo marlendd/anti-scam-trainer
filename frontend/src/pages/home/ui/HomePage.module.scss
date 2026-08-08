@@ -1,55 +1,70 @@
 ﻿.page {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  padding: 32px 20px;
+    display: grid;
+
+    flex: 1;
+
+    place-items: center;
+
+    padding: 32px 20px;
 }
 
 .card {
-  width: min(720px, 100%);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 40px 32px;
-  background:
-    radial-gradient(circle at top, rgba(170, 59, 255, 0.08), transparent 42%),
-    linear-gradient(180deg, rgba(244, 243, 236, 0.65), transparent);
-  box-shadow: var(--shadow);
+    width: min(720px, 100%);
+
+    padding: 40px 32px;
+
+    background:
+        radial-gradient(circle at top, rgb(170 59 255 / 8%), transparent 42%),
+        linear-gradient(180deg, rgb(244 243 236 / 65%), transparent);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
 }
 
 .eyebrow {
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 12px;
+    margin-bottom: 12px;
+
+    font-size: 12px;
+
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
 }
 
 .description {
-  margin-top: 12px;
+    margin-top: 12px;
 }
 
 .links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 28px;
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+    justify-content: center;
+
+    margin-top: 28px;
 }
 
 .link {
-  color: var(--text-h);
-  text-decoration: none;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 10px 16px;
-  background: var(--bg);
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    padding: 10px 16px;
 
-  &:hover {
-    transform: translateY(-1px);
-    border-color: var(--accent-border);
-    box-shadow: var(--shadow);
-  }
+    color: var(--text-h);
+
+    text-decoration: none;
+
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+    &:hover {
+        border-color: var(--accent-border);
+        box-shadow: var(--shadow);
+
+        transform: translateY(-1px);
+    }
 }

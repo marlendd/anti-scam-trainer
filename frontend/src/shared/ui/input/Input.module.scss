@@ -1,125 +1,131 @@
-// src/shared/ui/input/Input.module.scss
-
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
 }
 
 .label {
-  color: #242424;
+    font-size: 14px;
+    font-weight: 500;
 
-  font-size: 14px;
-  font-weight: 500;
+    color: #242424;
 
-  text-align: left;
+    text-align: left;
 }
 
 .required {
-  margin-left: 3px;
-  color: #ff4053;
+    margin-left: 3px;
+
+    color: #ff4053;
 }
 
 .control {
-  position: relative;
+    position: relative;
 }
 
 .input {
-  width: 100%;
-  min-height: 52px;
-  padding: 0 16px;
+    width: 100%;
+    min-height: 52px;
 
-  border: 1px solid #dcdcdc;
-  border-radius: 14px;
+    padding: 0 16px;
 
-  color: #242424;
-  background-color: #ffffff;
+    font: inherit;
+    font-size: 16px;
 
-  font: inherit;
-  font-size: 16px;
+    color: #242424;
 
-  outline: none;
+    outline: none;
 
-  transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease,
-    background-color 150ms ease;
+    background-color: #fff;
+    border: 1px solid #dcdcdc;
+    border-radius: 14px;
 
-  &::placeholder {
-    color: #a3a3a3;
-  }
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease,
+        background-color 150ms ease;
 
-  &:hover:not(:disabled) {
-    border-color: #b8b8b8;
-  }
+    &::placeholder {
+        color: #a3a3a3;
+    }
 
-  &:focus {
-    border-color: #ff4053;
-    box-shadow: 0 0 0 3px rgb(255 64 83 / 14%);
-  }
+    &:hover:not(:disabled) {
+        border-color: #b8b8b8;
+    }
 
-  &:disabled {
-    color: #9b9b9b;
-    background-color: #f5f5f5;
-    cursor: not-allowed;
-  }
+    &:focus {
+        border-color: #ff4053;
+        box-shadow: 0 0 0 3px rgb(255 64 83 / 14%);
+    }
+
+    &:disabled {
+        color: #9b9b9b;
+
+        cursor: not-allowed;
+
+        background-color: #f5f5f5;
+    }
 }
 
 .inputWithAdornment {
-  padding-right: 96px;
+    padding-right: 96px;
 }
 
 .inputError {
-  border-color: #ff4053;
-
-  &:focus {
     border-color: #ff4053;
-  }
+
+    &:focus {
+        border-color: #ff4053;
+    }
 }
 
 .endAdornment {
-  position: absolute;
-  top: 50%;
-  right: 14px;
+    position: absolute;
+    top: 50%;
+    right: 14px;
 
-  transform: translateY(-50%);
+    transform: translateY(-50%);
 
-  button {
-    padding: 4px;
+    button {
+        padding: 4px;
 
-    border: 0;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
 
-    color: #6f6f6f;
-    background: transparent;
+        color: #6f6f6f;
 
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
+        cursor: pointer;
 
-    cursor: pointer;
+        background: transparent;
+        border: 0;
 
-    &:hover {
-      color: #242424;
+        &:hover {
+            color: #242424;
+        }
+
+        &:focus-visible {
+            outline: 2px solid #ff4053;
+            outline-offset: 2px;
+
+            border-radius: 5px;
+        }
     }
-
-    &:focus-visible {
-      border-radius: 5px;
-      outline: 2px solid #ff4053;
-      outline-offset: 2px;
-    }
-  }
 }
 
 .error,
 .hint {
-  font-size: 13px;
-  line-height: 1.35;
+    font-size: 13px;
+
+    line-height: 1.35;
 }
 
 .error {
-  color: #e32636;
+    color: #e32636;
 }
 
 .hint {
-  color: #858585;
+    color: #858585;
 }

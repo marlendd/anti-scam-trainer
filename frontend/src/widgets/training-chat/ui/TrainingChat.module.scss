@@ -1,92 +1,101 @@
 .chat {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  min-height: 420px;
-  height: 100%;
-  max-height: 100%;
-  flex-direction: column;
+    display: flex;
 
-  border: 1px solid #e8e8e8;
-  border-radius: 28px;
+    flex-direction: column;
 
-  background-color: #f7f7f7;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 420px;
+    max-height: 100%;
 
-  overflow: hidden;
+    overflow: hidden;
+
+    background-color: #f7f7f7;
+    border: 1px solid #e8e8e8;
+    border-radius: 28px;
 }
 
 .empty {
-  display: flex;
-  width: 100%;
-  min-height: 420px;
-  padding: 48px 24px;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+    display: flex;
 
-  text-align: center;
+    flex: 1;
+    flex-direction: column;
+
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 420px;
+
+    padding: 48px 24px;
+
+    text-align: center;
 }
 
 .emptyIcon {
-  display: inline-flex;
-  width: 64px;
-  aspect-ratio: 1 / 1;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
 
-  border-radius: 20px;
+    align-items: center;
+    justify-content: center;
 
-  color: #222;
-  background-color: rgb(71 71 71 / 0.1);
+    width: 64px;
+    aspect-ratio: 1 / 1;
 
-  font-size: 26px;
+    font-size: 26px;
+
+    color: #222;
+
+    background-color: rgb(71 71 71 / 10%);
+    border-radius: 20px;
 }
 
 .emptyContent {
-  max-width: 360px;
+    max-width: 360px;
 }
 
 .emptyTitle {
-  margin: 0;
+    margin: 0;
 
-  color: #111111;
+    font-size: 20px;
+    font-weight: 600;
 
-  font-size: 20px;
-  font-weight: 600;
+    color: #111;
 }
 
 .emptyDescription {
-  margin: 8px 0 0;
+    margin: 8px 0 0;
 
-  color: #858585;
+    font-size: 14px;
 
-  font-size: 14px;
-  line-height: 1.5;
+    line-height: 1.5;
+
+    color: #858585;
 }
 
-@media (max-width: 640px) {
-  .chat {
-    min-height: 320px;
+@media (width <= 640px) {
+    .chat {
+        min-height: 320px;
 
-    border-radius: 20px;
-  }
+        border-radius: 20px;
+    }
 
-  .empty {
-    min-height: 320px;
-    padding: 32px 20px;
-  }
+    .empty {
+        min-height: 320px;
 
-  .emptyIcon {
-    width: 56px;
+        padding: 32px 20px;
+    }
 
-    border-radius: 18px;
+    .emptyIcon {
+        width: 56px;
 
-    font-size: 22px;
-  }
+        font-size: 22px;
 
-  .emptyTitle {
-    font-size: 18px;
-  }
+        border-radius: 18px;
+    }
+
+    .emptyTitle {
+        font-size: 18px;
+    }
 }

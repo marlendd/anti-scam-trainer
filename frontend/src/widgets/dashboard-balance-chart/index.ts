@@ -1,1 +1,1 @@
-export { DashboardBalanceChart } from './ui/DashboardBalanceChart.tsx';
+export { DashboardBalanceChart } from './ui/DashboardBalanceChart.tsx'

@@ -2,28 +2,23 @@
 
 import type { TrainingScenario } from './types'
 
-export type ScenarioStatus =
-  | 'completed'
-  | 'available'
-  | 'locked'
+export type ScenarioStatus = 'completed' | 'available' | 'locked'
 
 export function getScenarioStatus(
-  scenarios: TrainingScenario[],
-  scenarioIndex: number,
+    scenarios: TrainingScenario[],
+    scenarioIndex: number,
 ): ScenarioStatus {
-  const scenario = scenarios[scenarioIndex]
+    const scenario = scenarios[scenarioIndex]
 
-  if (scenario.isCompleted) {
-    return 'completed'
-  }
+    if (scenario.isCompleted) {
+        return 'completed'
+    }
 
-  const firstIncompleteIndex = scenarios.findIndex(
-    (item) => !item.isCompleted,
-  )
+    const firstIncompleteIndex = scenarios.findIndex((item) => !item.isCompleted)
 
-  if (scenarioIndex === firstIncompleteIndex) {
-    return 'available'
-  }
+    if (scenarioIndex === firstIncompleteIndex) {
+        return 'available'
+    }
 
-  return 'locked'
+    return 'locked'
 }

@@ -34,4 +34,5 @@ var (
 	ErrScenarioNotFound       = errors.New("scenario not found")
 	ErrScenarioInactive       = errors.New("scenario is inactive")
 	ErrInvalidScenarioContent = errors.New("invalid scenario content")
+	ErrInvalidRole            = errors.New("invalid scenario role")
 )

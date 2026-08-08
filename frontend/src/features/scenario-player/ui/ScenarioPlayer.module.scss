@@ -1,104 +1,115 @@
 .messages {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-  gap: 4px;
-  padding: 24px;
+    display: flex;
 
-  overflow-y: auto;
+    flex: 1;
+    flex-direction: column;
+
+    gap: 4px;
+
+    min-height: 0;
+
+    padding: 24px;
+
+    overflow-y: auto;
 }
 
 .typing {
-  align-self: flex-start;
-  margin: 8px 0 0 52px;
-  padding: 10px 16px;
+    align-self: flex-start;
 
-  border-radius: 20px;
+    padding: 10px 16px;
+    margin: 8px 0 0 52px;
 
-  color: #858585;
-  background-color: #f1f1f1;
+    font-size: 14px;
 
-  font-size: 14px;
+    color: #858585;
+
+    background-color: #f1f1f1;
+    border-radius: 20px;
 }
 
 .answers {
-  display: flex;
-  width: min(100%, 560px);
-  margin-top: 20px;
-  margin-left: auto;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    width: min(100%, 560px);
+
+    margin-top: 20px;
+    margin-left: auto;
 }
 
 .answersLabel {
-  margin-bottom: 4px;
+    margin-bottom: 4px;
 
-  color: #858585;
+    font-size: 13px;
 
-  font-size: 13px;
+    color: #858585;
 }
 
 .answer {
-  width: 100%;
-  padding: 14px 16px;
+    width: 100%;
 
-  border: 1px solid #e5e5e5;
-  border-radius: 16px;
+    padding: 14px 16px;
 
-  color: #222222;
-  background-color: #ffffff;
+    font: inherit;
+    font-size: 14px;
 
-  font: inherit;
-  font-size: 14px;
-  line-height: 1.4;
-  text-align: left;
+    line-height: 1.4;
 
-  cursor: pointer;
+    color: #222;
 
-  transition:
-    border-color 150ms ease,
-    background-color 150ms ease,
-    transform 150ms ease;
+    text-align: left;
 
-  &:hover {
-    border-color: #00aaff;
+    cursor: pointer;
 
-    background-color:
-      rgb(0 170 255 / 6%);
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
 
-    transform: translateY(-1px);
-  }
+    transition:
+        border-color 150ms ease,
+        background-color 150ms ease,
+        transform 150ms ease;
 
-  &:active {
-    transform: translateY(0);
-  }
+    &:hover {
+        background-color: rgb(0 170 255 / 6%);
+        border-color: #0af;
 
-  &:focus-visible {
-    outline: 3px solid rgb(0 170 255 / 20%);
-    outline-offset: 2px;
-  }
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgb(0 170 255 / 20%);
+        outline-offset: 2px;
+    }
 }
 
-@media (max-width: 640px) {
-  .messages {
-    padding: 16px;
-  }
+@media (width <= 640px) {
+    .messages {
+        padding: 16px;
+    }
 
-  .typing {
-    margin-left: 42px;
-  }
+    .typing {
+        margin-left: 42px;
+    }
 
-  .answers {
-    width: 100%;
-    margin-top: 16px;
-  }
+    .answers {
+        width: 100%;
 
-  .answer {
-    padding: 12px 14px;
+        margin-top: 16px;
+    }
 
-    border-radius: 14px;
+    .answer {
+        padding: 12px 14px;
 
-    font-size: 13px;
-  }
+        font-size: 13px;
+
+        border-radius: 14px;
+    }
 }

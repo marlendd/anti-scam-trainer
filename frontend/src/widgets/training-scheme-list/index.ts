@@ -1,1 +1,1 @@
-export { TrainingSchemeList } from './ui/TrainingSchemeList';
+export { TrainingSchemeList } from './ui/TrainingSchemeList'
