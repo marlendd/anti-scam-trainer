@@ -1,6 +1,6 @@
 import {ApiError} from './errors';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api/v1';
 
 type ApiRequestOptions = Omit<RequestInit, 'body'> & {
     body?: unknown;

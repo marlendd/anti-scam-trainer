@@ -4,8 +4,8 @@ import styles from './Header.module.scss'
 import {FragmentCounter} from './FragmentCounter'
 import {PointsCounter} from './PointsCounter'
 import {LoginButton} from "@/features/login-button";
-import {BurgerNavigation} from "@/widgets/header/ui/BurgerNavigation.tsx";
-import {useCurrentUser} from "@/entities/user/model/api/use-current-user.ts";
+import {BurgerNavigation} from "@/widgets/header";
+import {useCurrentUser} from "@/entities/user";
 import {Avatar} from "@/shared/ui/avatar";
 
 export const Header = () => {
@@ -24,7 +24,9 @@ export const Header = () => {
                     <Link to='/puzzle'>Магазин</Link>
                     <Link to='/glossary'>Глоссарий</Link>
                     <Link to='/leaderboard'>Лидеры</Link>
-                    <Link to='/dashboard'>Статистика</Link>
+                    {!isPending && !isError && user !== null && (
+                        <Link to='/dashboard'>Статистика</Link>
+                    )}
                 </nav>
 
                 <div className={styles.info}>
@@ -41,7 +43,9 @@ export const Header = () => {
                     )}
 
                     {!isPending && !isError && user !== null && (
-                        <Avatar/>
+                        <Link to={'/dashboard'}>
+                            <Avatar/>
+                        </Link>
                     )}
 
                     {isError && (
