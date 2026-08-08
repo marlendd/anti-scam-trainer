@@ -31,4 +31,7 @@ var (
 	ErrTooFewReachableEndings = errors.New("too few reachable endings")
 	ErrPathTooShort           = errors.New("scenario path has fewer than three choices")
 	ErrPathWithoutBranching   = errors.New("scenario path has no branching")
+	ErrScenarioNotFound       = errors.New("scenario not found")
+	ErrScenarioInactive       = errors.New("scenario is inactive")
+	ErrInvalidScenarioContent = errors.New("invalid scenario content")
 )
