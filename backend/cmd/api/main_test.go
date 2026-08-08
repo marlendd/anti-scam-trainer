@@ -360,6 +360,8 @@ func submitAnswerThroughAPI(
 	require.Equal(t, choiceID, result.ChoiceID)
 
 	return result
+}
+
 func cleanupTestDatabase(t *testing.T, databaseURL string) {
 	t.Helper()
 
