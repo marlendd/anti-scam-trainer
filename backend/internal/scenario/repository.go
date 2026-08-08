@@ -116,7 +116,7 @@ func (pg *PgRepository) getScenarioFromContent(scenario Scenario, content Conten
 	scenario.Endings = content.Endings
 
 	if err := Validate(scenario); err != nil {
-		return Scenario{}, err
+		return Scenario{}, fmt.Errorf("%w: %v", ErrInvalidScenarioContent, err)
 	}
 
 	return scenario, nil
