@@ -14,7 +14,7 @@ import (
 // ---------- mocks ----------
 
 type userRepositoryStub struct {
-	createFn         func(ctx context.Context, email, passwordHash string) (auth.User, error)
+	createFn         func(ctx context.Context, name, email, passwordHash string) (auth.User, error)
 	getByEmailFn     func(ctx context.Context, email string) (auth.User, error)
 	getByIDFn        func(ctx context.Context, id string) (auth.User, error)
 	updatePasswordFn func(ctx context.Context, userID, passwordHash string) error
@@ -27,11 +27,11 @@ func (s *userRepositoryStub) UpdatePassword(ctx context.Context, userID, passwor
 	return s.updatePasswordFn(ctx, userID, passwordHash)
 }
 
-func (s *userRepositoryStub) Create(ctx context.Context, email, passwordHash string) (auth.User, error) {
+func (s *userRepositoryStub) Create(ctx context.Context, name, email, passwordHash string) (auth.User, error) {
 	if s.createFn == nil {
 		panic("unexpected Create call")
 	}
-	return s.createFn(ctx, email, passwordHash)
+	return s.createFn(ctx, name, email, passwordHash)
 }
 
 func (s *userRepositoryStub) GetByEmail(ctx context.Context, email string) (auth.User, error) {
@@ -90,21 +90,37 @@ func TestService_Register(t *testing.T) {
 		t.Parallel()
 
 		var capturedHash string
+
 		users := &userRepositoryStub{
-			createFn: func(_ context.Context, email, passwordHash string) (auth.User, error) {
+			createFn: func(_ context.Context, name, email, passwordHash string) (auth.User, error) {
+				require.Equal(t, "Test User", name)
 				require.Equal(t, "test@example.com", email)
+
 				capturedHash = passwordHash
-				return auth.User{ID: "user-1", Email: email, PasswordHash: passwordHash}, nil
+
+				return auth.User{
+					ID:           "user-1",
+					Name:         name,
+					Email:        email,
+					PasswordHash: passwordHash,
+				}, nil
 			},
 		}
+
 		sessions := &sessionRepositoryStub{}
 
 		service := newTestService(users, sessions)
 
-		u, err := service.Register(context.Background(), "test@example.com", "password123")
+		u, err := service.Register(
+			context.Background(),
+			"Test User",
+			"test@example.com",
+			"password123",
+		)
 
 		require.NoError(t, err)
 		require.Equal(t, "user-1", u.ID)
+		require.Equal(t, "Test User", u.Name)
 		require.NotEqual(t, "password123", capturedHash, "password must be hashed, not stored in plaintext")
 		require.NoError(t, auth.CheckPassword(capturedHash, "password123"))
 	})
@@ -113,15 +129,21 @@ func TestService_Register(t *testing.T) {
 		t.Parallel()
 
 		users := &userRepositoryStub{
-			createFn: func(context.Context, string, string) (auth.User, error) {
+			createFn: func(context.Context, string, string, string) (auth.User, error) {
 				return auth.User{}, auth.ErrUserExists
 			},
 		}
+
 		sessions := &sessionRepositoryStub{}
 
 		service := newTestService(users, sessions)
 
-		_, err := service.Register(context.Background(), "taken@example.com", "password123")
+		_, err := service.Register(
+			context.Background(),
+			"Test User",
+			"taken@example.com",
+			"password123",
+		)
 
 		require.ErrorIs(t, err, auth.ErrEmailTaken)
 	})
@@ -130,16 +152,23 @@ func TestService_Register(t *testing.T) {
 		t.Parallel()
 
 		repoErr := errors.New("db connection lost")
+
 		users := &userRepositoryStub{
-			createFn: func(context.Context, string, string) (auth.User, error) {
+			createFn: func(context.Context, string, string, string) (auth.User, error) {
 				return auth.User{}, repoErr
 			},
 		}
+
 		sessions := &sessionRepositoryStub{}
 
 		service := newTestService(users, sessions)
 
-		_, err := service.Register(context.Background(), "test@example.com", "password123")
+		_, err := service.Register(
+			context.Background(),
+			"Test User",
+			"test@example.com",
+			"password123",
+		)
 
 		require.ErrorIs(t, err, repoErr)
 	})
@@ -156,7 +185,11 @@ func TestService_Login(t *testing.T) {
 		hash, err := auth.HashPassword("password123")
 		require.NoError(t, err)
 
-		existingUser := auth.User{ID: "user-1", Email: "test@example.com", PasswordHash: hash}
+		existingUser := auth.User{
+			ID:           "user-1",
+			Email:        "test@example.com",
+			PasswordHash: hash,
+		}
 
 		users := &userRepositoryStub{
 			getByEmailFn: func(_ context.Context, email string) (auth.User, error) {
@@ -166,17 +199,30 @@ func TestService_Login(t *testing.T) {
 		}
 
 		var capturedUserID string
+
 		sessions := &sessionRepositoryStub{
 			createFn: func(_ context.Context, userID, userAgent, ip string, ttl time.Duration) (auth.Session, error) {
 				capturedUserID = userID
+
 				require.Equal(t, auth.SessionTTL, ttl)
-				return auth.Session{ID: "session-1", UserID: userID, ExpiresAt: time.Now().Add(ttl)}, nil
+
+				return auth.Session{
+					ID:        "session-1",
+					UserID:    userID,
+					ExpiresAt: time.Now().Add(ttl),
+				}, nil
 			},
 		}
 
 		service := newTestService(users, sessions)
 
-		u, sess, err := service.Login(context.Background(), "test@example.com", "password123", "test-agent", "127.0.0.1")
+		u, sess, err := service.Login(
+			context.Background(),
+			"test@example.com",
+			"password123",
+			"test-agent",
+			"127.0.0.1",
+		)
 
 		require.NoError(t, err)
 		require.Equal(t, existingUser.ID, u.ID)
@@ -192,11 +238,18 @@ func TestService_Login(t *testing.T) {
 				return auth.User{}, auth.ErrUserNotFound
 			},
 		}
+
 		sessions := &sessionRepositoryStub{}
 
 		service := newTestService(users, sessions)
 
-		_, _, err := service.Login(context.Background(), "nobody@example.com", "password123", "", "")
+		_, _, err := service.Login(
+			context.Background(),
+			"nobody@example.com",
+			"password123",
+			"",
+			"",
+		)
 
 		require.ErrorIs(t, err, auth.ErrInvalidCredentials)
 	})
@@ -209,9 +262,13 @@ func TestService_Login(t *testing.T) {
 
 		users := &userRepositoryStub{
 			getByEmailFn: func(context.Context, string) (auth.User, error) {
-				return auth.User{ID: "user-1", PasswordHash: hash}, nil
+				return auth.User{
+					ID:           "user-1",
+					PasswordHash: hash,
+				}, nil
 			},
 		}
+
 		sessions := &sessionRepositoryStub{
 			createFn: func(context.Context, string, string, string, time.Duration) (auth.Session, error) {
 				t.Fatal("session must not be created on failed login")
@@ -221,7 +278,13 @@ func TestService_Login(t *testing.T) {
 
 		service := newTestService(users, sessions)
 
-		_, _, err = service.Login(context.Background(), "test@example.com", "wrong-password", "", "")
+		_, _, err = service.Login(
+			context.Background(),
+			"test@example.com",
+			"wrong-password",
+			"",
+			"",
+		)
 
 		require.ErrorIs(t, err, auth.ErrInvalidCredentials)
 	})
@@ -230,16 +293,24 @@ func TestService_Login(t *testing.T) {
 		t.Parallel()
 
 		repoErr := errors.New("db timeout")
+
 		users := &userRepositoryStub{
 			getByEmailFn: func(context.Context, string) (auth.User, error) {
 				return auth.User{}, repoErr
 			},
 		}
+
 		sessions := &sessionRepositoryStub{}
 
 		service := newTestService(users, sessions)
 
-		_, _, err := service.Login(context.Background(), "test@example.com", "password123", "", "")
+		_, _, err := service.Login(
+			context.Background(),
+			"test@example.com",
+			"password123",
+			"",
+			"",
+		)
 
 		require.ErrorIs(t, err, repoErr)
 	})
@@ -267,11 +338,15 @@ func TestService_GetUserBySession(t *testing.T) {
 	t.Run("returns user for active session", func(t *testing.T) {
 		t.Parallel()
 
-		expectedUser := auth.User{ID: "user-1", Email: "test@example.com"}
+		expectedUser := auth.User{
+			ID:    "user-1",
+			Email: "test@example.com",
+		}
 
 		sessions := &sessionRepositoryStub{
 			getByIDFn: func(_ context.Context, id string) (auth.Session, error) {
 				require.Equal(t, "session-1", id)
+
 				return auth.Session{
 					ID:        "session-1",
 					UserID:    "user-1",
@@ -279,6 +354,7 @@ func TestService_GetUserBySession(t *testing.T) {
 				}, nil
 			},
 		}
+
 		users := &userRepositoryStub{
 			getByIDFn: func(_ context.Context, id string) (auth.User, error) {
 				require.Equal(t, "user-1", id)
@@ -303,10 +379,11 @@ func TestService_GetUserBySession(t *testing.T) {
 				return auth.Session{
 					ID:        "session-1",
 					UserID:    "user-1",
-					ExpiresAt: time.Now().Add(-time.Hour), // уже истекла
+					ExpiresAt: time.Now().Add(-time.Hour),
 				}, nil
 			},
 		}
+
 		users := &userRepositoryStub{}
 
 		service := newTestService(users, sessions)
@@ -314,7 +391,12 @@ func TestService_GetUserBySession(t *testing.T) {
 		_, err := service.GetUserBySession(context.Background(), "session-1")
 
 		require.ErrorIs(t, err, auth.ErrSessionNotFound)
-		require.Equal(t, []string{"session-1"}, sessions.deleteCalledWith, "expired session must be cleaned up")
+		require.Equal(
+			t,
+			[]string{"session-1"},
+			sessions.deleteCalledWith,
+			"expired session must be cleaned up",
+		)
 	})
 
 	t.Run("returns ErrSessionNotFound when session does not exist", func(t *testing.T) {
@@ -328,7 +410,10 @@ func TestService_GetUserBySession(t *testing.T) {
 
 		service := newTestService(&userRepositoryStub{}, sessions)
 
-		_, err := service.GetUserBySession(context.Background(), "missing-session")
+		_, err := service.GetUserBySession(
+			context.Background(),
+			"missing-session",
+		)
 
 		require.ErrorIs(t, err, auth.ErrSessionNotFound)
 	})
@@ -336,19 +421,33 @@ func TestService_GetUserBySession(t *testing.T) {
 
 type passwordResetRepositoryStub struct{}
 
-func (s *passwordResetRepositoryStub) Create(context.Context, string, string, time.Duration) (auth.PasswordResetToken, error) {
+func (s *passwordResetRepositoryStub) Create(
+	context.Context,
+	string,
+	string,
+	time.Duration,
+) (auth.PasswordResetToken, error) {
 	return auth.PasswordResetToken{}, nil
 }
 
-func (s *passwordResetRepositoryStub) GetByTokenHash(context.Context, string) (auth.PasswordResetToken, error) {
+func (s *passwordResetRepositoryStub) GetByTokenHash(
+	context.Context,
+	string,
+) (auth.PasswordResetToken, error) {
 	return auth.PasswordResetToken{}, nil
 }
 
-func (s *passwordResetRepositoryStub) MarkUsed(context.Context, string) error {
+func (s *passwordResetRepositoryStub) MarkUsed(
+	context.Context,
+	string,
+) error {
 	return nil
 }
 
-func newTestService(users auth.UserRepository, sessions auth.SessionRepository) *auth.Service {
+func newTestService(
+	users auth.UserRepository,
+	sessions auth.SessionRepository,
+) *auth.Service {
 	m := mailer.New(mailer.Config{
 		Host:     "smtp.test",
 		Port:     465,
@@ -356,5 +455,12 @@ func newTestService(users auth.UserRepository, sessions auth.SessionRepository) 
 		Password: "test",
 		From:     "test@test.com",
 	})
-	return auth.NewService(users, sessions, &passwordResetRepositoryStub{}, m, "http://localhost:3000")
+
+	return auth.NewService(
+		users,
+		sessions,
+		&passwordResetRepositoryStub{},
+		m,
+		"http://localhost:3000",
+	)
 }
