@@ -1,4 +1,4 @@
-package evaluation
+package progress
 
 import (
 	"encoding/json"

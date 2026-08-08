@@ -1,113 +1,24 @@
 package evaluation
 
-import "context"
+import "math"
 
-type Service struct {
-	repo Repository
+type Evaluator struct{}
+
+func NewEvaluator() *Evaluator {
+	return &Evaluator{}
 }
 
-func NewService(repo Repository) *Service {
-	return &Service{repo: repo}
-}
-
-func (s *Service) GetAttemptResults(ctx context.Context, userID, attemptID string) (int, error) {
-	dbRes, err := s.repo.GetAnswersByAttempt(ctx, userID, attemptID)
-	if err != nil {
-		return -1, err
-	}
-
-	if len(dbRes) == 0 {
-		return 0, nil
+func (e *Evaluator) CalculateScore(answers []AnswerData) int {
+	if len(answers) == 0 {
+		return 0
 	}
 
 	var sum int
 	var weightSum int
-	for _, val := range dbRes {
+	for _, val := range answers {
 		sum += int(val.Weight * val.ChoiceScore)
 		weightSum += int(val.Weight)
 	}
 
-	res := sum / weightSum
-
-	return res, nil
-}
-
-func (s *Service) GetUserRoleStats(ctx context.Context, userID string) ([]RoleStats, error) {
-	return s.repo.GetUserStatsByRole(ctx, userID)
-}
-
-func (s *Service) GetUserPuzzleProgress(ctx context.Context, userID string) (PuzzleProgress, error) {
-	fragments, err := s.repo.GetUserFragments(ctx, userID)
-	if err != nil {
-		return PuzzleProgress{}, err
-	}
-
-	total, err := s.repo.GetTotalAvailableFragments(ctx)
-	if err != nil {
-		return PuzzleProgress{}, err
-	}
-
-	return PuzzleProgress{
-		EarnedCount: len(fragments),
-		TotalCount:  total,
-		Fragments:   fragments,
-	}, nil
-}
-
-// Эту функцию нужно вызывать в конце сценария
-func (s *Service) GrantRewardIfEligible(ctx context.Context, userID, fragmentID string, isSuccess bool) error {
-	if !isSuccess || fragmentID == "" {
-		return nil
-	}
-	return s.repo.SaveReward(ctx, userID, fragmentID)
-}
-
-func (s *Service) GetUserCategoryDashboard(ctx context.Context, userID string) (DashboardData, error) {
-	stats, err := s.repo.GetUserStatsByCategory(ctx, userID)
-	if err != nil {
-		return DashboardData{}, err
-	}
-
-	total, err := s.repo.GetUserTotalCompletedCount(ctx, userID)
-	if err != nil {
-		return DashboardData{}, err
-	}
-
-	return DashboardData{
-		TotalCompleted: total,
-		Stats:          stats,
-	}, nil
-}
-
-func (s *Service) GetLeaderboard(ctx context.Context, limit, offset int) (LeaderboardResponse, error) {
-	if limit <= 0 || limit > 100 {
-		limit = 50 // дефолт
-	}
-	if offset < 0 {
-		offset = 0
-	}
-
-	entries, err := s.repo.GetLeaderboard(ctx, limit, offset)
-	if err != nil {
-		return LeaderboardResponse{}, err
-	}
-
-	if entries == nil {
-		entries = []LeaderboardEntry{}
-	}
-
-	return LeaderboardResponse{Entries: entries}, nil
-}
-
-func (s *Service) GetMyRankHistory(ctx context.Context, userID string) (RankHistoryResponse, error) {
-	history, err := s.repo.GetUserRankHistory(ctx, userID, 7) // За последнюю неделю
-	if err != nil {
-		return RankHistoryResponse{}, err
-	}
-
-	if history == nil {
-		history = []RankHistoryPoint{}
-	}
-
-	return RankHistoryResponse{History: history}, nil
+	return int(math.Round(float64(sum) / float64(weightSum)))
 }

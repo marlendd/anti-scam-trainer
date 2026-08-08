@@ -1,13 +1,15 @@
-package evaluation
+package progress
 
 import (
 	"context"
 	"database/sql"
 	"log/slog"
+
+	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
 )
 
 type Repository interface {
-	GetAnswersByAttempt(ctx context.Context, userID, attemptID string) ([]AnswerData, error)
+	GetAnswersByAttempt(ctx context.Context, userID, attemptID string) ([]evaluation.AnswerData, error)
 	GetUserStatsByRole(ctx context.Context, userID string) ([]RoleStats, error)
 	SaveReward(ctx context.Context, userID, fragmentID string) error
 	GetUserFragments(ctx context.Context, userID string) ([]PuzzleFragment, error)
@@ -27,7 +29,7 @@ func NewPgRepository(db *sql.DB, log *slog.Logger) *PgRepository {
 	return &PgRepository{db: db, log: log}
 }
 
-func (r *PgRepository) GetAnswersByAttempt(ctx context.Context, userID, attemptID string) ([]AnswerData, error) {
+func (r *PgRepository) GetAnswersByAttempt(ctx context.Context, userID, attemptID string) ([]evaluation.AnswerData, error) {
 	const q = `
 		SELECT ans.weight, ans.choice_score 
 		FROM answers ans
@@ -45,9 +47,9 @@ func (r *PgRepository) GetAnswersByAttempt(ctx context.Context, userID, attemptI
 		}
 	}()
 
-	var res []AnswerData
+	var res []evaluation.AnswerData
 	for rows.Next() {
-		var a AnswerData
+		var a evaluation.AnswerData
 		if err := rows.Scan(&a.Weight, &a.ChoiceScore); err != nil {
 			return nil, err
 		}
