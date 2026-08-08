@@ -14,12 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func setupTestDB(t *testing.T) *sql.DB {
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		dbURL = "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
-	}
-
+func setupTestDB(t *testing.T, dbURL string) *sql.DB {
+	t.Helper()
 	db, err := sql.Open("postgres", dbURL)
 	require.NoError(t, err)
 
@@ -27,14 +23,21 @@ func setupTestDB(t *testing.T) *sql.DB {
 }
 
 func TestEvaluation_Integration(t *testing.T) {
-	dbURL := os.Getenv("DATABASE_URL")
+	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
+		t.Skip("set RUN_INTEGRATION_TESTS=1 to run integration tests")
+	}
+
+	dbURL := os.Getenv("TEST_DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+		dbURL = os.Getenv("DATABASE_URL")
+	}
+	if dbURL == "" {
+		dbURL = "postgres://postgres:postgres@127.0.0.1:5433/antiscam?sslmode=disable"
 	}
 	err := postgres.RunMigrations(dbURL, "../../migrations")
 	require.NoError(t, err, "failed to run migrations")
 
-	db := setupTestDB(t)
+	db := setupTestDB(t, dbURL)
 
 	defer func() {
 		err := db.Close()
