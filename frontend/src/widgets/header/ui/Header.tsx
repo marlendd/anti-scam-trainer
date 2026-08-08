@@ -3,12 +3,15 @@ import {Logo} from '@/shared/ui/logo'
 import styles from './Header.module.scss'
 import {FragmentCounter} from './FragmentCounter'
 import {PointsCounter} from './PointsCounter'
-// import {Avatar} from "@/shared/ui/avatar";
 import {LoginButton} from "@/features/login-button";
 import {BurgerNavigation} from "@/widgets/header/ui/BurgerNavigation.tsx";
-// import {PlayButton} from "@/features/play-button";
+import {useCurrentUser} from "@/entities/user/model/api/use-current-user.ts";
+import {Avatar} from "@/shared/ui/avatar";
 
 export const Header = () => {
+
+    const {data: user, isPending, isError} = useCurrentUser()
+
     return (
         <header className={styles.header}>
             <Link to="/">
@@ -30,13 +33,22 @@ export const Header = () => {
                         <PointsCounter value={0}/>
                     </div>
 
-                    {/*<Link to={'/dashboard'}>*/}
-                    {/*    <Avatar/>*/}
-                    {/*</Link>*/}
 
-                    <LoginButton/>
+                    {isPending && <LoginButton/> }
 
-                    <BurgerNavigation />
+                    {!isPending && !isError && user === null && (
+                        <LoginButton/>
+                    )}
+
+                    {!isPending && !isError && user !== null && (
+                        <Avatar/>
+                    )}
+
+                    {isError && (
+                        <LoginButton/>
+                    )}
+
+                    <BurgerNavigation/>
 
                     {/*<PlayButton/>*/}
                 </div>
