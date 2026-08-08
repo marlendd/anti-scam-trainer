@@ -44,6 +44,20 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     strategy:
       fail-fast: false
       matrix:
@@ -73,7 +87,11 @@ jobs:
           path: backend/cover.html
 
       - name: Integration Test
-        run: make test-e2e
+        env:
+          DATABASE_URL: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
+        run: |
+          cd backend
+          go test -v ./tests/integration/...
           
       - name: Dump docker logs on failure
         if: failure()
