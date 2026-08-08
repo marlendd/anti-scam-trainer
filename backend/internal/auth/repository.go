@@ -47,7 +47,7 @@ func NewPgUserRepository(db *sql.DB) *PgUserRepository {
 func (r *PgUserRepository) Create(ctx context.Context, name, email, passwordHash string) (User, error) {
 	const q = `
 		INSERT INTO users (name, email, password_hash)
-		VALUES ($1, $2)
+		VALUES ($1, $2, $3)
 		RETURNING id, name, email, password_hash, created_at, updated_at
 	`
 	var u User
