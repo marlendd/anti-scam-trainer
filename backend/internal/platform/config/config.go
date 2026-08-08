@@ -22,7 +22,8 @@ type Config struct {
 	ConnMaxIdleTime time.Duration `yaml:"conn_max_idle_time" env:"DB_CONN_MAX_IDLE_TIME" env-default:"5m"`
 
 	SecureCookies bool `yaml:"secure_cookies" env:"SECURE_COOKIES" env-default:"false"`
-
+	// CORS
+	AllowedOrigins string `yaml:"allowed_origins" env:"ALLOWED_ORIGINS" env-default:"http://localhost:3000"`
 	// SMTP
 	SMTPHost     string `yaml:"smtp_host" env:"SMTP_HOST"`
 	SMTPPort     int    `yaml:"smtp_port" env:"SMTP_PORT" env-default:"587"`
