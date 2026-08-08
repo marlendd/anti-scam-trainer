@@ -2,21 +2,24 @@
 
 .field {
     display: flex;
+
     flex-direction: column;
+
     gap: 8px;
 }
 
 .label {
-    color: #242424;
-
     font-size: 14px;
     font-weight: 500;
+
+    color: #242424;
 
     text-align: left;
 }
 
 .required {
     margin-left: 3px;
+
     color: #ff4053;
 }
 
@@ -27,18 +30,19 @@
 .input {
     width: 100%;
     min-height: 52px;
+
     padding: 0 16px;
-
-    border: 1px solid #dcdcdc;
-    border-radius: 14px;
-
-    color: #242424;
-    background-color: #ffffff;
 
     font: inherit;
     font-size: 16px;
 
+    color: #242424;
+
     outline: none;
+
+    background-color: #fff;
+    border: 1px solid #dcdcdc;
+    border-radius: 14px;
 
     transition:
         border-color 150ms ease,
@@ -60,8 +64,10 @@
 
     &:disabled {
         color: #9b9b9b;
-        background-color: #f5f5f5;
+
         cursor: not-allowed;
+
+        background-color: #f5f5f5;
     }
 }
 
@@ -87,25 +93,26 @@
     button {
         padding: 4px;
 
-        border: 0;
-
-        color: #6f6f6f;
-        background: transparent;
-
         font: inherit;
         font-size: 13px;
         font-weight: 500;
 
+        color: #6f6f6f;
+
         cursor: pointer;
+
+        background: transparent;
+        border: 0;
 
         &:hover {
             color: #242424;
         }
 
         &:focus-visible {
-            border-radius: 5px;
             outline: 2px solid #ff4053;
             outline-offset: 2px;
+
+            border-radius: 5px;
         }
     }
 }
@@ -113,6 +120,7 @@
 .error,
 .hint {
     font-size: 13px;
+
     line-height: 1.35;
 }
 

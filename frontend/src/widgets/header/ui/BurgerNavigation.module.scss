@@ -6,29 +6,33 @@
 
 .trigger {
     display: inline-flex;
-    width: 42px;
-    aspect-ratio: 1 / 1;
-    padding: 0;
+
     align-items: center;
     justify-content: center;
 
-    border: 0;
-    border-radius: 12px;
+    width: 42px;
+    aspect-ratio: 1 / 1;
 
-    color: #111111;
-    background-color: #f2f2f2;
+    padding: 0;
 
     font: inherit;
     font-size: 19px;
 
+    color: #111;
+
     cursor: pointer;
+
+    background-color: #f2f2f2;
+    border: 0;
+    border-radius: 12px;
 
     transition:
         color 150ms ease,
         background-color 150ms ease;
 
     &:hover {
-        color: #00aaff;
+        color: #0af;
+
         background-color: rgb(0 170 255 / 10%);
     }
 
@@ -40,26 +44,31 @@
 
 .menu {
     position: absolute;
-    z-index: 100;
     top: calc(100% + 10px);
     right: 0;
+    z-index: 100;
 
     display: flex;
-    width: min(300px, calc(100vw - 32px));
-    padding: 10px;
+    visibility: hidden;
+
     flex-direction: column;
+
     gap: 4px;
 
+    width: min(300px, calc(100vw - 32px));
+
+    padding: 10px;
+
+    pointer-events: none;
+
+    background-color: #fff;
     border: 1px solid #ededed;
     border-radius: 18px;
-
-    background-color: #ffffff;
     box-shadow: 0 18px 45px rgb(0 0 0 / 12%);
 
     opacity: 0;
-    visibility: hidden;
+
     transform: translateY(-8px);
-    pointer-events: none;
 
     transition:
         opacity 160ms ease,
@@ -67,43 +76,52 @@
         transform 160ms ease;
 
     &[data-open='true'] {
-        opacity: 1;
         visibility: visible;
-        transform: translateY(0);
+
         pointer-events: auto;
+
+        opacity: 1;
+
+        transform: translateY(0);
     }
 }
 
 .link {
     display: flex;
-    min-height: 46px;
-    padding: 0 14px;
+
     align-items: center;
 
-    border-radius: 12px;
+    min-height: 46px;
 
-    color: #222222;
+    padding: 0 14px;
 
     font-size: 15px;
     font-weight: 500;
+
+    color: #222;
+
     text-decoration: none;
+
+    border-radius: 12px;
 
     transition:
         color 150ms ease,
         background-color 150ms ease;
 
     &:hover {
-        color: #00aaff;
+        color: #0af;
+
         background-color: #f5f5f5;
     }
 }
 
 .activeLink {
-    color: #00aaff;
+    color: #0af;
+
     background-color: rgb(0 170 255 / 9%);
 }
 
-@media (max-width: 800px) {
+@media (width <= 800px) {
     .root {
         display: block;
     }

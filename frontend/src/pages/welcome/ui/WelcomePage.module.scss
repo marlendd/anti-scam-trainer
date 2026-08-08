@@ -1,59 +1,58 @@
 .page {
-    --slide-accent: #00aaff;
+    --slide-accent: #0af;
     --header-height: 80px;
 
     position: absolute;
     inset: var(--header-height) 0 0;
 
+    box-sizing: border-box;
     display: flex;
+
+    flex-direction: column;
+
     width: min(100%, 1480px);
     height: calc(100dvh - var(--header-height));
     min-height: 0;
     max-height: 800px;
-    margin: 0 auto;
 
     padding: clamp(28px, 4vw, 48px) clamp(24px, 5vw, 64px) 28px;
-    flex-direction: column;
+    margin: 0 auto;
 
-    box-sizing: border-box;
+    overflow: hidden auto;
 
-    background:
-        radial-gradient(
+    background: radial-gradient(
             circle at 70% 45%,
             color-mix(in srgb, var(--slide-accent) 14%, transparent),
             transparent 36%
-        ),
-        #ffffff;
-
-    overflow-x: hidden;
-    overflow-y: auto;
+    ),
+    #fff;
 }
 
 .skipButton {
     position: absolute;
-    z-index: 5;
     top: clamp(20px, 3vw, 48px);
     right: clamp(20px, 4vw, 48px);
+    z-index: 5;
 
     padding: 10px 14px;
-
-    border: 0;
-    border-radius: 12px;
-
-    color: #858585;
-    background-color: transparent;
 
     font: inherit;
     font-size: 14px;
 
+    color: #858585;
+
     cursor: pointer;
 
-    transition:
-        color 150ms ease,
-        background-color 150ms ease;
+    background-color: transparent;
+    border: 0;
+    border-radius: 12px;
+
+    transition: color 150ms ease,
+    background-color 150ms ease;
 
     &:hover {
-        color: #111111;
+        color: #111;
+
         background-color: #f2f2f2;
     }
 
@@ -65,17 +64,21 @@
 
 .slide {
     display: grid;
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
-    margin: auto;
+
     grid-template-columns:
         minmax(0, 0.9fr)
         minmax(340px, 1.1fr);
-    align-items: center;
-    gap: clamp(32px, 5vw, 72px);
 
-    animation: slideAppear 350ms ease;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    margin: auto;
+
+    animation: slide-appear 350ms ease;
 
     > * {
         min-width: 0;
@@ -87,12 +90,15 @@
     z-index: 1;
 
     display: flex;
-    min-width: 0;
-    max-width: 650px;
+
     flex-direction: column;
+
+    gap: clamp(28px, 4vh, 48px);
     align-items: flex-start;
     justify-content: center;
-    gap: clamp(28px, 4vh, 48px);
+
+    min-width: 0;
+    max-width: 650px;
 
     text-align: left;
 }
@@ -103,57 +109,66 @@
 
 .eyebrow {
     display: inline-flex;
+
     padding: 8px 14px;
-
-    border-radius: 999px;
-
-    color: var(--slide-accent);
-    background-color: color-mix(in srgb, var(--slide-accent) 12%, white);
 
     font-size: 14px;
     font-weight: 600;
+
+    color: var(--slide-accent);
+
+    background-color: color-mix(in srgb, var(--slide-accent) 12%, white);
+    border-radius: 999px;
 }
 
 .title {
     max-width: 680px;
-    margin: 24px 0 0;
 
-    color: #111111;
+    margin: 24px 0 0;
 
     font-size: clamp(40px, 4.6vw, 72px);
     font-weight: 700;
-    line-height: 1.04;
-    letter-spacing: -0.04em;
 
+    line-height: 1.04;
+
+    color: #111;
+
+    letter-spacing: -0.04em;
     text-wrap: balance;
 }
 
 .description {
     max-width: 590px;
+
     margin: 24px 0 0;
 
-    color: #707070;
-
     font-size: clamp(16px, 1.4vw, 21px);
+
     line-height: 1.55;
+
+    color: #707070;
 
     text-wrap: pretty;
 }
 
 .controls {
     display: flex;
-    width: 100%;
-    align-items: center;
+
     gap: 12px;
+    align-items: center;
+
+    width: 100%;
 }
 
 .illustrationWrapper {
     position: relative;
 
     display: grid;
+
+    place-items: center;
+
     min-width: 0;
     min-height: 0;
-    place-items: center;
 }
 
 .illustrationBackground {
@@ -162,9 +177,8 @@
     width: min(85%, 620px);
     aspect-ratio: 1 / 1;
 
-    border-radius: 42% 58% 52% 48% / 50% 44% 56% 50%;
-
     background-color: color-mix(in srgb, var(--slide-accent) 10%, white);
+    border-radius: 42% 58% 52% 48% / 50% 44% 56% 50%;
 
     transform: rotate(-6deg);
 
@@ -176,6 +190,7 @@
     z-index: 1;
 
     display: block;
+
     width: min(100%, 680px);
     height: clamp(300px, 52vh, 520px);
 
@@ -186,50 +201,55 @@
 
 .pagination {
     display: flex;
+
     flex-shrink: 0;
+
+    gap: 8px;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+
     padding-top: 24px;
 }
 
 .paginationButton {
     width: 10px;
     height: 10px;
+
     padding: 0;
-
-    border: 0;
-    border-radius: 999px;
-
-    background-color: #d9d9d9;
 
     cursor: pointer;
 
-    transition:
-        width 200ms ease,
-        background-color 200ms ease;
+    background-color: #d9d9d9;
+    border: 0;
+    border-radius: 999px;
+
+    transition: width 200ms ease,
+    background-color 200ms ease;
 
     &[data-active='true'] {
         width: 32px;
+
         background-color: var(--slide-accent);
     }
 }
 
-@keyframes slideAppear {
+@keyframes slide-appear {
     from {
         opacity: 0;
+
         transform: translateX(24px);
     }
 
     to {
         opacity: 1;
+
         transform: translateX(0);
     }
 }
 
 /* Ноутбуки */
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
     .page {
         padding-right: 36px;
         padding-left: 36px;
@@ -239,6 +259,7 @@
         grid-template-columns:
             minmax(0, 1fr)
             minmax(320px, 0.9fr);
+
         gap: 36px;
     }
 
@@ -253,16 +274,18 @@
 
 /* Планшеты */
 
-@media (max-width: 960px) {
+@media (width <= 960px) {
     .page {
         padding: 72px 28px 24px;
     }
 
     .slide {
-        margin: 0 auto;
-        grid-template-columns: 1fr;
         grid-template-rows: auto minmax(260px, 1fr);
+        grid-template-columns: 1fr;
+
         gap: 24px;
+
+        margin: 0 auto;
 
         .content {
             order: 2;
@@ -274,10 +297,12 @@
     }
 
     .content {
-        max-width: 720px;
-        margin: 0 auto;
-        align-items: center;
         gap: 28px;
+        align-items: center;
+
+        max-width: 720px;
+
+        margin: 0 auto;
 
         text-align: center;
     }
@@ -315,7 +340,7 @@
 
 /* Мобильные устройства */
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
     .page {
         --header-height: 64px;
 
@@ -333,6 +358,7 @@
 
     .slide {
         grid-template-rows: auto minmax(220px, 1fr);
+
         gap: 18px;
 
         .content {
@@ -356,7 +382,9 @@
         margin-top: 16px;
 
         font-size: clamp(30px, 9vw, 38px);
+
         line-height: 1.08;
+
         letter-spacing: -0.035em;
     }
 
@@ -364,6 +392,7 @@
         margin-top: 16px;
 
         font-size: 15px;
+
         line-height: 1.45;
     }
 
@@ -371,8 +400,9 @@
         gap: 8px;
 
         > * {
-            min-width: 0;
             flex: 1;
+
+            min-width: 0;
         }
     }
 
@@ -394,7 +424,7 @@
 
 /* Очень узкие экраны */
 
-@media (max-width: 400px) {
+@media (width <= 400px) {
     .page {
         padding-right: 12px;
         padding-left: 12px;
@@ -421,7 +451,7 @@
 
 /* Низкие ноутбуки и небольшая высота окна */
 
-@media (min-width: 961px) and (max-height: 760px) {
+@media (width >= 961px) and (height <= 760px) {
     .page {
         padding-top: 24px;
         padding-bottom: 16px;
@@ -462,22 +492,23 @@
 
 /* Планшеты и телефоны в горизонтальном режиме */
 
-@media (max-width: 960px) and (orientation: landscape) and (max-height: 600px) {
+@media (width <= 960px) and (orientation: landscape) and (height <= 600px) {
     .page {
         padding: 52px 24px 14px;
     }
 
     .slide {
+        grid-template-rows: 1fr;
         grid-template-columns:
             minmax(0, 1fr)
             minmax(260px, 0.8fr);
-        grid-template-rows: 1fr;
+
         gap: 24px;
     }
 
     .content {
-        align-items: flex-start;
         gap: 18px;
+        align-items: flex-start;
 
         text-align: left;
     }
@@ -503,9 +534,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    //.slide {
+    // .slide {
     //  animation: none;
-    //}
+    // }
 
     .paginationButton,
     .illustrationBackground {

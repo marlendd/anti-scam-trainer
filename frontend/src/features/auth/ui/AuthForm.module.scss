@@ -5,70 +5,83 @@
 }
 
 .header {
-    margin-bottom: 28px;
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
     justify-content: center;
+
+    margin-bottom: 28px;
 }
 
 .title {
     margin: 0;
 
-    color: #242424;
-
     font-size: 32px;
     font-weight: 600;
+
+    color: #242424;
+
     letter-spacing: -0.02em;
 }
 
 .controls {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+
+    flex-flow: row nowrap;
+
     gap: 8px;
-    flex-wrap: nowrap;
+    justify-content: center;
 }
 
 .description {
     margin: 8px 0 0;
 
-    color: #858585;
-
     font-size: 15px;
+
     line-height: 1.45;
+
+    color: #858585;
 }
 
 .form {
     display: flex;
+
     flex-direction: column;
+
     gap: 18px;
 }
 
 .formActions {
     display: flex;
+
     justify-content: flex-end;
+
     margin-top: -6px;
 }
 
 .submit {
     display: inline-flex;
-    min-height: 52px;
+
     align-items: center;
     justify-content: center;
+
+    min-height: 52px;
+
     padding: 0 24px;
-
-    border: 0;
-    border-radius: 14px;
-
-    color: #ffffff;
-    background-color: #ff4053;
 
     font: inherit;
     font-size: 16px;
     font-weight: 600;
 
+    color: #fff;
+
     cursor: pointer;
+
+    background-color: #ff4053;
+    border: 0;
+    border-radius: 14px;
 
     transition:
         background-color 150ms ease,
@@ -88,24 +101,28 @@
     }
 
     &:disabled {
-        opacity: 0.55;
         cursor: not-allowed;
+
+        opacity: 0.55;
     }
 }
 
 .footer {
     margin: 24px 0 0;
 
+    font-size: 14px;
+
     color: #858585;
 
-    font-size: 14px;
     text-align: center;
 }
 
 .link,
 .secondaryLink {
-    color: #ff4053;
     font-weight: 500;
+
+    color: #ff4053;
+
     text-decoration: none;
 
     &:visited {
@@ -117,9 +134,10 @@
     }
 
     &:focus-visible {
-        border-radius: 3px;
         outline: 2px solid #ff4053;
         outline-offset: 3px;
+
+        border-radius: 3px;
     }
 }
 
@@ -128,15 +146,16 @@
 }
 
 .error {
-    margin: 0;
     padding: 10px 12px;
+    margin: 0;
 
     font-size: 14px;
+
     line-height: 20px;
 
     color: #d32f2f;
-    background: #fff2f2;
 
+    background: #fff2f2;
     border: 1px solid #ffd6d6;
     border-radius: 8px;
 }

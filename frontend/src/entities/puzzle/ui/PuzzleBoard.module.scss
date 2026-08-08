@@ -1,17 +1,19 @@
 .board {
     position: relative;
 
+    box-sizing: border-box;
+
     width: 100%;
     aspect-ratio: 1 / 1;
 
-    border-radius: 32px;
-
-    box-sizing: border-box;
     overflow: hidden;
+
+    border-radius: 32px;
 }
 
 .svg {
     display: block;
+
     width: 100%;
     height: 100%;
 
@@ -19,12 +21,12 @@
 }
 
 .background {
-    fill: #eeeeee;
+    fill: #eee;
 }
 
 .piece {
-    transform-box: fill-box;
     transform-origin: center;
+    transform-box: fill-box;
 
     transition:
         opacity 180ms ease,
@@ -39,7 +41,7 @@
     }
 
     &[data-highlighted='true'] {
-        animation: pieceHighlight 1.4s ease-in-out infinite;
+        animation: piece-highlight 1.4s ease-in-out infinite;
     }
 }
 
@@ -48,18 +50,16 @@
 }
 
 .unlockedOutline {
-    fill: transparent;
+    pointer-events: none;
 
+    fill: transparent;
     stroke: rgb(255 255 255 / 80%);
     stroke-width: 2;
-
-    pointer-events: none;
 }
 
 .lockedPiece {
     fill: #e8eaed;
-
-    stroke: #ffffff;
+    stroke: #fff;
     stroke-width: 2;
 
     transition:
@@ -68,16 +68,16 @@
 }
 
 .question {
-    fill: #afb3b8;
-
     font-size: 20px;
     font-weight: 700;
 
     pointer-events: none;
     user-select: none;
+
+    fill: #afb3b8;
 }
 
-@keyframes pieceHighlight {
+@keyframes piece-highlight {
     0%,
     100% {
         filter: drop-shadow(0 0 0 rgb(0 170 255 / 0%));
@@ -88,7 +88,7 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
     .board {
         border-radius: 28px;
     }

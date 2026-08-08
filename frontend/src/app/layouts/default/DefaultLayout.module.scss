@@ -1,26 +1,21 @@
 .layout {
-    padding: 0 48px 48px 48px;
-    max-width: 1480px;
     width: 100%;
+    max-width: 1480px;
+
+    padding: 0 48px 48px;
     margin: 0 auto;
 }
 
-.body {
-}
-
-.content {
-}
-
 /* Планшеты */
-@media (max-width: 800px) {
+@media (width <= 800px) {
     .layout {
-        padding: 0 32px 32px 32px;
+        padding: 0 32px 32px;
     }
 }
 
 /* Телефоны */
-@media (max-width: 400px) {
+@media (width <= 400px) {
     .layout {
-        padding: 0 24px 24px 24px;
+        padding: 0 24px 24px;
     }
 }

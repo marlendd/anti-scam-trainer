@@ -2,20 +2,23 @@
 
 .separator {
     display: flex;
-    width: 100%;
+
     align-items: center;
     justify-content: center;
+
+    width: 100%;
+
     padding: 12px 0;
 }
 
 .label {
     padding: 6px 12px;
 
-    border-radius: 999px;
-
-    color: #858585;
-    background-color: #f1f1f1;
-
     font-size: 12px;
     font-weight: 500;
+
+    color: #858585;
+
+    background-color: #f1f1f1;
+    border-radius: 999px;
 }

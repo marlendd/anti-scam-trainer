@@ -4,39 +4,41 @@
 
 .periodSelect {
     display: inline-flex;
-    align-items: center;
+
     gap: 8px;
+    align-items: center;
 
     width: max-content;
 }
 
 .periodSelectControl {
-    field-sizing: content;
-
     min-height: 36px;
+
     padding: 4px 0;
-
-    border: none;
-    outline: none;
-
-    color: #000;
-    background: transparent;
 
     font: inherit;
     font-size: 16px;
     font-weight: 500;
 
-    cursor: pointer;
+    color: #000;
+
     appearance: none;
+    cursor: pointer;
+    outline: none;
+
+    background: transparent;
+    border: none;
+    field-sizing: content;
 
     &:hover {
         color: #525252;
     }
 
     &:focus-visible {
-        border-radius: 4px;
-        outline: 2px solid #00aaff;
+        outline: 2px solid #0af;
         outline-offset: 4px;
+
+        border-radius: 4px;
     }
 }
 
@@ -45,21 +47,24 @@
 
     width: 7px;
     height: 7px;
+
     margin-top: -4px;
 
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-
     pointer-events: none;
+
+    border-right: 1.5px solid currentcolor;
+    border-bottom: 1.5px solid currentcolor;
+
     transform: rotate(45deg);
 }
 
 .text {
     display: flex;
-    flex-direction: row;
+
+    flex-flow: row nowrap;
+
     gap: 16px;
     align-items: center;
-    flex-wrap: nowrap;
 
     padding-bottom: 16px;
 }
@@ -71,6 +76,7 @@
 .counter {
     font-size: 28px;
     font-weight: bold;
+
     color: #a1a1a1;
 }
 
@@ -80,26 +86,30 @@
 
 .periods {
     display: flex;
+
     flex-wrap: wrap;
+
     gap: 8px;
+
     margin-bottom: 20px;
 }
 
 .periodButton {
     min-height: 40px;
+
     padding: 0 18px;
-
-    border: 1px solid #e0e2e6;
-    border-radius: 12px;
-
-    color: #292929;
-    background-color: #ffffff;
 
     font: inherit;
     font-size: 14px;
     font-weight: 500;
 
+    color: #292929;
+
     cursor: pointer;
+
+    background-color: #fff;
+    border: 1px solid #e0e2e6;
+    border-radius: 12px;
 
     transition:
         background-color 150ms ease,
@@ -117,9 +127,10 @@
 }
 
 .periodButtonActive {
-    border-color: #00aaff;
-    color: #0077cc;
+    color: #07c;
+
     background-color: #e5f6ff;
+    border-color: #0af;
 
     &:hover {
         background-color: #d9f2ff;
@@ -128,6 +139,7 @@
 
 .grid {
     width: 100%;
+
     overflow: hidden;
 
     border: 1px solid #e5e7eb;
@@ -135,28 +147,23 @@
 
     --ag-font-family: inherit;
     --ag-font-size: 14px;
-
-    --ag-background-color: #ffffff;
+    --ag-background-color: #fff;
     --ag-foreground-color: #292929;
-
     --ag-header-background-color: #f5f5f7;
     --ag-header-foreground-color: #292929;
-
-    --ag-data-background-color: #ffffff;
+    --ag-data-background-color: #fff;
     --ag-odd-row-background-color: #fafafa;
     --ag-row-hover-color: #f0f1f3;
-
     --ag-border-color: #e5e7eb;
     --ag-row-border-color: #eceef1;
-
     --ag-border-radius: 12px;
     --ag-wrapper-border-radius: 20px;
-
     --ag-cell-horizontal-padding: 20px;
     --ag-pagination-panel-height: 56px;
 
     :global(.ag-root-wrapper) {
         overflow: hidden;
+
         border: none;
         border-radius: inherit;
     }
@@ -167,22 +174,24 @@
 
     :global(.ag-cell) {
         display: flex;
+
         align-items: center;
     }
 
     :global(.ag-paging-panel) {
+        background-color: #fff;
         border-top: 1px solid #e5e7eb;
-        background-color: #ffffff;
     }
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
     .text {
         justify-content: space-between;
     }
 
     .title {
         font-size: 24px;
+
         text-align: left;
     }
 
@@ -192,11 +201,13 @@
 
     .periods {
         display: grid;
+
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .periodButton {
         width: 100%;
+
         padding-inline: 12px;
     }
 
@@ -205,7 +216,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
     .title {
         font-size: 20px;
     }

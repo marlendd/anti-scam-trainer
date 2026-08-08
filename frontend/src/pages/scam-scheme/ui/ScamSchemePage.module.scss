@@ -2,29 +2,32 @@
 
 .page {
     width: 100%;
+
     padding: 16px 0;
 }
 
 .training {
     display: grid;
-    width: 100%;
 
     grid-template-columns: 1fr 500px;
-    align-items: stretch;
+
     gap: 24px;
+    align-items: stretch;
+
+    width: 100%;
 
     > * {
         min-width: 0;
     }
 }
 
-@media (max-width: 1100px) {
+@media (width <= 1100px) {
     .training {
         grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
     .training {
         gap: 16px;
     }
@@ -32,25 +35,32 @@
 
 .text {
     display: flex;
+
     flex-direction: column;
-    justify-content: center;
+
     align-items: start;
-    text-align: left;
+    justify-content: center;
+
     margin-bottom: 32px;
+
+    text-align: left;
 }
 
 .title {
-    font-size: 2rem;
     margin-bottom: 8px;
+
+    font-size: 2rem;
 }
 
 .description {
-    font-size: 1rem;
     max-width: 700px;
+
+    font-size: 1rem;
+
     text-align: left;
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
     .text {
         margin-bottom: 16px;
     }

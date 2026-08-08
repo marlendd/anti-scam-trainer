@@ -1,9 +1,13 @@
 .messages {
     display: flex;
+
     flex: 1;
-    min-height: 0;
     flex-direction: column;
+
     gap: 4px;
+
+    min-height: 0;
+
     padding: 24px;
 
     overflow-y: auto;
@@ -11,50 +15,58 @@
 
 .typing {
     align-self: flex-start;
-    margin: 8px 0 0 52px;
+
     padding: 10px 16px;
-
-    border-radius: 20px;
-
-    color: #858585;
-    background-color: #f1f1f1;
+    margin: 8px 0 0 52px;
 
     font-size: 14px;
+
+    color: #858585;
+
+    background-color: #f1f1f1;
+    border-radius: 20px;
 }
 
 .answers {
     display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
     width: min(100%, 560px);
+
     margin-top: 20px;
     margin-left: auto;
-    flex-direction: column;
-    gap: 8px;
 }
 
 .answersLabel {
     margin-bottom: 4px;
 
-    color: #858585;
-
     font-size: 13px;
+
+    color: #858585;
 }
 
 .answer {
     width: 100%;
+
     padding: 14px 16px;
-
-    border: 1px solid #e5e5e5;
-    border-radius: 16px;
-
-    color: #222222;
-    background-color: #ffffff;
 
     font: inherit;
     font-size: 14px;
+
     line-height: 1.4;
+
+    color: #222;
+
     text-align: left;
 
     cursor: pointer;
+
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
 
     transition:
         border-color 150ms ease,
@@ -62,9 +74,8 @@
         transform 150ms ease;
 
     &:hover {
-        border-color: #00aaff;
-
         background-color: rgb(0 170 255 / 6%);
+        border-color: #0af;
 
         transform: translateY(-1px);
     }
@@ -79,7 +90,7 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
     .messages {
         padding: 16px;
     }
@@ -90,14 +101,15 @@
 
     .answers {
         width: 100%;
+
         margin-top: 16px;
     }
 
     .answer {
         padding: 12px 14px;
 
-        border-radius: 14px;
-
         font-size: 13px;
+
+        border-radius: 14px;
     }
 }

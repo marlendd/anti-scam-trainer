@@ -1,19 +1,20 @@
 .list {
+    gap: 16px;
+
     width: 100%;
     max-height: calc(100dvh - 120px);
+
     overflow-y: scroll;
-    gap: 16px;
 }
 
 .scheme {
-    border: 1px solid #ededed;
-    border-radius: 24px;
-
-    background-color: #ffffff;
-
     min-height: 160px;
 
     overflow: hidden;
+
+    background-color: #fff;
+    border: 1px solid #ededed;
+    border-radius: 24px;
 
     &:not(:last-child) {
         margin-bottom: 16px;
@@ -22,49 +23,56 @@
 
 .schemeHeader {
     display: flex;
-    width: 100%;
-    padding: 24px;
+
+    gap: 24px;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
 
-    border: 0;
+    width: 100%;
+
+    padding: 24px;
 
     color: inherit;
-    background: transparent;
 
     text-align: left;
 
     cursor: pointer;
+
+    background: transparent;
+    border: 0;
 }
 
 .schemeInformation {
-    min-width: 0;
     flex: 1;
+
+    min-width: 0;
 }
 
 .schemeTitle {
     margin: 0;
 
-    color: #111111;
-
     font-size: 22px;
     font-weight: 600;
+
+    color: #111;
 }
 
 .schemeDescription {
     margin: 8px 0 0;
 
-    color: #858585;
-
     font-size: 14px;
+
     line-height: 1.45;
+
+    color: #858585;
 }
 
 .progressRow {
     display: flex;
-    align-items: center;
+
     gap: 14px;
+    align-items: center;
+
     margin-top: 18px;
 }
 
@@ -72,27 +80,27 @@
     width: min(100%, 320px);
     height: 8px;
 
-    border-radius: 999px;
-
-    background-color: #eeeeee;
-
     overflow: hidden;
+
+    background-color: #eee;
+    border-radius: 999px;
 }
 
 .progressFill {
     display: block;
+
     height: 100%;
 
+    background-color: #0af;
     border-radius: inherit;
-
-    background-color: #00aaff;
 }
 
 .progressValue {
-    color: #858585;
-
     font-size: 13px;
     font-weight: 600;
+
+    color: #858585;
+
     white-space: nowrap;
 }
 
@@ -110,30 +118,36 @@
 
 .scenarios {
     display: flex;
-    padding: 0 16px 16px;
+
     flex-direction: column;
+
     gap: 8px;
+
+    padding: 0 16px 16px;
 }
 
 .scenario {
     display: flex;
-    width: 100%;
-    padding: 16px;
-    align-items: center;
-    gap: 16px;
 
-    border: 0;
-    border-radius: 16px;
+    gap: 16px;
+    align-items: center;
+
+    width: 100%;
+
+    padding: 16px;
 
     color: inherit;
-    background-color: #f7f7f7;
 
     text-align: left;
 
     cursor: pointer;
 
+    background-color: #f7f7f7;
+    border: 0;
+    border-radius: 16px;
+
     &:hover:not(:disabled) {
-        background-color: #eeeeee;
+        background-color: #eee;
     }
 
     &[data-status='available'] {
@@ -141,23 +155,26 @@
     }
 
     &[data-status='locked'] {
-        opacity: 0.48;
         cursor: not-allowed;
+
+        opacity: 0.48;
     }
 }
 
 .scenarioIcon {
     display: inline-flex;
-    width: 42px;
-    min-width: 42px;
-    aspect-ratio: 1 / 1;
+
     align-items: center;
     justify-content: center;
 
-    border-radius: 14px;
+    width: 42px;
+    min-width: 42px;
+    aspect-ratio: 1 / 1;
 
-    color: #ffffff;
-    background-color: #00aaff;
+    color: #fff;
+
+    background-color: #0af;
+    border-radius: 14px;
 }
 
 .scenario[data-status='completed'] .scenarioIcon {
@@ -170,29 +187,34 @@
 
 .scenarioContent {
     display: flex;
-    min-width: 0;
+
     flex: 1;
     flex-direction: column;
+
     gap: 5px;
+
+    min-width: 0;
 }
 
 .scenarioTitle {
-    color: #222222;
-
     font-size: 16px;
     font-weight: 600;
+
+    color: #222;
 }
 
 .scenarioDescription {
-    color: #858585;
-
     font-size: 13px;
+
     line-height: 1.4;
+
+    color: #858585;
 }
 
 .scenarioDuration {
+    font-size: 13px;
+
     color: #858585;
 
-    font-size: 13px;
     white-space: nowrap;
 }

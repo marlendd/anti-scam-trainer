@@ -1,31 +1,35 @@
 .card {
     padding: 24px;
 
+    text-align: left;
+
     background: #f7f7f7;
     border-radius: 40px;
-
-    text-align: left;
 
     transition: background-color 0.2s ease;
 
     .header {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        justify-content: space-between;
+
+        flex-flow: row nowrap;
+
         align-items: center;
+        justify-content: space-between;
     }
 
     .title {
-        color: #333;
-        font-weight: normal;
         font-size: 20px;
+        font-weight: normal;
+
+        color: #333;
+
         transition: color 0.2s ease;
     }
 
     .description {
-        color: #6b6375;
         font-size: 16px;
+
+        color: #6b6375;
     }
 
     &:hover {
@@ -39,6 +43,7 @@
 
 .chevron {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
 }
