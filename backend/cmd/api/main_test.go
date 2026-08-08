@@ -19,11 +19,17 @@ func TestRunIntegration_AuthFlow(t *testing.T) {
 	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
 		t.Skip("skipping integration test; set RUN_INTEGRATION_TESTS=1 to run")
 	}
+
+	databaseURL := os.Getenv("TEST_DATABASE_URL")
+	if databaseURL == "" {
+		databaseURL = "postgres://postgres:postgres@127.0.0.1:5433/antiscam?sslmode=disable"
+	}
+
 	cfg := config.Config{
 		LogLevel:        "DEBUG",
 		Port:            "8089",
 		Timeout:         2 * time.Second,
-		DatabaseURL:     "postgres://postgres:password@127.0.0.1:5433/postgres?sslmode=disable",
+		DatabaseURL:     databaseURL,
 		MigrationsPath:  "../../migrations",
 		MaxOpenConns:    5,
 		MaxIdleConns:    5,
