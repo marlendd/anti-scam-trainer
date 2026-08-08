@@ -8,7 +8,6 @@ import (
 
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
-	_ "github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
 	"github.com/stretchr/testify/require"
 )
 
