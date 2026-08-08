@@ -5,7 +5,6 @@ import { DefaultLayout } from '@/app/layouts/default'
 
 import { DashboardPage } from '@/pages/dashboard'
 import { GlossaryPage } from '@/pages/glossary'
-// import {HomePage} from '@/pages/home'
 import { LeaderboardPage } from '@/pages/leaderboard'
 import { LoginPage } from '@/pages/login'
 import { NotFoundPage } from '@/pages/not-found'
