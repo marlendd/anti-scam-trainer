@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
+	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 	"github.com/marlendd/anti-scam-trainer/internal/progress"
 	"github.com/stretchr/testify/require"
 )
@@ -26,6 +27,13 @@ func setupTestDB(t *testing.T) *sql.DB {
 }
 
 func TestEvaluation_Integration(t *testing.T) {
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		dbURL = "postgres://postgres:password@localhost:5432/postgres?sslmode=disable"
+	}
+	err := postgres.RunMigrations(dbURL, "../../migrations")
+	require.NoError(t, err, "failed to run migrations")
+
 	db := setupTestDB(t)
 
 	defer func() {
@@ -39,7 +47,7 @@ func TestEvaluation_Integration(t *testing.T) {
 	svc := progress.NewService(repo, evaluator)
 	ctx := context.Background()
 
-	_, err := db.Exec("TRUNCATE users, scenario_versions, attempts, answers CASCADE")
+	_, err = db.Exec("TRUNCATE users, scenario_versions, attempts, answers CASCADE")
 	require.NoError(t, err)
 
 	userID := "00000000-0000-0000-0000-000000000001"
