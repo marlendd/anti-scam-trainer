@@ -1,5 +1,3 @@
-// src/shared/ui/chat-date-separator/ChatDateSeparator.tsx
-
 import styles from './ChatDateSeparator.module.scss'
 
 type ChatDateSeparatorProps = {

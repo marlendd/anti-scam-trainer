@@ -1,5 +1,3 @@
-// src/shared/ui/chat-message/ChatMessage.tsx
-
 import {
     faCheck,
     faCheckDouble,

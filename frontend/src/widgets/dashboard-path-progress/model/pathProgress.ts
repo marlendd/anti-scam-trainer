@@ -1,5 +1,3 @@
-// src/widgets/dashboard-path-progress/model/pathProgress.ts
-
 export type TrainingPathId = 'buyer' | 'seller'
 
 export type TrainingPathProgress = {

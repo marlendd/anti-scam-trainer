@@ -1,5 +1,3 @@
-// src/shared/ui/input/PasswordInput.tsx
-
 import { useState } from 'react'
 
 import { Input, type InputProps } from './Input'

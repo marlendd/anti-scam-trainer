@@ -1,5 +1,3 @@
-// src/features/auth/ui/RegisterForm.tsx
-
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ApiError } from '@/shared/api'

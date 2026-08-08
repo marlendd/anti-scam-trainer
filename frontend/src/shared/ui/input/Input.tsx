@@ -1,5 +1,3 @@
-// src/shared/ui/input/Input.tsx
-
 import { useId, type ComponentPropsWithRef, type ReactNode } from 'react'
 
 import styles from './Input.module.scss'

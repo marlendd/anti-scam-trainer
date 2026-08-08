@@ -1,5 +1,3 @@
-// src/widgets/dashboard-path-progress/ui/DashboardPathProgress.tsx
-
 import type { CSSProperties } from 'react'
 import { faCartShopping, faStore, type IconDefinition } from '@fortawesome/free-solid-svg-icons'
 

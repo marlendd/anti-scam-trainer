@@ -1,5 +1,3 @@
-// src/features/auth/ui/LoginForm.tsx
-
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 

@@ -1,5 +1,3 @@
-// src/pages/welcome/model/welcomeSlides.ts
-
 import welcomeImage from '@/shared/assets/images/welcome.webp'
 import scenariosImage from '@/shared/assets/images/scenarios.webp'
 import pathsImage from '@/shared/assets/images/paths.webp'

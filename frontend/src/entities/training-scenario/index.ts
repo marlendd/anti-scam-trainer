@@ -1,5 +1,3 @@
-// src/entities/training-scenario/index.ts
-
 export { fakeDeliveryScenario, trainingScenarioMocks } from './model/mocks'
 
 export type {

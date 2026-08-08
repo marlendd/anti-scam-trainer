@@ -1,5 +1,3 @@
-// src/widgets/scenario-analysis-panel/ui/ScenarioAnalysisPanel.tsx
-
 import type { ScenarioAnalysis, ScenarioRedFlag } from '@/entities/training-scenario'
 
 import styles from './ScenarioAnalysisPanel.module.scss'

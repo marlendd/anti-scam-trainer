@@ -1,5 +1,3 @@
-// src/shared/ui/chat-composer/ChatComposer.tsx
-
 import {
     useLayoutEffect,
     useRef,
