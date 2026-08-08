@@ -14,6 +14,7 @@ import (
 
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
+	"github.com/marlendd/anti-scam-trainer/internal/platform/health"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 )
@@ -70,12 +71,8 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux := http.NewServeMux()
 
 	// health/ready
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-	mux.HandleFunc("GET /ready", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
+	mux.HandleFunc("GET /health", health.Health)
+	mux.HandleFunc("GET /ready", health.Ready(db))
 
 	// auth routes
 	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
