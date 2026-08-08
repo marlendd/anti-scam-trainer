@@ -1,6 +1,7 @@
 package mailer
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
@@ -22,7 +23,7 @@ func New(cfg Config) *Mailer {
 	return &Mailer{cfg: cfg}
 }
 
-func (m *Mailer) SendPasswordReset(toEmail, resetLink string) error {
+func (m *Mailer) SendPasswordReset(ctx context.Context, toEmail, resetLink string) error {
 	subject := "Восстановление пароля — Anti-Scam Trainer"
 	body := fmt.Sprintf(
 		"Здравствуйте!\r\n\r\n"+
@@ -37,20 +38,21 @@ func (m *Mailer) SendPasswordReset(toEmail, resetLink string) error {
 		m.cfg.From, toEmail, subject, body,
 	)
 
-	return m.sendViaImplicitTLS(toEmail, []byte(msg))
+	return m.sendViaImplicitTLS(ctx, toEmail, []byte(msg))
 }
 
 // sendViaImplicitTLS отправляет письмо через SMTPS (порт 465) —
 // в отличие от STARTTLS (587), тут TLS устанавливается сразу при подключении,
 // именно так требует Яндекс для порта 465.
-func (m *Mailer) sendViaImplicitTLS(toEmail string, msg []byte) error {
+func (m *Mailer) sendViaImplicitTLS(ctx context.Context, toEmail string, msg []byte) error {
 	addr := fmt.Sprintf("%s:%d", m.cfg.Host, m.cfg.Port)
 
 	tlsConfig := &tls.Config{
 		ServerName: m.cfg.Host,
 	}
 
-	conn, err := tls.Dial("tcp", addr, tlsConfig)
+	dialer := &tls.Dialer{Config: tlsConfig}
+	conn, err := dialer.DialContext(ctx, "tcp", addr)
 	if err != nil {
 		return fmt.Errorf("tls dial failed: %w", err)
 	}
