@@ -11,7 +11,7 @@ import (
 type Repository interface {
 	GetAnswersByAttempt(ctx context.Context, userID, attemptID string) ([]evaluation.AnswerData, error)
 	GetUserStatsByRole(ctx context.Context, userID string) ([]RoleStats, error)
-	SaveReward(ctx context.Context, userID, fragmentID string) error
+	SaveReward(ctx context.Context, userID, scenarioID, fragmentID string) error
 	GetUserFragments(ctx context.Context, userID string) ([]PuzzleFragment, error)
 	GetTotalAvailableFragments(ctx context.Context) (int, error)
 	GetUserStatsByCategory(ctx context.Context, userID string) ([]CategoryStat, error)
@@ -91,13 +91,13 @@ func (r *PgRepository) GetUserStatsByRole(ctx context.Context, userID string) ([
 	return stats, rows.Err()
 }
 
-func (r *PgRepository) SaveReward(ctx context.Context, userID, fragmentID string) error {
+func (r *PgRepository) SaveReward(ctx context.Context, userID, scenarioID, fragmentID string) error {
 	const q = `
-		INSERT INTO user_inventory (user_id, fragment_id)
-		VALUES ($1, $2)
-		ON CONFLICT (user_id, fragment_id) DO NOTHING`
+		INSERT INTO user_inventory (user_id, scenario_id, fragment_id)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (user_id, scenario_id, fragment_id) DO NOTHING`
 
-	_, err := r.db.ExecContext(ctx, q, userID, fragmentID)
+	_, err := r.db.ExecContext(ctx, q, userID, scenarioID, fragmentID)
 	return err
 }
 
