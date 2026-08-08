@@ -21,6 +21,7 @@ func NewHandler(service *Service, log *slog.Logger, secureCookies bool) *Handler
 }
 
 type registerRequest struct {
+	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -36,6 +37,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
+	
+	req.Name = strings.TrimSpace(req.Name)
+	if req.Name == "" {
+		respondError(w, http.StatusBadRequest, "name is required")
+		return
+	}
 
 	req.Email = strings.TrimSpace(req.Email)
 	if !isValidEmail(req.Email) {
@@ -47,7 +54,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.service.Register(r.Context(), req.Email, req.Password)
+	u, err := h.service.Register(r.Context(), req.Name, req.Email, req.Password)
 	if err != nil {
 		if errors.Is(err, ErrEmailTaken) {
 			respondError(w, http.StatusConflict, "email already registered")

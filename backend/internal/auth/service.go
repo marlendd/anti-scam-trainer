@@ -22,13 +22,13 @@ var (
 	ErrTokenAlreadyUsed   = errors.New("reset token already used")
 )
 
-func (s *Service) Register(ctx context.Context, email, password string) (User, error) {
+func (s *Service) Register(ctx context.Context, name, email, password string) (User, error) {
 	hash, err := HashPassword(password)
 	if err != nil {
 		return User{}, err
 	}
 
-	u, err := s.users.Create(ctx, email, hash)
+	u, err := s.users.Create(ctx, name, email, hash)
 	if err != nil {
 		if errors.Is(err, ErrUserExists) {
 			return User{}, ErrEmailTaken
