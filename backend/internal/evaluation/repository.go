@@ -15,6 +15,7 @@ type Repository interface {
 	GetUserStatsByCategory(ctx context.Context, userID string) ([]CategoryStat, error)
 	GetUserTotalCompletedCount(ctx context.Context, userID string) (int, error)
 	GetLeaderboard(ctx context.Context, limit, offset int) ([]LeaderboardEntry, error)
+	GetUserRankHistory(ctx context.Context, userID string, days int) ([]RankHistoryPoint, error)
 }
 
 type PgRepository struct {
@@ -261,4 +262,62 @@ func (r *PgRepository) GetLeaderboard(ctx context.Context, limit, offset int) ([
 	}
 
 	return entries, rows.Err()
+}
+
+func (r *PgRepository) GetUserRankHistory(ctx context.Context, userID string, days int) ([]RankHistoryPoint, error) {
+	const q = `
+		WITH RECURSIVE dates AS (
+			SELECT (CURRENT_DATE - ($2 * INTERVAL '1 day'))::date as d
+			UNION ALL
+			SELECT (d + interval '1 day')::date FROM dates WHERE d < CURRENT_DATE
+		),
+		scores_per_day AS (
+			SELECT 
+				d.d,
+				u_scores.user_id,
+				SUM(u_scores.max_score) as total_score
+			FROM dates d
+			CROSS JOIN LATERAL (
+				SELECT att.user_id, sv.logical_id, MAX(att.score) as max_score
+				FROM attempts att
+				JOIN scenario_versions sv ON att.scenario_id = sv.id
+				WHERE att.status = 'completed' AND att.completed_at::date <= d.d
+				GROUP BY att.user_id, sv.logical_id
+			) u_scores
+			GROUP BY d.d, u_scores.user_id
+		),
+		ranks_per_day AS (
+			SELECT 
+				d,
+				user_id,
+				DENSE_RANK() OVER (PARTITION BY d ORDER BY total_score DESC) as rnk
+			FROM scores_per_day
+		)
+		SELECT d, rnk FROM ranks_per_day WHERE user_id = $1 ORDER BY d ASC;
+	`
+
+	rows, err := r.db.QueryContext(ctx, q, userID, days)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			r.log.Error("failed to close rows", "error", err)
+		}
+	}()
+
+	var history []RankHistoryPoint
+	for rows.Next() {
+		var p RankHistoryPoint
+		if err := rows.Scan(&p.Date, &p.Rank); err != nil {
+			return nil, err
+		}
+		history = append(history, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return history, nil
 }

@@ -46,3 +46,12 @@ type LeaderboardEntry struct {
 type LeaderboardResponse struct {
 	Entries []LeaderboardEntry `json:"entries"`
 }
+
+type RankHistoryPoint struct {
+	Date time.Time `json:"date"`
+	Rank int       `json:"rank"`
+}
+
+type RankHistoryResponse struct {
+	History []RankHistoryPoint `json:"history"`
+}

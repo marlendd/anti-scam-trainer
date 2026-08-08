@@ -96,7 +96,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.Handle("GET /api/v1/profile/categories-progress", requireAuth(http.HandlerFunc(evalHandler.GetMyCategoryDashboard)))
 	mux.Handle("GET /api/v1/profile/puzzle", requireAuth(http.HandlerFunc(evalHandler.GetMyPuzzleProgress)))
 	mux.Handle("GET /api/v1/attempts/{id}/result", requireAuth(http.HandlerFunc(evalHandler.GetStatsOfAttempt)))
-
+	mux.Handle("GET /api/v1/profile/rank-history", requireAuth(http.HandlerFunc(evalHandler.GetMyRankHistory)))
 	addr := ":" + cfg.Port
 	if cfg.Port == "" {
 		addr = ":8080"

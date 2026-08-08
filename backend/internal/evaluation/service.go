@@ -98,3 +98,16 @@ func (s *Service) GetLeaderboard(ctx context.Context, limit, offset int) (Leader
 
 	return LeaderboardResponse{Entries: entries}, nil
 }
+
+func (s *Service) GetMyRankHistory(ctx context.Context, userID string) (RankHistoryResponse, error) {
+	history, err := s.repo.GetUserRankHistory(ctx, userID, 7) // За последнюю неделю
+	if err != nil {
+		return RankHistoryResponse{}, err
+	}
+
+	if history == nil {
+		history = []RankHistoryPoint{}
+	}
+
+	return RankHistoryResponse{History: history}, nil
+}
