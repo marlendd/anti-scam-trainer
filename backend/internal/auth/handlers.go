@@ -54,8 +54,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.service.Register(r.Context(), req.Name, req.Email, req.Password)
-	if err != nil {
+	if _, err := h.service.Register(r.Context(), req.Name, req.Email, req.Password); err != nil {
 		if errors.Is(err, ErrEmailTaken) {
 			respondError(w, http.StatusConflict, "email already registered")
 			return
