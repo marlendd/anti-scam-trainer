@@ -1,0 +1,75 @@
+// TrainingPage.module.scss
+
+.page {
+    width: 100%;
+
+    padding: 16px 0;
+}
+
+.training {
+    display: grid;
+
+    grid-template-columns: 1fr 500px;
+
+    gap: 24px;
+    align-items: stretch;
+
+    width: 100%;
+
+    > * {
+        min-width: 0;
+    }
+}
+
+@media (width <= 1100px) {
+    .training {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (width <= 640px) {
+    .training {
+        gap: 16px;
+    }
+}
+
+.text {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: start;
+    justify-content: center;
+
+    margin-bottom: 32px;
+
+    text-align: left;
+}
+
+.title {
+    margin-bottom: 8px;
+
+    font-size: 2rem;
+}
+
+.description {
+    max-width: 700px;
+
+    font-size: 1rem;
+
+    text-align: left;
+}
+
+@media (width <= 640px) {
+    .text {
+        margin-bottom: 16px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .description {
+        font-size: 16px;
+    }
+}

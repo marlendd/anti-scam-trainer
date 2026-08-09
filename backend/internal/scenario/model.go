@@ -6,6 +6,7 @@ type Weight uint8
 
 type ScenarioID string
 type LogicalScenarioID string
+type FragmentID string
 type NodeID string
 type ChoiceID string
 type EndingID string
@@ -30,44 +31,64 @@ const (
 	RiskFakePaymentDelivery RiskCategory = "fake_payment_delivery"
 	RiskUrgencyPressure     RiskCategory = "urgency_pressure"
 	RiskDisableProtection   RiskCategory = "disable_protection"
+	RiskUnverifiedEvidence  RiskCategory = "unverified_evidence"
 )
 
 type Role string
 
 type Scenario struct {
-	ID          ScenarioID        // ID версии сценария
-	LogicalID   LogicalScenarioID // ID сценария
-	Version     int
-	Role        Role
-	Title       string
-	Description string
-	StartNodeID NodeID
-	Nodes       []Node
-	Endings     []Ending
+	ID                  ScenarioID        // ID версии сценария
+	LogicalID           LogicalScenarioID // ID сценария
+	Version             int
+	Role                Role
+	Title               string
+	Description         string
+	RewardFragmentID    FragmentID
+	SuccessfulEndingIDs []EndingID
+	StartNodeID         NodeID
+	Nodes               []Node
+	Endings             []Ending
 }
 
 type Node struct {
-	ID      NodeID
-	Author  AuthorID
-	Text    string
-	Choices []Choice
+	ID      NodeID   `json:"id"`
+	Author  AuthorID `json:"author"`
+	Text    string   `json:"text"`
+	Choices []Choice `json:"choices"`
 }
 
 type Choice struct {
-	ID             ChoiceID
-	Text           string
-	Consequence    string
-	Explanation    string
-	Weight         Weight      // важность выбора
-	Score          ChoiceScore // оценка безопасности выбора (больше -> безопаснее)
-	RiskCategories []RiskCategory
-	NextNodeID     NodeID
-	EndingID       EndingID
+	ID             ChoiceID       `json:"id"`
+	Text           string         `json:"text"`
+	Consequence    string         `json:"consequence"`
+	Explanation    string         `json:"explanation"`
+	Weight         Weight         `json:"weight"` // важность выбора
+	Score          ChoiceScore    `json:"score"`  // оценка безопасности выбора (больше -> безопаснее)
+	RiskCategories []RiskCategory `json:"risk_categories"`
+	NextNodeID     NodeID         `json:"next_node_id,omitempty"`
+	EndingID       EndingID       `json:"ending_id,omitempty"`
 	// у одного выбора должно быть заполнено только одно поле из пары NextNodeID / EndingID.
 }
 
 type Ending struct {
-	ID     EndingID
-	Header string
-	Result string
+	ID     EndingID `json:"id"`
+	Header string   `json:"header"`
+	Result string   `json:"result"`
+}
+
+type Content struct {
+	StartNodeID         NodeID     `json:"start_node_id"`
+	SuccessfulEndingIDs []EndingID `json:"successful_ending_ids,omitempty"`
+	Nodes               []Node     `json:"nodes"`
+	Endings             []Ending   `json:"endings"`
+}
+
+func (s Scenario) IsSuccessfulEnding(endingID EndingID) bool {
+	for _, successfulEndingID := range s.SuccessfulEndingIDs {
+		if successfulEndingID == endingID {
+			return true
+		}
+	}
+
+	return false
 }

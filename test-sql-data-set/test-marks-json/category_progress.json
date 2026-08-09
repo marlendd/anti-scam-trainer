@@ -1,0 +1,13 @@
+{
+  "total_completed": 1,
+  "stats": [
+    {
+      "category": "Предоплата",
+      "count": 1
+    },
+    {
+      "category": "Фишинг",
+      "count": 1
+    }
+  ]
+}
