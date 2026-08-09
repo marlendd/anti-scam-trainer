@@ -88,11 +88,13 @@ jobs:
 
       - name: Integration Test
         env:
+          RUN_INTEGRATION_TESTS: "1"
+          TEST_DATABASE_URL: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
           DATABASE_URL: postgres://postgres:password@localhost:5432/postgres?sslmode=disable
         run: |
           cd backend
-          go test -v ./tests/integration/...
-          
+          go test -p 1 -v -race ./...
+
       - name: Dump docker logs on failure
         if: failure()
-        run: docker compose logs 
+        run: docker compose logs
