@@ -25,12 +25,9 @@ type Config struct {
 	SecureCookies bool `yaml:"secure_cookies" env:"SECURE_COOKIES" env-default:"false"`
 	// CORS
 	AllowedOrigins string `yaml:"allowed_origins" env:"ALLOWED_ORIGINS" env-default:"http://localhost:3000"`
-	// SMTP
-	SMTPHost     string `yaml:"smtp_host" env:"SMTP_HOST"`
-	SMTPPort     int    `yaml:"smtp_port" env:"SMTP_PORT" env-default:"587"`
-	SMTPUsername string `yaml:"smtp_username" env:"SMTP_USERNAME"`
-	SMTPPassword string `yaml:"smtp_password" env:"SMTP_PASSWORD"`
-	SMTPFrom     string `yaml:"smtp_from" env:"SMTP_FROM"`
+	// Resend (email)
+	ResendAPIKey string `yaml:"resend_api_key" env:"RESEND_API_KEY"`
+	ResendFrom   string `yaml:"resend_from" env:"RESEND_FROM" env-default:"onboarding@resend.dev"`
 
 	AppBaseURL string `yaml:"app_base_url" env:"APP_BASE_URL" env-default:"http://localhost:3000"`
 }

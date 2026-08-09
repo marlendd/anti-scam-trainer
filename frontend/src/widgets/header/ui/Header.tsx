@@ -1,4 +1,4 @@
-﻿import {Link} from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import {Logo} from '@/shared/ui/logo'
 import styles from './Header.module.scss'
 import {LoginButton} from '@/features/login-button'

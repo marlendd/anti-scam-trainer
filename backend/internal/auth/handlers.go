@@ -54,8 +54,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := h.service.Register(r.Context(), req.Name, req.Email, req.Password)
-	if err != nil {
+	if _, err := h.service.Register(r.Context(), req.Name, req.Email, req.Password); err != nil {
 		if errors.Is(err, ErrEmailTaken) {
 			respondError(w, http.StatusConflict, "email already registered")
 			return
@@ -64,7 +63,17 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, "internal server error")
 		return
 	}
-
+	// автоматический вход сразу после успешной регистрации
+	userAgent := r.UserAgent()
+	ip := clientIP(r)
+	u, sess, err := h.service.Login(r.Context(), req.Email, req.Password, userAgent, ip)
+	if err != nil {
+		// маловероятно (регистрация только что прошла успешно), но на случай гонки/сбоя
+		h.log.Error("auto-login after register failed", "error", err)
+		respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	setSessionCookie(w, sess, h.secureCookies)
 	respondJSON(w, http.StatusCreated, u.ToPublic())
 }
 
