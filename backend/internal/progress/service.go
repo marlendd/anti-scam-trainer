@@ -25,7 +25,7 @@ func (s *Service) GetAttemptResults(ctx context.Context, userID, attemptID strin
 		return -1, nil
 	}
 
-	return s.evaluator.CalculateScore(answers), nil
+	return s.evaluator.CalculateScore(answers)
 }
 
 func (s *Service) GetUserRoleStats(ctx context.Context, userID string) ([]RoleStats, error) {

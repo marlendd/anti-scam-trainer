@@ -218,7 +218,7 @@ func (s *Service) SubmitAnswer(ctx context.Context, input SubmitAnswerInput) (Su
 			weightSum := totals.WeightSum +
 				int(transitionResult.Choice.Weight)
 
-			score, err := engine.CalculateScore(weightedScoreSum, weightSum)
+			score, err := s.evaluator.CalculateScoreFromTotals(weightedScoreSum, weightSum)
 			if err != nil {
 				return fmt.Errorf("calculate attempt score: %w", err)
 			}
