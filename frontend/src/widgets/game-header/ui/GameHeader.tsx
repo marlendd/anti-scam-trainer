@@ -3,8 +3,6 @@ import { faChevronLeft, faPause } from '@fortawesome/free-solid-svg-icons'
 import { Icon } from '@/shared/ui/icon'
 
 import styles from './GameHeader.module.scss'
-import { FragmentCounter } from '@/widgets/header/ui/FragmentCounter.tsx'
-import { PointsCounter } from '@/widgets/header/ui/PointsCounter.tsx'
 import { Button } from '@/shared/ui/button'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { faHome } from '@fortawesome/free-regular-svg-icons'

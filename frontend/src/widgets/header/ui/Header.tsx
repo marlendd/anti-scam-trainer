@@ -28,9 +28,11 @@ export const Header = () => {
                 </nav>
 
                 <div className={styles.info}>
-                    <div className={styles.counters}>
-                        <HeaderCounters/>
-                    </div>
+                    {!isPending && !isError && user !== null && (
+                        <div className={styles.counters}>
+                            <HeaderCounters/>
+                        </div>)
+                    }
 
                     {isPending && <LoginButton/>}
 
