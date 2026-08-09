@@ -19,11 +19,8 @@ tags:
     description: Каталог активных сценариев
   - name: system
     description: Health и readiness проверки
-<<<<<<< HEAD
-=======
   - name: progress
     description: Метрики пользователя, прогресс, пазлы и лидерборд
->>>>>>> feature/add-llm-feedback-recomendation
 
 paths:
   /api/v1/auth/register:
@@ -377,8 +374,6 @@ paths:
           description: Готов
         '503':
           description: БД недоступна
-<<<<<<< HEAD
-=======
   
   /api/v1/attempts/{attemptID}/result:
     get:
@@ -505,7 +500,6 @@ paths:
                 $ref: '#/components/schemas/RankHistoryResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
->>>>>>> feature/add-llm-feedback-recomendation
 
 components:
   securitySchemes:
@@ -754,8 +748,6 @@ components:
       properties:
         error:
           type: string
-<<<<<<< HEAD
-=======
 
     AttemptResultResponse:
       type: object
@@ -888,4 +880,3 @@ components:
             type: string
         motivation:
           type: string
->>>>>>> feature/add-llm-feedback-recomendation
