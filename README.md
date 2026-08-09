@@ -46,7 +46,7 @@
 
 ### Через Docker Compose (рекомендуется — поднимает весь стек)
 
-1. Скопируй `.env.example` в `.env` и заполни значения:
+1. Скопируй `.config.example.yaml` в `config.yaml` и заполни значения:
    ```bash
    config.example.yaml
    ```
