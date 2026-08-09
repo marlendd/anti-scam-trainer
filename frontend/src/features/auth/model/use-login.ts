@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { currentUserQueryKey } from '@/entities/user'
+import { setAuthSession } from '@/shared/lib/auth-session'
 
 import { login } from '../api/login'
 
@@ -10,8 +11,10 @@ export function useLogin() {
     return useMutation({
         mutationFn: login,
 
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
+        onSuccess: () => {
+            setAuthSession()
+
+            void queryClient.invalidateQueries({
                 queryKey: currentUserQueryKey,
             })
         },
