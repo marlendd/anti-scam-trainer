@@ -637,9 +637,42 @@ components:
       allOf:
         - $ref: '#/components/schemas/AttemptResponse'
         - type: object
+          required: [history]
           properties:
             current_node:
               $ref: '#/components/schemas/CurrentNode'
+            history:
+              type: array
+              description: Previously answered dialogue nodes in chronological order.
+              items:
+                $ref: '#/components/schemas/AttemptHistoryItem'
+
+    AttemptHistoryItem:
+      type: object
+      additionalProperties: false
+      required: [node, selected_choice, consequence, answered_at]
+      properties:
+        node:
+          $ref: '#/components/schemas/HistoryNode'
+        selected_choice:
+          $ref: '#/components/schemas/ChoiceOption'
+        consequence:
+          type: string
+        answered_at:
+          type: string
+          format: date-time
+
+    HistoryNode:
+      type: object
+      additionalProperties: false
+      required: [id, author, text]
+      properties:
+        id:
+          type: string
+        author:
+          type: string
+        text:
+          type: string
 
     CurrentNode:
       type: object

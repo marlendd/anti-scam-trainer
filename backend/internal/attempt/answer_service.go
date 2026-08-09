@@ -30,6 +30,12 @@ type AnswerRepository interface {
 		nodeID scenario.NodeID,
 	) (Answer, error)
 
+	ListAnswersByAttempt(
+		ctx context.Context,
+		attemptID AttemptID,
+		userID string,
+	) ([]Answer, error)
+
 	GetScoreTotals(
 		ctx context.Context,
 		attemptID AttemptID,

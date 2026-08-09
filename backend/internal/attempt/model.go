@@ -40,7 +40,21 @@ type CurrentNode struct {
 	Choices []ChoiceOption
 }
 
+type HistoryNode struct {
+	ID     scenario.NodeID
+	Author scenario.AuthorID
+	Text   string
+}
+
+type HistoryItem struct {
+	Node           HistoryNode
+	SelectedChoice ChoiceOption
+	Consequence    string
+	AnsweredAt     time.Time
+}
+
 type State struct {
 	Attempt     Attempt
 	CurrentNode *CurrentNode
+	History     []HistoryItem
 }
