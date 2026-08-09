@@ -45,6 +45,39 @@ func TestApplySeedFilesIsIdempotent_Integration(t *testing.T) {
 	}
 
 	seed := seeds[0]
+	require.NotEmpty(t, seed.Content.Nodes[0].Messages)
+	expectedMessages := append([]scenario.Message(nil), seed.Content.Nodes[0].Messages...)
+	legacyContent := seed.Content
+	legacyContent.Nodes = append([]scenario.Node(nil), seed.Content.Nodes...)
+	legacyContent.Nodes[0].Author = expectedMessages[len(expectedMessages)-1].Author
+	legacyContent.Nodes[0].Text = "legacy combined dialogue"
+	legacyContent.Nodes[0].Messages = nil
+	legacyContentJSON, err := json.Marshal(legacyContent)
+	require.NoError(t, err)
+	_, err = db.ExecContext(
+		ctx,
+		`UPDATE scenario_versions SET content = $1 WHERE id = $2`,
+		legacyContentJSON,
+		seed.ID,
+	)
+	require.NoError(t, err)
+
+	_, err = scenario.ApplySeedFiles(ctx, db, "../../seeds")
+	require.NoError(t, err)
+
+	var backfilledContentJSON json.RawMessage
+	err = db.QueryRowContext(
+		ctx,
+		`SELECT content FROM scenario_versions WHERE id = $1`,
+		seed.ID,
+	).Scan(&backfilledContentJSON)
+	require.NoError(t, err)
+	var backfilledContent scenario.Content
+	require.NoError(t, json.Unmarshal(backfilledContentJSON, &backfilledContent))
+	require.Equal(t, expectedMessages, backfilledContent.Nodes[0].Messages)
+	require.Empty(t, backfilledContent.Nodes[0].Author)
+	require.Empty(t, backfilledContent.Nodes[0].Text)
+
 	_, err = db.ExecContext(
 		ctx,
 		`UPDATE scenario_versions

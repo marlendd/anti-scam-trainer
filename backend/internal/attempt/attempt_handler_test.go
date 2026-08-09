@@ -112,9 +112,10 @@ func TestHandler_GetState(t *testing.T) {
 				UpdatedAt:     time.Date(2026, time.August, 8, 10, 1, 0, 0, time.UTC),
 			},
 			CurrentNode: &attempt.CurrentNode{
-				ID:     currentNodeID,
-				Author: "seller",
-				Text:   "Выберите действие",
+				ID:       currentNodeID,
+				Author:   "seller",
+				Text:     "Выберите действие",
+				Messages: []scenario.Message{{Author: "seller", Text: "Выберите действие"}},
 				Choices: []attempt.ChoiceOption{
 					{ID: "choice-safe", Text: "Остаться на платформе"},
 				},
@@ -125,6 +126,10 @@ func TestHandler_GetState(t *testing.T) {
 						ID:     "node-previous",
 						Author: "seller",
 						Text:   "Предыдущее сообщение",
+						Messages: []scenario.Message{
+							{Author: "buyer", Text: "Первая реплика"},
+							{Author: "seller", Text: "Предыдущее сообщение"},
+						},
 					},
 					SelectedChoice: attempt.ChoiceOption{
 						ID:   "choice-previous",
@@ -166,6 +171,12 @@ func TestHandler_GetState(t *testing.T) {
 	require.NotContains(t, choice, "explanation")
 	require.NotContains(t, choice, "next_node_id")
 	require.NotContains(t, choice, "ending_id")
+	require.Equal(t, []any{
+		map[string]any{
+			"author": "seller",
+			"text":   "Выберите действие",
+		},
+	}, currentNode["messages"])
 	history := payload["history"].([]any)
 	require.Len(t, history, 1)
 	historyItem := history[0].(map[string]any)
@@ -173,6 +184,10 @@ func TestHandler_GetState(t *testing.T) {
 		"id":     "node-previous",
 		"author": "seller",
 		"text":   "Предыдущее сообщение",
+		"messages": []any{
+			map[string]any{"author": "buyer", "text": "Первая реплика"},
+			map[string]any{"author": "seller", "text": "Предыдущее сообщение"},
+		},
 	}, historyItem["node"])
 	require.Equal(t, map[string]any{
 		"id":   "choice-previous",

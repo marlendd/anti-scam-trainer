@@ -109,11 +109,14 @@ func (s *Service) GetState(
 			return State{}, ErrInvalidAttemptState
 		}
 
+		messages := node.DialogueMessages()
+		lastMessage := messages[len(messages)-1]
 		state.History = append(state.History, HistoryItem{
 			Node: HistoryNode{
-				ID:     node.ID,
-				Author: node.Author,
-				Text:   node.Text,
+				ID:       node.ID,
+				Author:   lastMessage.Author,
+				Text:     lastMessage.Text,
+				Messages: messages,
 			},
 			SelectedChoice: ChoiceOption{
 				ID:   choice.ID,
@@ -144,12 +147,15 @@ func (s *Service) GetState(
 			Text: choice.Text,
 		})
 	}
+	messages := node.DialogueMessages()
+	lastMessage := messages[len(messages)-1]
 
 	state.CurrentNode = &CurrentNode{
-		ID:      node.ID,
-		Author:  node.Author,
-		Text:    node.Text,
-		Choices: choices,
+		ID:       node.ID,
+		Author:   lastMessage.Author,
+		Text:     lastMessage.Text,
+		Messages: messages,
+		Choices:  choices,
 	}
 
 	return state, nil

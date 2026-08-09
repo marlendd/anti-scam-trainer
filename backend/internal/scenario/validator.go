@@ -22,8 +22,30 @@ func Validate(s Scenario) error {
 		if node.ID == "" {
 			return ErrEmptyNodeID
 		}
-		if strings.TrimSpace(node.Text) == "" {
-			return fmt.Errorf("%w: node %q", ErrEmptyNodeText, node.ID)
+
+		hasLegacyMessage := node.Author != "" || strings.TrimSpace(node.Text) != ""
+		if hasLegacyMessage && len(node.Messages) > 0 {
+			return fmt.Errorf("%w: node %q", ErrMixedNodeMessageFormat, node.ID)
+		}
+
+		messages := node.DialogueMessages()
+		for index, message := range messages {
+			if strings.TrimSpace(string(message.Author)) == "" {
+				return fmt.Errorf(
+					"%w: node %q message %d",
+					ErrEmptyNodeAuthor,
+					node.ID,
+					index,
+				)
+			}
+			if strings.TrimSpace(message.Text) == "" {
+				return fmt.Errorf(
+					"%w: node %q message %d",
+					ErrEmptyNodeText,
+					node.ID,
+					index,
+				)
+			}
 		}
 
 		if _, exists := nodesByID[node.ID]; exists {

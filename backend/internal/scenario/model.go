@@ -50,11 +50,25 @@ type Scenario struct {
 	Endings             []Ending
 }
 
+type Message struct {
+	Author AuthorID `json:"author"`
+	Text   string   `json:"text"`
+}
+
 type Node struct {
-	ID      NodeID   `json:"id"`
-	Author  AuthorID `json:"author"`
-	Text    string   `json:"text"`
-	Choices []Choice `json:"choices"`
+	ID       NodeID    `json:"id"`
+	Author   AuthorID  `json:"author,omitempty"`
+	Text     string    `json:"text,omitempty"`
+	Messages []Message `json:"messages,omitempty"`
+	Choices  []Choice  `json:"choices"`
+}
+
+func (n Node) DialogueMessages() []Message {
+	if len(n.Messages) > 0 {
+		return n.Messages
+	}
+
+	return []Message{{Author: n.Author, Text: n.Text}}
 }
 
 type Choice struct {

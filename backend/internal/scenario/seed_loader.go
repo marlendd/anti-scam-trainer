@@ -93,8 +93,8 @@ func LoadSeedFiles(directory string) ([]SeedFile, error) {
 }
 
 // ApplySeedFiles загружает все seeds одной транзакцией.
-// Для существующих версий загрузчик только дополняет отсутствующие метаданные награды,
-// не изменяя граф, тексты и уже заданные значения.
+// Для существующих версий загрузчик дополняет метаданные награды и новое
+// представление реплик messages, не изменяя варианты, оценки и переходы графа.
 func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, error) {
 	seeds, err := LoadSeedFiles(directory)
 	if err != nil {
@@ -163,6 +163,10 @@ func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, err
 		); err != nil {
 			return 0, fmt.Errorf("upsert scenario seed %q: %w", seed.ID, err)
 		}
+
+		if err := backfillSeedMessages(ctx, tx, seed); err != nil {
+			return 0, fmt.Errorf("backfill scenario seed %q messages: %w", seed.ID, err)
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -170,6 +174,79 @@ func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, err
 	}
 
 	return len(seeds), nil
+}
+
+func backfillSeedMessages(ctx context.Context, tx *sql.Tx, seed SeedFile) error {
+	var rawContent json.RawMessage
+	if err := tx.QueryRowContext(
+		ctx,
+		`SELECT content FROM scenario_versions WHERE id = $1`,
+		seed.ID,
+	).Scan(&rawContent); err != nil {
+		return fmt.Errorf("load stored scenario content: %w", err)
+	}
+
+	var stored Content
+	if err := json.Unmarshal(rawContent, &stored); err != nil {
+		return fmt.Errorf("decode stored scenario content: %w", err)
+	}
+
+	seedNodes := make(map[NodeID]Node, len(seed.Content.Nodes))
+	for _, node := range seed.Content.Nodes {
+		seedNodes[node.ID] = node
+	}
+
+	changed := false
+	for index := range stored.Nodes {
+		seedNode, exists := seedNodes[stored.Nodes[index].ID]
+		if !exists || len(seedNode.Messages) == 0 {
+			continue
+		}
+
+		if len(stored.Nodes[index].Messages) > 0 &&
+			messagesEqual(stored.Nodes[index].Messages, seedNode.Messages) {
+			continue
+		}
+
+		stored.Nodes[index].Author = ""
+		stored.Nodes[index].Text = ""
+		stored.Nodes[index].Messages = append([]Message(nil), seedNode.Messages...)
+		changed = true
+	}
+
+	if !changed {
+		return nil
+	}
+
+	updatedContent, err := json.Marshal(stored)
+	if err != nil {
+		return fmt.Errorf("encode updated scenario content: %w", err)
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		`UPDATE scenario_versions SET content = $1 WHERE id = $2`,
+		updatedContent,
+		seed.ID,
+	); err != nil {
+		return fmt.Errorf("update stored scenario messages: %w", err)
+	}
+
+	return nil
+}
+
+func messagesEqual(left, right []Message) bool {
+	if len(left) != len(right) {
+		return false
+	}
+
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+
+	return true
 }
 
 func decodeSeedFile(path string) (SeedFile, error) {

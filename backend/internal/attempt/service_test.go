@@ -140,6 +140,12 @@ func TestServiceGetState(t *testing.T) {
 		t.Parallel()
 
 		fixture := testfixture.ValidScenario()
+		fixture.Nodes[0].Author = ""
+		fixture.Nodes[0].Text = ""
+		fixture.Nodes[0].Messages = []scenario.Message{
+			{Author: "buyer", Text: "Вопрос покупателя"},
+			{Author: "seller", Text: "Ответ продавца"},
+		}
 		currentNodeID := testfixture.MiddleNodeID
 		answeredAt := time.Date(2026, time.August, 9, 12, 0, 0, 0, time.UTC)
 		currentAttempt := attempt.Attempt{
@@ -190,6 +196,7 @@ func TestServiceGetState(t *testing.T) {
 		require.Equal(t, testfixture.MiddleNodeID, state.CurrentNode.ID)
 		require.Equal(t, fixture.Nodes[1].Author, state.CurrentNode.Author)
 		require.Equal(t, fixture.Nodes[1].Text, state.CurrentNode.Text)
+		require.Equal(t, fixture.Nodes[1].DialogueMessages(), state.CurrentNode.Messages)
 		require.Len(t, state.CurrentNode.Choices, len(fixture.Nodes[1].Choices))
 		require.Equal(t, attempt.ChoiceOption{
 			ID:   fixture.Nodes[1].Choices[0].ID,
@@ -198,9 +205,10 @@ func TestServiceGetState(t *testing.T) {
 		require.Equal(t, []attempt.HistoryItem{
 			{
 				Node: attempt.HistoryNode{
-					ID:     fixture.Nodes[0].ID,
-					Author: fixture.Nodes[0].Author,
-					Text:   fixture.Nodes[0].Text,
+					ID:       fixture.Nodes[0].ID,
+					Author:   fixture.Nodes[0].Messages[1].Author,
+					Text:     fixture.Nodes[0].Messages[1].Text,
+					Messages: fixture.Nodes[0].Messages,
 				},
 				SelectedChoice: attempt.ChoiceOption{
 					ID:   fixture.Nodes[0].Choices[0].ID,
