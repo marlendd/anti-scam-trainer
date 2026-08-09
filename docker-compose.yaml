@@ -40,11 +40,8 @@ services:
       - MIGRATIONS_PATH=migrations
       - SEEDS_PATH=seeds
       - SECURE_COOKIES=false
-      - SMTP_HOST=smtp.yandex.ru
-      - SMTP_PORT=465
-      - SMTP_USERNAME=EgorEmil@yandex.ru
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SMTP_FROM=EgorEmil@yandex.ru
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM=onboarding@resend.dev
       - APP_BASE_URL=http://localhost:3000
       - ALLOWED_ORIGINS=http://localhost:3000
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
