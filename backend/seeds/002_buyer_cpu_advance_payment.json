@@ -6,8 +6,10 @@
   "title": "Дешёвый процессор и предоплата",
   "description": "Покупка процессора по подозрительно низкой цене, при которой продавец отказывается от безопасной доставки, показывает чужие доказательства и требует предоплату.",
   "is_active": true,
+  "reward_fragment_id": "safe-deal-piece-2",
   "content": {
     "start_node_id": "n1_delivery_refusal",
+    "successful_ending_ids": ["ending_safe", "ending_recovered"],
     "nodes": [
       {
         "id": "n1_delivery_refusal",

@@ -6,8 +6,10 @@
   "title": "Поддельная оплата и звонок поддержки",
   "description": "Продажа телефона, при которой покупатель показывает фальшивую оплату, требует отправить товар и подключает сообщника под видом поддержки.",
   "is_active": true,
+  "reward_fragment_id": "safe-deal-piece-3",
   "content": {
     "start_node_id": "n1_fake_payment_screenshot",
+    "successful_ending_ids": ["ending_safe", "ending_recovered"],
     "nodes": [
       {
         "id": "n1_fake_payment_screenshot",

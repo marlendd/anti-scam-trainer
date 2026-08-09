@@ -6,8 +6,10 @@
   "title": "Видеокарта и фальшивая поддержка",
   "description": "Покупка видеокарты, при которой продавец создаёт дефицит, уводит оплату с площадки и подключает фальшивую поддержку.",
   "is_active": true,
+  "reward_fragment_id": "safe-deal-piece-1",
   "content": {
     "start_node_id": "n1_scarcity_pressure",
+    "successful_ending_ids": ["ending_safe", "ending_recovered"],
     "nodes": [
       {
         "id": "n1_scarcity_pressure",
