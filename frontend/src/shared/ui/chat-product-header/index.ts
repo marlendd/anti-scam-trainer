@@ -1,1 +1,0 @@
-export { ChatProductHeader } from './ChatProductHeader'

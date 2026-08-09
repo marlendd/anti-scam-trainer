@@ -1,1 +1,0 @@
-export { WelcomeSlider } from './ui/WelcomeSlider'

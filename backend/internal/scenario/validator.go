@@ -1,9 +1,6 @@
 package scenario
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 // Validate - валидатор данных сценария, проверяющий, удовлетворяет ли сценарий следующим условиям:
 // 1) ID старта, узлов, концовок и вариантов заполнены и уникальны;
@@ -13,39 +10,11 @@ func Validate(s Scenario) error {
 	if s.StartNodeID == "" {
 		return ErrEmptyStartNodeID
 	}
-	if s.RewardFragmentID != "" && strings.TrimSpace(string(s.RewardFragmentID)) == "" {
-		return ErrInvalidRewardFragment
-	}
 
 	nodesByID := make(map[NodeID]Node, len(s.Nodes))
 	for _, node := range s.Nodes {
 		if node.ID == "" {
 			return ErrEmptyNodeID
-		}
-
-		hasLegacyMessage := node.Author != "" || strings.TrimSpace(node.Text) != ""
-		if hasLegacyMessage && len(node.Messages) > 0 {
-			return fmt.Errorf("%w: node %q", ErrMixedNodeMessageFormat, node.ID)
-		}
-
-		messages := node.DialogueMessages()
-		for index, message := range messages {
-			if strings.TrimSpace(string(message.Author)) == "" {
-				return fmt.Errorf(
-					"%w: node %q message %d",
-					ErrEmptyNodeAuthor,
-					node.ID,
-					index,
-				)
-			}
-			if strings.TrimSpace(message.Text) == "" {
-				return fmt.Errorf(
-					"%w: node %q message %d",
-					ErrEmptyNodeText,
-					node.ID,
-					index,
-				)
-			}
 		}
 
 		if _, exists := nodesByID[node.ID]; exists {
@@ -59,30 +28,10 @@ func Validate(s Scenario) error {
 		if ending.ID == "" {
 			return ErrEmptyEndingID
 		}
-		if strings.TrimSpace(ending.Header) == "" {
-			return fmt.Errorf("%w: ending %q", ErrEmptyEndingHeader, ending.ID)
-		}
-		if strings.TrimSpace(ending.Result) == "" {
-			return fmt.Errorf("%w: ending %q", ErrEmptyEndingResult, ending.ID)
-		}
 		if _, exists := seenEndings[ending.ID]; exists {
 			return fmt.Errorf("%w: %q", ErrDuplicateEndingID, ending.ID)
 		}
 		seenEndings[ending.ID] = struct{}{}
-	}
-
-	seenSuccessfulEndings := make(map[EndingID]struct{}, len(s.SuccessfulEndingIDs))
-	for _, endingID := range s.SuccessfulEndingIDs {
-		if _, exists := seenEndings[endingID]; !exists {
-			return fmt.Errorf("%w: %q", ErrUnknownSuccessfulEnding, endingID)
-		}
-		if _, exists := seenSuccessfulEndings[endingID]; exists {
-			return fmt.Errorf("%w: %q", ErrDuplicateSuccessfulEnding, endingID)
-		}
-		seenSuccessfulEndings[endingID] = struct{}{}
-	}
-	if s.RewardFragmentID != "" && len(seenSuccessfulEndings) == 0 {
-		return ErrMissingSuccessfulEnding
 	}
 
 	if _, ok := nodesByID[s.StartNodeID]; !ok {
@@ -103,15 +52,6 @@ func Validate(s Scenario) error {
 		for _, choice := range node.Choices {
 			if choice.ID == "" {
 				return ErrEmptyChoiceID
-			}
-			if strings.TrimSpace(choice.Text) == "" {
-				return fmt.Errorf("%w: choice %q", ErrEmptyChoiceText, choice.ID)
-			}
-			if strings.TrimSpace(choice.Consequence) == "" {
-				return fmt.Errorf("%w: choice %q", ErrEmptyConsequence, choice.ID)
-			}
-			if strings.TrimSpace(choice.Explanation) == "" {
-				return fmt.Errorf("%w: choice %q", ErrEmptyExplanation, choice.ID)
 			}
 
 			if _, exists := seenChoices[choice.ID]; exists {
@@ -155,41 +95,15 @@ func Validate(s Scenario) error {
 				return fmt.Errorf("%w: got %d", ErrInvalidScore, choice.Score)
 			}
 
-			if choice.Score != ScoreSafe && len(choice.RiskCategories) == 0 {
-				return fmt.Errorf("%w: choice %q", ErrMissingRiskCategory, choice.ID)
-			}
-
-			for _, category := range choice.RiskCategories {
-				if !isKnownRiskCategory(category) {
-					return fmt.Errorf(
-						"%w: choice %q has %q",
-						ErrUnknownRiskCategory,
-						choice.ID,
-						category,
-					)
+			if choice.Score != ScoreSafe {
+				if len(choice.RiskCategories) == 0 {
+					return fmt.Errorf("%w: choice %q", ErrMissingRiskCategory, choice.ID)
 				}
 			}
 		}
 	}
 
 	return validateGraph(s, nodesByID, seenEndings)
-}
-
-// isKnownRiskCategory - проверяет принадлежность категории риска закрытому набору значений.
-func isKnownRiskCategory(category RiskCategory) bool {
-	switch category {
-	case RiskExternalMessenger,
-		RiskExternalLink,
-		RiskSMSCode,
-		RiskOffPlatformPayment,
-		RiskFakePaymentDelivery,
-		RiskUrgencyPressure,
-		RiskDisableProtection,
-		RiskUnverifiedEvidence:
-		return true
-	default:
-		return false
-	}
 }
 
 // validateGraph - валидатор графа сценария, проверяющий, удовлетворяет ли граф следующим условиям:
