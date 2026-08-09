@@ -83,6 +83,7 @@ func TestPgRepository_ListActiveByRole_Integration(t *testing.T) {
 	completed := itemsByID[activeCompletedVersionID]
 	require.Equal(t, scenario.ProgressCompleted, completed.Status)
 	require.Equal(t, 2, completed.Version)
+	require.Equal(t, testfixture.ValidScenario().Product, completed.Product)
 	_, oldVersionExposed := itemsByID[oldCompletedVersionID]
 	require.False(t, oldVersionExposed)
 
@@ -127,6 +128,7 @@ func insertCatalogScenario(
 
 	fixture := testfixture.ValidScenario()
 	content, err := json.Marshal(scenario.Content{
+		Product:     fixture.Product,
 		StartNodeID: fixture.StartNodeID,
 		Nodes:       fixture.Nodes,
 		Endings:     fixture.Endings,

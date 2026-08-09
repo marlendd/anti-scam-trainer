@@ -94,7 +94,7 @@ func LoadSeedFiles(directory string) ([]SeedFile, error) {
 
 // ApplySeedFiles загружает все seeds одной транзакцией.
 // Для существующих версий загрузчик дополняет метаданные награды и новое
-// представление реплик messages, не изменяя варианты, оценки и переходы графа.
+// представление объявления и реплик messages, не изменяя варианты, оценки и переходы графа.
 func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, error) {
 	seeds, err := LoadSeedFiles(directory)
 	if err != nil {
@@ -164,8 +164,8 @@ func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, err
 			return 0, fmt.Errorf("upsert scenario seed %q: %w", seed.ID, err)
 		}
 
-		if err := backfillSeedMessages(ctx, tx, seed); err != nil {
-			return 0, fmt.Errorf("backfill scenario seed %q messages: %w", seed.ID, err)
+		if err := backfillSeedPresentation(ctx, tx, seed); err != nil {
+			return 0, fmt.Errorf("backfill scenario seed %q presentation: %w", seed.ID, err)
 		}
 	}
 
@@ -176,7 +176,7 @@ func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, err
 	return len(seeds), nil
 }
 
-func backfillSeedMessages(ctx context.Context, tx *sql.Tx, seed SeedFile) error {
+func backfillSeedPresentation(ctx context.Context, tx *sql.Tx, seed SeedFile) error {
 	var rawContent json.RawMessage
 	if err := tx.QueryRowContext(
 		ctx,
@@ -197,6 +197,10 @@ func backfillSeedMessages(ctx context.Context, tx *sql.Tx, seed SeedFile) error 
 	}
 
 	changed := false
+	if stored.Product != seed.Content.Product {
+		stored.Product = seed.Content.Product
+		changed = true
+	}
 	for index := range stored.Nodes {
 		seedNode, exists := seedNodes[stored.Nodes[index].ID]
 		if !exists || len(seedNode.Messages) == 0 {
@@ -307,11 +311,18 @@ func validateSeedMetadata(seed SeedFile) error {
 		Role:                seed.Role,
 		Title:               seed.Title,
 		Description:         seed.Description,
+		Product:             seed.Content.Product,
 		RewardFragmentID:    seed.RewardFragmentID,
 		SuccessfulEndingIDs: seed.Content.SuccessfulEndingIDs,
 		StartNodeID:         seed.Content.StartNodeID,
 		Nodes:               seed.Content.Nodes,
 		Endings:             seed.Content.Endings,
+	}
+	if strings.TrimSpace(seed.Content.Product.Title) == "" {
+		return errors.New("product title is required")
+	}
+	if seed.Content.Product.Price <= 0 {
+		return fmt.Errorf("product price must be positive: got %d", seed.Content.Product.Price)
 	}
 	if err := Validate(s); err != nil {
 		return fmt.Errorf("invalid scenario graph: %w", err)

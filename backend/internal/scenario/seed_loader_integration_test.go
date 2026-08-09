@@ -82,7 +82,7 @@ func TestApplySeedFilesIsIdempotent_Integration(t *testing.T) {
 		ctx,
 		`UPDATE scenario_versions
 		 SET reward_fragment_id = NULL,
-		     content = content - 'successful_ending_ids'
+		     content = content - 'successful_ending_ids' - 'product'
 		 WHERE id = $1`,
 		seed.ID,
 	)
@@ -94,19 +94,24 @@ func TestApplySeedFilesIsIdempotent_Integration(t *testing.T) {
 	var (
 		rewardFragmentID        string
 		successfulEndingIDsJSON json.RawMessage
+		productJSON             json.RawMessage
 	)
 	err = db.QueryRowContext(
 		ctx,
 		`SELECT reward_fragment_id,
-		        content -> 'successful_ending_ids'
+		        content -> 'successful_ending_ids',
+		        content -> 'product'
 		 FROM scenario_versions
 		 WHERE id = $1`,
 		seed.ID,
-	).Scan(&rewardFragmentID, &successfulEndingIDsJSON)
+	).Scan(&rewardFragmentID, &successfulEndingIDsJSON, &productJSON)
 	require.NoError(t, err)
 
 	var successfulEndingIDs []string
 	require.NoError(t, json.Unmarshal(successfulEndingIDsJSON, &successfulEndingIDs))
 	require.Equal(t, string(seed.RewardFragmentID), rewardFragmentID)
 	require.Equal(t, []string{"ending_safe", "ending_recovered"}, successfulEndingIDs)
+	var product scenario.Product
+	require.NoError(t, json.Unmarshal(productJSON, &product))
+	require.Equal(t, seed.Content.Product, product)
 }

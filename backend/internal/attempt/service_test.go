@@ -192,6 +192,12 @@ func TestServiceGetState(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, currentAttempt, state.Attempt)
+		require.Equal(t, attempt.ScenarioHeader{
+			Title:       fixture.Title,
+			Description: fixture.Description,
+			Role:        fixture.Role,
+			Product:     fixture.Product,
+		}, state.Scenario)
 		require.NotNil(t, state.CurrentNode)
 		require.Equal(t, testfixture.MiddleNodeID, state.CurrentNode.ID)
 		require.Equal(t, fixture.Nodes[1].Author, state.CurrentNode.Author)

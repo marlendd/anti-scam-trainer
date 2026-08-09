@@ -509,8 +509,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/AttemptResponse'
         - type: object
-          required: [history]
+          required: [scenario, history]
           properties:
+            scenario:
+              $ref: '#/components/schemas/ScenarioHeader'
             current_node:
               $ref: '#/components/schemas/CurrentNode'
             history:
@@ -603,7 +605,7 @@ components:
 
     ScenarioCatalogItem:
       type: object
-      required: [id, logical_id, version, role, title, description, status]
+      required: [id, logical_id, version, role, title, description, product, status]
       properties:
         id:
           type: string
@@ -621,9 +623,42 @@ components:
           type: string
         description:
           type: string
+        product:
+          $ref: '#/components/schemas/ScenarioProduct'
         status:
           type: string
           enum: [not_started, in_progress, completed]
+
+    ScenarioHeader:
+      type: object
+      additionalProperties: false
+      required: [title, description, role, product]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        role:
+          type: string
+          enum: [buyer, seller]
+        product:
+          $ref: '#/components/schemas/ScenarioProduct'
+
+    ScenarioProduct:
+      type: object
+      additionalProperties: false
+      required: [title, price]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        price:
+          type: integer
+          minimum: 1
+          description: Цена товара в целых рублях.
+        image_url:
+          type: string
+          description: Опциональный URL фотографии товара. Если отсутствует, фронтенд показывает заглушку.
     SubmitAnswerRequest:
       type: object
       additionalProperties: false

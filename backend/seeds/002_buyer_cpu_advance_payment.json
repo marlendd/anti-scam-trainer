@@ -8,6 +8,10 @@
   "is_active": true,
   "reward_fragment_id": "safe-deal-piece-2",
   "content": {
+    "product": {
+      "title": "Intel Core i9-14900KS",
+      "price": 30000
+    },
     "start_node_id": "n1_delivery_refusal",
     "successful_ending_ids": ["ending_safe", "ending_recovered"],
     "nodes": [

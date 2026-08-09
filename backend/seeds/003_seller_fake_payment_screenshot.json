@@ -8,6 +8,10 @@
   "is_active": true,
   "reward_fragment_id": "safe-deal-piece-3",
   "content": {
+    "product": {
+      "title": "iPhone 15 Pro 256 ГБ",
+      "price": 84990
+    },
     "start_node_id": "n1_fake_payment_screenshot",
     "successful_ending_ids": ["ending_safe", "ending_recovered"],
     "nodes": [

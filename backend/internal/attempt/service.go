@@ -95,6 +95,12 @@ func (s *Service) GetState(
 
 	state := State{
 		Attempt: currentAttempt,
+		Scenario: ScenarioHeader{
+			Title:       currentScenario.Title,
+			Description: currentScenario.Description,
+			Role:        currentScenario.Role,
+			Product:     currentScenario.Product,
+		},
 		History: make([]HistoryItem, 0, len(answers)),
 	}
 

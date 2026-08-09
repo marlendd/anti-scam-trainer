@@ -55,8 +55,16 @@ type HistoryItem struct {
 	AnsweredAt     time.Time
 }
 
+type ScenarioHeader struct {
+	Title       string
+	Description string
+	Role        scenario.Role
+	Product     scenario.Product
+}
+
 type State struct {
 	Attempt     Attempt
+	Scenario    ScenarioHeader
 	CurrentNode *CurrentNode
 	History     []HistoryItem
 }
