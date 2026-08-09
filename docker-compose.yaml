@@ -47,6 +47,7 @@ services:
       - SMTP_FROM=EgorEmil@yandex.ru
       - APP_BASE_URL=http://localhost:3000
       - ALLOWED_ORIGINS=http://localhost:3000
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
     networks:
       - antiscam_net
 
@@ -75,6 +76,8 @@ services:
       PGADMIN_DISABLE_POSTFIX: "true"
     volumes:
       - pgadmin:/var/lib/pgadmin
+    networks:
+      - antiscam_net
     depends_on:
       - postgres
 networks:

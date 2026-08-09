@@ -15,6 +15,7 @@ import (
 	"github.com/marlendd/anti-scam-trainer/internal/attempt"
 	"github.com/marlendd/anti-scam-trainer/internal/auth"
 	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
+	"github.com/marlendd/anti-scam-trainer/internal/feedback"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/config"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/health"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/mailer"
@@ -99,6 +100,22 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	progressService := progress.NewService(progressRepo, evaluator)
 	progressHandler := progress.NewHandler(progressService, log)
 
+	// ---------- feedback ----------
+	openRouterKey := os.Getenv("OPENROUTER_API_KEY")
+	if openRouterKey == "" {
+		log.Warn("OPENROUTER_API_KEY is not set, feedback generation will fail")
+	}
+
+	llmProvider := feedback.NewOpenRouterLLMProvider(
+		openRouterKey,
+		"https://openrouter.ai/api/v1",
+		"openai/gpt-oss-20b:free",
+	)
+
+	feedbackRepo := feedback.NewPgRepository(db, log)
+	feedbackService := feedback.NewService(feedbackRepo, llmProvider, log)
+	feedbackHandler := feedback.NewHandler(feedbackService, log)
+
 	mux := http.NewServeMux()
 
 	// health/ready
@@ -149,6 +166,8 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.Handle("GET /api/v1/profile/puzzle", requireAuth(http.HandlerFunc(progressHandler.GetMyPuzzleProgress)))
 	mux.Handle("GET /api/v1/attempts/{id}/result", requireAuth(http.HandlerFunc(progressHandler.GetStatsOfAttempt)))
 	mux.Handle("GET /api/v1/profile/rank-history", requireAuth(http.HandlerFunc(progressHandler.GetMyRankHistory)))
+	// feedback routes
+	mux.Handle("GET /api/v1/attempts/{id}/feedback", requireAuth(http.HandlerFunc(feedbackHandler.GetAttemptFeedback)))
 	addr := ":" + cfg.Port
 	if cfg.Port == "" {
 		addr = ":8080"

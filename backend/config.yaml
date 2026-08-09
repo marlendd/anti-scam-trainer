@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # config.example.yaml — скопируй в config.yaml и заполни своими значениями
 env: "local"
 port: "8080"
@@ -22,3 +23,6 @@ smtp_from: "EgorEmil@yandex.ru"
 
 
 app_base_url: "http://localhost:3000"
+=======
+log_level: DEBUG
+>>>>>>> feature/add-llm-feedback-recomendation
