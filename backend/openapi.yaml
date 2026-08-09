@@ -914,6 +914,8 @@ components:
           type: integer
         total_count:
           type: integer
+        is_completed:          
+          type: boolean   
         fragments:
           type: array
           items:

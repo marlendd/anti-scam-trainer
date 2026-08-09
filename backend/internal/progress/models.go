@@ -18,6 +18,7 @@ type PuzzleFragment struct {
 type PuzzleProgress struct {
 	EarnedCount int              `json:"earned_count"`
 	TotalCount  int              `json:"total_count"`
+	IsCompleted bool             `json:"is_completed"`
 	Fragments   []PuzzleFragment `json:"fragments"`
 }
 
