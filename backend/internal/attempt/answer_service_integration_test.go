@@ -119,7 +119,10 @@ func TestService_SubmitAnswerLifecycle_Integration(t *testing.T) {
 	require.Equal(t, testfixture.SafeEndingID, *finalResult.EndingID)
 	require.NotNil(t, finalResult.Score)
 	require.Equal(t, 100, *finalResult.Score)
+	require.NotNil(t, finalResult.RewardFragmentID)
+	require.Equal(t, testfixture.RewardFragmentID, *finalResult.RewardFragmentID)
 	require.Equal(t, 3, countAttemptAnswers(t, ctx, db, currentAttempt.ID))
+	require.Equal(t, 1, countUserFragments(t, ctx, db, testUserID))
 
 	completedAttempt, err := attemptRepository.GetByID(
 		ctx,
@@ -145,6 +148,11 @@ func TestService_SubmitAnswerLifecycle_Integration(t *testing.T) {
 	require.Equal(t, scenario.WeightLow, savedFinalAnswer.Weight)
 	require.Equal(t, scenario.ScoreSafe, savedFinalAnswer.ChoiceScore)
 	require.Equal(t, finalResult, savedFinalAnswer.Response)
+
+	replayedFinalResult, err := service.SubmitAnswer(ctx, finalInput)
+	require.NoError(t, err)
+	require.Equal(t, finalResult, replayedFinalResult)
+	require.Equal(t, 1, countUserFragments(t, ctx, db, testUserID))
 }
 
 func TestService_SubmitAnswerConcurrentReplay_Integration(t *testing.T) {
@@ -218,9 +226,10 @@ func insertValidTestScenario(
 
 	fixture := testfixture.ValidScenario()
 	contentJSON, err := json.Marshal(scenario.Content{
-		StartNodeID: fixture.StartNodeID,
-		Nodes:       fixture.Nodes,
-		Endings:     fixture.Endings,
+		StartNodeID:         fixture.StartNodeID,
+		SuccessfulEndingIDs: fixture.SuccessfulEndingIDs,
+		Nodes:               fixture.Nodes,
+		Endings:             fixture.Endings,
 	})
 	require.NoError(t, err)
 
@@ -230,9 +239,10 @@ func insertValidTestScenario(
 						role,
 						title,
 						description,
+						reward_fragment_id,
 						content
 					)
-					VALUES (gen_random_uuid(), $1, $2, $3, $4, $5::jsonb)
+					VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6::jsonb)
 					RETURNING id
 	`
 
@@ -244,11 +254,31 @@ func insertValidTestScenario(
 		fixture.Role,
 		fixture.Title,
 		fixture.Description,
+		fixture.RewardFragmentID,
 		string(contentJSON),
 	).Scan(&scenarioID)
 	require.NoError(t, err)
 
 	return scenarioID
+}
+
+func countUserFragments(
+	t *testing.T,
+	ctx context.Context,
+	db *sql.DB,
+	userID string,
+) int {
+	t.Helper()
+
+	var count int
+	err := db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(*) FROM user_inventory WHERE user_id = $1`,
+		userID,
+	).Scan(&count)
+	require.NoError(t, err)
+
+	return count
 }
 
 func countAttemptAnswers(

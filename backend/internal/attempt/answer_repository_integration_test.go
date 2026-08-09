@@ -189,6 +189,53 @@ func TestPgRepository_AnswerLifecycle_Integration(t *testing.T) {
 	require.ErrorIs(t, err, attempt.ErrNodeAlreadyAnswered)
 }
 
+func TestPgRepository_GrantFragmentIsIdempotent_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	repository := attempt.NewPgRepository(db)
+	fragmentID := scenario.FragmentID("safe-deal-piece-test")
+
+	awarded, err := repository.GrantFragment(
+		ctx,
+		testUserID,
+		testScenarioID,
+		fragmentID,
+	)
+	require.NoError(t, err)
+	require.True(t, awarded)
+
+	awarded, err = repository.GrantFragment(
+		ctx,
+		testUserID,
+		testScenarioID,
+		fragmentID,
+	)
+	require.NoError(t, err)
+	require.False(t, awarded)
+
+	var (
+		savedScenarioID scenario.ScenarioID
+		savedFragmentID scenario.FragmentID
+		count           int
+	)
+	err = db.QueryRowContext(
+		ctx,
+		`SELECT MIN(scenario_id::text), MIN(fragment_id), COUNT(*)
+		 FROM user_inventory
+		 WHERE user_id = $1`,
+		testUserID,
+	).Scan(&savedScenarioID, &savedFragmentID, &count)
+	require.NoError(t, err)
+	require.Equal(t, testScenarioID, savedScenarioID)
+	require.Equal(t, fragmentID, savedFragmentID)
+	require.Equal(t, 1, count)
+}
+
 func newIdempotencyKey(
 	t *testing.T,
 	ctx context.Context,

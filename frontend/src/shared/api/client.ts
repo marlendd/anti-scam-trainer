@@ -11,7 +11,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
     const response = await fetch(`${API_BASE_URL}${path}`, {
         ...rest,
-        credentials: 'same-origin',
+        credentials: 'include',
         headers: {
             ...(body !== undefined && { 'Content-Type': 'application/json' }),
             ...headers,

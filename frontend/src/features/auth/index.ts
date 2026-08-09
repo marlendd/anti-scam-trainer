@@ -4,3 +4,4 @@ export { ForgotPasswordForm } from './ui/ForgotPasswordForm'
 
 export { useLogin } from './model/use-login.ts'
 export { useRegister } from './model/use-register.ts'
+export { useForgot } from './model/use-forgot.ts'

@@ -102,7 +102,10 @@ func (r *PgRepository) SaveReward(ctx context.Context, userID, scenarioID, fragm
 }
 
 func (r *PgRepository) GetUserFragments(ctx context.Context, userID string) ([]PuzzleFragment, error) {
-	const q = `SELECT fragment_id, earned_at FROM user_inventory WHERE user_id = $1`
+	const q = `SELECT scenario_id, fragment_id, earned_at
+		FROM user_inventory
+		WHERE user_id = $1
+		ORDER BY earned_at, id`
 
 	rows, err := r.db.QueryContext(ctx, q, userID)
 	if err != nil {
@@ -118,7 +121,7 @@ func (r *PgRepository) GetUserFragments(ctx context.Context, userID string) ([]P
 	var fragments []PuzzleFragment
 	for rows.Next() {
 		var f PuzzleFragment
-		if err := rows.Scan(&f.FragmentID, &f.EarnedAt); err != nil {
+		if err := rows.Scan(&f.ScenarioID, &f.FragmentID, &f.EarnedAt); err != nil {
 			return nil, err
 		}
 		fragments = append(fragments, f)
@@ -127,7 +130,9 @@ func (r *PgRepository) GetUserFragments(ctx context.Context, userID string) ([]P
 }
 
 func (r *PgRepository) GetTotalAvailableFragments(ctx context.Context) (int, error) {
-	const q = `SELECT COUNT(DISTINCT reward_fragment_id) FROM scenario_versions WHERE reward_fragment_id IS NOT NULL`
+	const q = `SELECT COUNT(DISTINCT reward_fragment_id)
+		FROM scenario_versions
+		WHERE reward_fragment_id IS NOT NULL AND is_active = TRUE`
 	var count int
 	err := r.db.QueryRowContext(ctx, q).Scan(&count)
 	return count, err

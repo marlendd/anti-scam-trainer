@@ -135,6 +135,7 @@ func (pg *PgRepository) getScenarioData(ctx context.Context, scenarioID Scenario
 						  title,
 						  description,
 						  is_active,
+						  COALESCE(reward_fragment_id, ''),
 						  content
 					FROM scenario_versions
 					WHERE id = $1
@@ -152,6 +153,7 @@ func (pg *PgRepository) getScenarioData(ctx context.Context, scenarioID Scenario
 		&result.Title,
 		&result.Description,
 		&result.IsActive,
+		&result.RewardFragmentID,
 		&result.Content,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -174,6 +176,7 @@ func (pg *PgRepository) decodeContent(rawContent json.RawMessage) (Content, erro
 
 func (pg *PgRepository) getScenarioFromContent(scenario Scenario, content Content) (Scenario, error) {
 	scenario.StartNodeID = content.StartNodeID
+	scenario.SuccessfulEndingIDs = content.SuccessfulEndingIDs
 	scenario.Nodes = content.Nodes
 	scenario.Endings = content.Endings
 

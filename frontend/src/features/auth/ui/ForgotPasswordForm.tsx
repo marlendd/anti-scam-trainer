@@ -1,15 +1,17 @@
 import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { useForgot } from '@/features/auth'
+import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Logo } from '@/shared/ui/logo'
 
 import styles from './AuthForm.module.scss'
-import { Button } from '@/shared/ui/button'
 
 export function ForgotPasswordForm() {
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
+
+    const forgot = useForgot()
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -21,23 +23,37 @@ export function ForgotPasswordForm() {
             return
         }
 
+        forgot.reset()
+
         try {
-            setIsSubmitting(true)
-
-            // Здесь позже будет mutation:
-            // await forgotPasswordMutation({ email }).unwrap()
-
-            await new Promise((resolve) => {
-                window.setTimeout(resolve, 700)
+            await forgot.mutateAsync({
+                email,
             })
 
             setSubmittedEmail(email)
-        } finally {
-            setIsSubmitting(false)
+        } catch {
+            // Ошибка уже находится в forgot.error
+        }
+    }
+
+    async function handleResend() {
+        if (!submittedEmail) {
+            return
+        }
+
+        forgot.reset()
+
+        try {
+            await forgot.mutateAsync({
+                email: submittedEmail,
+            })
+        } catch {
+            // Ошибка уже находится в forgot.error
         }
     }
 
     function handleRetry() {
+        forgot.reset()
         setSubmittedEmail(null)
     }
 
@@ -54,18 +70,28 @@ export function ForgotPasswordForm() {
                     </p>
                 </header>
 
-                <div className={styles.controls}>
-                    <Button className={styles.submit} type="button" onClick={handleRetry}>
-                        Вернуться
-                    </Button>
+                {forgot.isError && (
+                    <p className={styles.error}>
+                        Не удалось отправить письмо. Попробуйте ещё раз.
+                    </p>
+                )}
 
+                <div className={styles.controls}>
                     <Button
-                        className={styles.submit}
                         type="button"
                         variant="secondary"
                         onClick={handleRetry}
+                        disabled={forgot.isPending}
                     >
-                        Отправить ещё раз
+                        Изменить почту
+                    </Button>
+
+                    <Button
+                        type="button"
+                        onClick={handleResend}
+                        disabled={forgot.isPending}
+                    >
+                        {forgot.isPending ? 'Отправляем...' : 'Отправить ещё раз'}
                     </Button>
                 </div>
 
@@ -86,7 +112,9 @@ export function ForgotPasswordForm() {
                     <Logo />
                 </Link>
 
-                <p className={styles.description}>Введите почту, чтобы восстановить аккаунт</p>
+                <p className={styles.description}>
+                    Введите почту, чтобы восстановить аккаунт
+                </p>
             </header>
 
             <form className={styles.form} onSubmit={handleSubmit}>
@@ -98,12 +126,22 @@ export function ForgotPasswordForm() {
                     autoComplete="email"
                     inputMode="email"
                     required
-                    disabled={isSubmitting}
+                    disabled={forgot.isPending}
                 />
 
-                <button className={styles.submit} type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Отправляем...' : 'Восстановить пароль'}
-                </button>
+                {forgot.isError && (
+                    <p className={styles.error}>
+                        Не удалось отправить письмо. Проверьте адрес и попробуйте ещё раз.
+                    </p>
+                )}
+
+                <Button
+                    className={styles.submit}
+                    type="submit"
+                    disabled={forgot.isPending}
+                >
+                    {forgot.isPending ? 'Отправляем...' : 'Восстановить пароль'}
+                </Button>
             </form>
 
             <p className={styles.footer}>
