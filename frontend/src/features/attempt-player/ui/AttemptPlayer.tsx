@@ -31,6 +31,7 @@ export function AttemptPlayer({
     const submitAnswer = useSubmitAnswer()
 
     const node = attempt.currentNode
+    const isCompleted = attempt.status === 'completed'
 
     useEffect(() => {
         setHistory([])
@@ -44,11 +45,11 @@ export function AttemptPlayer({
         setHistory((currentHistory) => {
             const messageId = `node-${node.id}`
 
-            if (
-                currentHistory.some(
-                    (message) => message.id === messageId,
-                )
-            ) {
+            const alreadyExists = currentHistory.some(
+                (message) => message.id === messageId,
+            )
+
+            if (alreadyExists) {
                 return currentHistory
             }
 
@@ -79,10 +80,12 @@ export function AttemptPlayer({
             return
         }
 
+        const messageId = `choice-${node.id}-${choiceId}`
+
         setHistory((currentHistory) => [
             ...currentHistory,
             {
-                id: `choice-${node.id}-${choiceId}`,
+                id: messageId,
                 direction: 'outgoing',
                 text: choiceText,
             },
@@ -98,17 +101,27 @@ export function AttemptPlayer({
             if (result.completed) {
                 onComplete?.()
             }
-        } catch (error) {
+        } catch {
             setHistory((currentHistory) =>
                 currentHistory.filter(
-                    (message) =>
-                        message.id !==
-                        `choice-${node.id}-${choiceId}`,
+                    (message) => message.id !== messageId,
                 ),
             )
-
-            throw error
         }
+    }
+
+    if (isCompleted) {
+        return null
+    }
+
+    if (!node) {
+        return (
+            <div className={styles.messages}>
+                <div className={styles.error}>
+                    Не удалось получить текущий шаг сценария.
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -124,48 +137,34 @@ export function AttemptPlayer({
                 />
             ))}
 
-            {attempt.status === 'in_progress' && node && (
-                <div className={styles.answers}>
-                    <span className={styles.answersLabel}>
-                        Выберите ответ
+            <div className={styles.answers}>
+                <span className={styles.answersLabel}>
+                    Выберите ответ
+                </span>
+
+                {node.choices.map((choice) => (
+                    <button
+                        key={choice.id}
+                        type="button"
+                        className={styles.answer}
+                        disabled={submitAnswer.isPending}
+                        onClick={() => {
+                            void handleChoiceSelect(
+                                choice.id,
+                                choice.text,
+                            )
+                        }}
+                    >
+                        {choice.text}
+                    </button>
+                ))}
+
+                {submitAnswer.isError && (
+                    <span className={styles.error}>
+                        Не удалось отправить ответ. Попробуйте ещё раз.
                     </span>
-
-                    {node.choices.map((choice) => (
-                        <button
-                            key={choice.id}
-                            type="button"
-                            className={styles.answer}
-                            disabled={submitAnswer.isPending}
-                            onClick={() => {
-                                void handleChoiceSelect(
-                                    choice.id,
-                                    choice.text,
-                                )
-                            }}
-                        >
-                            {choice.text}
-                        </button>
-                    ))}
-
-                    {submitAnswer.isError && (
-                        <span className={styles.error}>
-                            Не удалось отправить ответ.
-                        </span>
-                    )}
-                </div>
-            )}
-
-            {attempt.status === 'completed' && (
-                <div className={styles.completed}>
-                    <strong>Сценарий завершён</strong>
-
-                    {attempt.score !== undefined && (
-                        <span>
-                            Результат: {attempt.score}
-                        </span>
-                    )}
-                </div>
-            )}
+                )}
+            </div>
 
             <div ref={messagesEndRef} />
         </div>
