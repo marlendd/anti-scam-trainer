@@ -8,10 +8,6 @@ type AttemptResultResponseDto = {
     score?: number
 }
 
-export async function getAttemptResult(
-    attemptId: string,
-): Promise<AttemptResult> {
-    return apiRequest<AttemptResultResponseDto>(
-        `/attempts/${attemptId}/result`,
-    )
+export async function getAttemptResult(attemptId: string): Promise<AttemptResult> {
+    return apiRequest<AttemptResultResponseDto>(`/attempts/${attemptId}/result`)
 }

@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import {
-    type TrainingAttemptState,
-    useSubmitAnswer,
-} from '@/entities/training-attempt'
+import { type TrainingAttemptState, useSubmitAnswer } from '@/entities/training-attempt'
 import { ChatMessage } from '@/shared/ui/chat-message'
 
 import styles from './AttemptPlayer.module.scss'
@@ -20,10 +17,7 @@ type HistoryMessage = {
     avatarText?: string
 }
 
-export function AttemptPlayer({
-    attempt,
-    onComplete,
-}: AttemptPlayerProps) {
+export function AttemptPlayer({ attempt, onComplete }: AttemptPlayerProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
     const [history, setHistory] = useState<HistoryMessage[]>([])
@@ -45,9 +39,7 @@ export function AttemptPlayer({
         setHistory((currentHistory) => {
             const messageId = `node-${node.id}`
 
-            const alreadyExists = currentHistory.some(
-                (message) => message.id === messageId,
-            )
+            const alreadyExists = currentHistory.some((message) => message.id === messageId)
 
             if (alreadyExists) {
                 return currentHistory
@@ -72,10 +64,7 @@ export function AttemptPlayer({
         })
     }, [history.length])
 
-    async function handleChoiceSelect(
-        choiceId: string,
-        choiceText: string,
-    ) {
+    async function handleChoiceSelect(choiceId: string, choiceText: string) {
         if (!node || submitAnswer.isPending) {
             return
         }
@@ -103,9 +92,7 @@ export function AttemptPlayer({
             }
         } catch {
             setHistory((currentHistory) =>
-                currentHistory.filter(
-                    (message) => message.id !== messageId,
-                ),
+                currentHistory.filter((message) => message.id !== messageId),
             )
         }
     }
@@ -117,9 +104,7 @@ export function AttemptPlayer({
     if (!node) {
         return (
             <div className={styles.messages}>
-                <div className={styles.error}>
-                    Не удалось получить текущий шаг сценария.
-                </div>
+                <div className={styles.error}>Не удалось получить текущий шаг сценария.</div>
             </div>
         )
     }
@@ -138,9 +123,7 @@ export function AttemptPlayer({
             ))}
 
             <div className={styles.answers}>
-                <span className={styles.answersLabel}>
-                    Выберите ответ
-                </span>
+                <span className={styles.answersLabel}>Выберите ответ</span>
 
                 {node.choices.map((choice) => (
                     <button
@@ -149,10 +132,7 @@ export function AttemptPlayer({
                         className={styles.answer}
                         disabled={submitAnswer.isPending}
                         onClick={() => {
-                            void handleChoiceSelect(
-                                choice.id,
-                                choice.text,
-                            )
+                            void handleChoiceSelect(choice.id, choice.text)
                         }}
                     >
                         {choice.text}

@@ -1,33 +1,59 @@
+import { useMemo } from 'react'
 import type { AgChartOptions } from 'ag-charts-community'
 import { AgCharts } from 'ag-charts-react'
 
-import { balanceHistory } from '../model/balanceHistory'
+import { usePuzzleProgress } from '@/entities/profile-progress'
 
 import styles from './DashboardBalanceChart.module.scss'
 
-const INCREASE_COLOR = '#04e061'
-const DECREASE_COLOR = '#ff4053'
-const NEUTRAL_COLOR = '#858585'
+const CHART_COLOR = '#00aaff'
 
-export function DashboardBalanceChart() {
-    const currentBalance = balanceHistory[balanceHistory.length - 1]?.balance
+type PuzzleChartPoint = {
+    date: string
+    fragments: number
+}
 
-    const previousBalance = balanceHistory[balanceHistory.length - 2]?.balance
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+})
 
-    const balanceDifference =
-        previousBalance !== undefined && currentBalance !== undefined
-            ? currentBalance - previousBalance
-            : 0
+function createChartData(
+    fragments: {
+        fragmentId: string
+        earnedAt: string
+    }[],
+): PuzzleChartPoint[] {
+    const sortedFragments = [...fragments].sort(
+        (first, second) => new Date(first.earnedAt).getTime() - new Date(second.earnedAt).getTime(),
+    )
 
-    const chartColor =
-        balanceDifference > 0
-            ? INCREASE_COLOR
-            : balanceDifference < 0
-              ? DECREASE_COLOR
-              : NEUTRAL_COLOR
+    const fragmentsByDate = new Map<string, number>()
 
-    const options: AgChartOptions = {
-        data: balanceHistory,
+    for (const fragment of sortedFragments) {
+        const date = dateFormatter.format(new Date(fragment.earnedAt))
+
+        fragmentsByDate.set(date, (fragmentsByDate.get(date) ?? 0) + 1)
+    }
+
+    let total = 0
+
+    return Array.from(fragmentsByDate.entries()).map(([date, count]) => {
+        total += count
+
+        return {
+            date,
+            fragments: total,
+        }
+    })
+}
+
+function createOptions(
+    data: PuzzleChartPoint[],
+    totalCount: number,
+): AgChartOptions<PuzzleChartPoint> {
+    return {
+        data,
 
         background: {
             fill: 'transparent',
@@ -61,10 +87,21 @@ export function DashboardBalanceChart() {
             y: {
                 type: 'number',
                 position: 'left',
+
+                min: 0,
+                max: totalCount > 0 ? totalCount : undefined,
                 nice: false,
 
+                title: {
+                    enabled: false,
+                },
+
+                interval: {
+                    step: 1,
+                },
+
                 label: {
-                    formatter: ({ value }) => `${value} ₽`,
+                    formatter: ({ value }) => `${value}`,
                 },
 
                 gridLine: {
@@ -82,14 +119,14 @@ export function DashboardBalanceChart() {
             {
                 type: 'line',
                 xKey: 'date',
-                yKey: 'balance',
-                yName: 'Баланс',
+                yKey: 'fragments',
+                yName: 'Фрагменты',
 
                 interpolation: {
                     type: 'smooth',
                 },
 
-                stroke: chartColor,
+                stroke: CHART_COLOR,
                 strokeWidth: 3,
                 lineDash: [10, 7],
 
@@ -97,7 +134,7 @@ export function DashboardBalanceChart() {
                     enabled: true,
                     size: 7,
                     fill: '#f7f7f7',
-                    stroke: chartColor,
+                    stroke: CHART_COLOR,
                     strokeWidth: 3,
                 },
 
@@ -105,8 +142,8 @@ export function DashboardBalanceChart() {
                     renderer: ({ datum }) => ({
                         data: [
                             {
-                                label: 'Остаток',
-                                value: `${datum.balance} ₽`,
+                                label: 'Собрано',
+                                value: `${datum.fragments} из ${totalCount}`,
                             },
                         ],
                     }),
@@ -114,32 +151,56 @@ export function DashboardBalanceChart() {
             },
         ],
     }
+}
+
+export function DashboardBalanceChart() {
+    const { data, isPending, isError } = usePuzzleProgress()
+
+    const chartData = useMemo(() => createChartData(data?.fragments ?? []), [data])
+
+    const options = useMemo(
+        () => createOptions(chartData, data?.totalCount ?? 0),
+        [chartData, data?.totalCount],
+    )
+
+    const earnedCount = data?.earnedCount ?? 0
+    const totalCount = data?.totalCount ?? 0
+
+    const progress = totalCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0
 
     return (
         <section className={styles.card}>
             <header className={styles.header}>
                 <div className={styles.text}>
-                    <h2 className={styles.title}>Ваш баланс</h2>
+                    <h2 className={styles.title}>Фрагменты пазла</h2>
 
-                    <p className={styles.description}>История изменения баланса</p>
+                    <p className={styles.description}>История сбора фрагментов</p>
                 </div>
 
-                <div className={styles.currentBalance}>
-                    <span className={styles.balance}>{currentBalance} ₽</span>
-
-                    {balanceDifference !== 0 && (
-                        <span
-                            className={balanceDifference > 0 ? styles.improvement : styles.decline}
-                        >
-                            {balanceDifference > 0 ? '↑' : '↓'} {Math.abs(balanceDifference)} ₽
+                {!isPending && !isError && (
+                    <div className={styles.currentBalance}>
+                        <span className={styles.balance}>
+                            {earnedCount} из {totalCount}
                         </span>
-                    )}
-                </div>
+
+                        <span className={styles.improvement}>{progress}%</span>
+                    </div>
+                )}
             </header>
 
-            <div className={styles.chart}>
-                <AgCharts options={options} />
-            </div>
+            {isPending && <p className={styles.description}>Загружаем прогресс...</p>}
+
+            {isError && <p className={styles.description}>Не удалось загрузить прогресс пазла.</p>}
+
+            {!isPending && !isError && chartData.length === 0 && (
+                <p className={styles.description}>Фрагменты пока не собраны.</p>
+            )}
+
+            {!isPending && !isError && chartData.length > 0 && (
+                <div className={styles.chart}>
+                    <AgCharts options={options} />
+                </div>
+            )}
         </section>
     )
 }

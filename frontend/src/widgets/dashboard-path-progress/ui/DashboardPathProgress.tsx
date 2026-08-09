@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react'
 import { faCartShopping, faStore, type IconDefinition } from '@fortawesome/free-solid-svg-icons'
 
+import { type ProgressRole, useRoleProgress } from '@/entities/profile-progress'
+import { useScenarios } from '@/entities/training-scenario'
 import { Icon } from '@/shared/ui/icon'
 
 import {
@@ -63,7 +65,9 @@ function PathProgressItem({ path }: PathProgressItemProps) {
                 <div className={styles.pathHeading}>
                     <span
                         className={styles.pathIcon}
-                        style={{ color: path.color }}
+                        style={{
+                            color: path.color,
+                        }}
                         aria-hidden="true"
                     >
                         <Icon icon={pathIcons[path.id]} />
@@ -96,11 +100,61 @@ function PathProgressItem({ path }: PathProgressItemProps) {
     )
 }
 
-type DashboardPathProgressProps = {
-    paths?: TrainingPathProgress[]
+function getCompletedCount(
+    roleProgress:
+        | {
+              role: ProgressRole
+              completedCount: number
+          }[]
+        | undefined,
+    role: ProgressRole,
+) {
+    return roleProgress?.find((item) => item.role === role)?.completedCount ?? 0
 }
 
-export function DashboardPathProgress({ paths = pathProgressMock }: DashboardPathProgressProps) {
+export function DashboardPathProgress() {
+    const {
+        data: roleProgress,
+        isPending: isRoleProgressPending,
+        isError: isRoleProgressError,
+    } = useRoleProgress()
+
+    const {
+        data: buyerScenarios = [],
+        isPending: isBuyerPending,
+        isError: isBuyerError,
+    } = useScenarios('buyer')
+
+    const {
+        data: sellerScenarios = [],
+        isPending: isSellerPending,
+        isError: isSellerError,
+    } = useScenarios('seller')
+
+    const isPending = isRoleProgressPending || isBuyerPending || isSellerPending
+
+    const isError = isRoleProgressError || isBuyerError || isSellerError
+
+    if (isPending) {
+        return null
+    }
+
+    if (isError) {
+        return null
+    }
+
+    const paths = pathProgressMock.map((path) => {
+        const role = path.id as ProgressRole
+
+        const totalScenarios = role === 'buyer' ? buyerScenarios.length : sellerScenarios.length
+
+        return {
+            ...path,
+            completedScenarios: getCompletedCount(roleProgress, role),
+            totalScenarios,
+        }
+    })
+
     return (
         <div className={styles.paths}>
             {paths.map((path) => (

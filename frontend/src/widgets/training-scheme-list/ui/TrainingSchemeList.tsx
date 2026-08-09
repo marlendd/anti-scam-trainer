@@ -12,17 +12,12 @@ type TrainingScenarioListProps = {
     scenarios: TrainingScenarioSummary[]
 }
 
-export function TrainingSchemeList({
-    scenarios,
-}: TrainingScenarioListProps) {
+export function TrainingSchemeList({ scenarios }: TrainingScenarioListProps) {
     const navigate = useNavigate()
 
-    const [startingScenarioId, setStartingScenarioId] =
-        useState<string | null>(null)
+    const [startingScenarioId, setStartingScenarioId] = useState<string | null>(null)
 
-    async function handleScenarioClick(
-        scenario: TrainingScenarioSummary,
-    ) {
+    async function handleScenarioClick(scenario: TrainingScenarioSummary) {
         if (startingScenarioId) {
             return
         }
@@ -34,9 +29,7 @@ export function TrainingSchemeList({
                 await startAttempt(scenario.id)
             }
 
-            navigate(
-                `/training/path/${scenario.role}/${scenario.id}`,
-            )
+            navigate(`/training/path/${scenario.role}/${scenario.id}`)
         } finally {
             setStartingScenarioId(null)
         }
@@ -45,11 +38,9 @@ export function TrainingSchemeList({
     return (
         <div className={styles.list}>
             {scenarios.map((scenario) => {
-                const isCompleted =
-                    scenario.status === 'completed'
+                const isCompleted = scenario.status === 'completed'
 
-                const isStarting =
-                    startingScenarioId === scenario.id
+                const isStarting = startingScenarioId === scenario.id
 
                 return (
                     <button
@@ -58,39 +49,16 @@ export function TrainingSchemeList({
                         className={styles.scenario}
                         data-status={scenario.status}
                         disabled={isStarting}
-                        onClick={() =>
-                            handleScenarioClick(scenario)
-                        }
+                        onClick={() => handleScenarioClick(scenario)}
                     >
-                        <span
-                            className={styles.scenarioIcon}
-                            aria-hidden="true"
-                        >
-                            <Icon
-                                icon={
-                                    isCompleted
-                                        ? faCheck
-                                        : faPlay
-                                }
-                            />
+                        <span className={styles.scenarioIcon} aria-hidden="true">
+                            <Icon icon={isCompleted ? faCheck : faPlay} />
                         </span>
 
-                        <span
-                            className={styles.scenarioContent}
-                        >
-                            <strong
-                                className={
-                                    styles.scenarioTitle
-                                }
-                            >
-                                {scenario.title}
-                            </strong>
+                        <span className={styles.scenarioContent}>
+                            <strong className={styles.scenarioTitle}>{scenario.title}</strong>
 
-                            <span
-                                className={
-                                    styles.scenarioDescription
-                                }
-                            >
+                            <span className={styles.scenarioDescription}>
                                 {scenario.description}
                             </span>
                         </span>

@@ -45,13 +45,10 @@ export async function submitAnswer({
         idempotency_key: crypto.randomUUID(),
     }
 
-    const response = await apiRequest<SubmitAnswerResponseDto>(
-        `/attempts/${attemptId}/answers`,
-        {
-            method: 'POST',
-            body,
-        },
-    )
+    const response = await apiRequest<SubmitAnswerResponseDto>(`/attempts/${attemptId}/answers`, {
+        method: 'POST',
+        body,
+    })
 
     return {
         attemptId: response.attempt_id,

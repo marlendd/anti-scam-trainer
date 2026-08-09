@@ -2,11 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { ApiError, apiRequest } from '@/shared/api'
 
-import type {
-    AttemptStatus,
-    TrainingAttempt,
-    TrainingAttemptState,
-} from '../model/types'
+import type { AttemptStatus, TrainingAttempt, TrainingAttemptState } from '../model/types'
 
 interface AttemptResponseDto {
     id: string
@@ -46,9 +42,7 @@ function mapAttempt(dto: AttemptResponseDto): TrainingAttempt {
     }
 }
 
-function mapAttemptState(
-    dto: AttemptStateResponseDto,
-): TrainingAttemptState {
+function mapAttemptState(dto: AttemptStateResponseDto): TrainingAttemptState {
     return {
         ...mapAttempt(dto),
 
@@ -66,9 +60,7 @@ function mapAttemptState(
     }
 }
 
-async function getActiveAttempt(
-    scenarioId: string,
-): Promise<TrainingAttempt> {
+async function getActiveAttempt(scenarioId: string): Promise<TrainingAttempt> {
     const response = await apiRequest<AttemptResponseDto>(
         `/scenarios/${scenarioId}/attempts/active`,
     )
@@ -76,32 +68,21 @@ async function getActiveAttempt(
     return mapAttempt(response)
 }
 
-async function startAttempt(
-    scenarioId: string,
-): Promise<TrainingAttempt> {
-    const response = await apiRequest<AttemptResponseDto>(
-        `/scenarios/${scenarioId}/attempts`,
-        {
-            method: 'POST',
-        },
-    )
+async function startAttempt(scenarioId: string): Promise<TrainingAttempt> {
+    const response = await apiRequest<AttemptResponseDto>(`/scenarios/${scenarioId}/attempts`, {
+        method: 'POST',
+    })
 
     return mapAttempt(response)
 }
 
-async function getAttempt(
-    attemptId: string,
-): Promise<TrainingAttemptState> {
-    const response = await apiRequest<AttemptStateResponseDto>(
-        `/attempts/${attemptId}`,
-    )
+async function getAttempt(attemptId: string): Promise<TrainingAttemptState> {
+    const response = await apiRequest<AttemptStateResponseDto>(`/attempts/${attemptId}`)
 
     return mapAttemptState(response)
 }
 
-async function getOrStartAttempt(
-    scenarioId: string,
-): Promise<TrainingAttempt> {
+async function getOrStartAttempt(scenarioId: string): Promise<TrainingAttempt> {
     try {
         return await getActiveAttempt(scenarioId)
     } catch (error) {
@@ -125,15 +106,9 @@ async function getOrStartAttempt(
     }
 }
 
-export function useTrainingSession(
-    scenarioId: string | null,
-) {
+export function useTrainingSession(scenarioId: string | null) {
     const attemptQuery = useQuery({
-        queryKey: [
-            'training-attempt',
-            'active',
-            scenarioId,
-        ],
+        queryKey: ['training-attempt', 'active', scenarioId],
         queryFn: () => {
             if (!scenarioId) {
                 throw new Error('Scenario ID is required')
@@ -148,11 +123,7 @@ export function useTrainingSession(
     const attemptId = attemptQuery.data?.id ?? null
 
     const stateQuery = useQuery({
-        queryKey: [
-            'training-attempt',
-            'state',
-            attemptId,
-        ],
+        queryKey: ['training-attempt', 'state', attemptId],
         queryFn: () => {
             if (!attemptId) {
                 throw new Error('Attempt ID is required')
@@ -169,20 +140,10 @@ export function useTrainingSession(
 
         isPending:
             scenarioId !== null &&
-            (
-                attemptQuery.isPending ||
-                (
-                    attemptQuery.isSuccess &&
-                    stateQuery.isPending
-                )
-            ),
+            (attemptQuery.isPending || (attemptQuery.isSuccess && stateQuery.isPending)),
 
-        isError:
-            attemptQuery.isError ||
-            stateQuery.isError,
+        isError: attemptQuery.isError || stateQuery.isError,
 
-        error:
-            attemptQuery.error ??
-            stateQuery.error,
+        error: attemptQuery.error ?? stateQuery.error,
     }
 }

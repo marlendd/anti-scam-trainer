@@ -28,24 +28,17 @@ type AttemptFeedbackResponseDto = {
     motivation?: string
 }
 
-export async function getAttemptFeedback(
-    attemptId: string,
-): Promise<AttemptFeedback> {
-    const response = await apiRequest<AttemptFeedbackResponseDto>(
-        `/attempts/${attemptId}/feedback`,
-    )
+export async function getAttemptFeedback(attemptId: string): Promise<AttemptFeedback> {
+    const response = await apiRequest<AttemptFeedbackResponseDto>(`/attempts/${attemptId}/feedback`)
 
     return {
         strengths: response.strengths ?? [],
         weaknesses: response.weaknesses ?? [],
         riskProfile: response.risk_profile
             ? {
-                  dominantRisk:
-                      response.risk_profile.dominant_risk,
-                  riskCount:
-                      response.risk_profile.risk_count,
-                  description:
-                      response.risk_profile.description,
+                  dominantRisk: response.risk_profile.dominant_risk,
+                  riskCount: response.risk_profile.risk_count,
+                  description: response.risk_profile.description,
               }
             : undefined,
         recommendations: response.recommendations ?? [],

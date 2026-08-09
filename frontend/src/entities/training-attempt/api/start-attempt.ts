@@ -14,15 +14,10 @@ interface AttemptResponseDto {
     completed_at?: string
 }
 
-export async function startAttempt(
-    scenarioId: string,
-): Promise<TrainingAttempt> {
-    const response = await apiRequest<AttemptResponseDto>(
-        `/scenarios/${scenarioId}/attempts`,
-        {
-            method: 'POST',
-        },
-    )
+export async function startAttempt(scenarioId: string): Promise<TrainingAttempt> {
+    const response = await apiRequest<AttemptResponseDto>(`/scenarios/${scenarioId}/attempts`, {
+        method: 'POST',
+    })
 
     return {
         id: response.id,

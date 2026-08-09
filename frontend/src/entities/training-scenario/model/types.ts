@@ -24,10 +24,7 @@ export type ScenarioMessage = {
 
 export type TrainingRole = 'buyer' | 'seller'
 
-export type TrainingScenarioStatus =
-    | 'not_started'
-    | 'in_progress'
-    | 'completed'
+export type TrainingScenarioStatus = 'not_started' | 'in_progress' | 'completed'
 
 export interface TrainingScenarioSummary {
     id: string

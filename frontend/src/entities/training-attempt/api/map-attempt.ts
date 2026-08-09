@@ -1,16 +1,8 @@
-import type {
-    TrainingAttempt,
-    TrainingAttemptState,
-} from '../model/types'
+import type { TrainingAttempt, TrainingAttemptState } from '../model/types'
 
-import type {
-    AttemptResponseDto,
-    AttemptStateResponseDto,
-} from './types'
+import type { AttemptResponseDto, AttemptStateResponseDto } from './types'
 
-export function mapAttempt(
-    dto: AttemptResponseDto,
-): TrainingAttempt {
+export function mapAttempt(dto: AttemptResponseDto): TrainingAttempt {
     return {
         id: dto.id,
         scenarioId: dto.scenario_id,
@@ -24,9 +16,7 @@ export function mapAttempt(
     }
 }
 
-export function mapAttemptState(
-    dto: AttemptStateResponseDto,
-): TrainingAttemptState {
+export function mapAttemptState(dto: AttemptStateResponseDto): TrainingAttemptState {
     return {
         ...mapAttempt(dto),
 

@@ -1,7 +1,4 @@
-export type AttemptStatus =
-    | 'in_progress'
-    | 'completed'
-    | 'aborted'
+export type AttemptStatus = 'in_progress' | 'completed' | 'aborted'
 
 export interface ChoiceOption {
     id: string

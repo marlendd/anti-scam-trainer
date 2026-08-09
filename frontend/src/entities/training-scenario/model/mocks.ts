@@ -92,14 +92,12 @@ export const phishingLinkScenario: TrainingScenario = {
             {
                 id: 'external-link',
                 title: 'Внешняя ссылка',
-                description:
-                    'Собеседник предлагает перейти на сторонний сайт для получения денег.',
+                description: 'Собеседник предлагает перейти на сторонний сайт для получения денег.',
             },
             {
                 id: 'fake-domain',
                 title: 'Поддельный адрес',
-                description:
-                    'Домен лишь имитирует официальный сервис и не относится к платформе.',
+                description: 'Домен лишь имитирует официальный сервис и не относится к платформе.',
             },
             {
                 id: 'fake-payment',
@@ -201,8 +199,7 @@ export const advancePaymentScenario: TrainingScenario = {
             {
                 id: 'direct-transfer',
                 title: 'Перевод напрямую',
-                description:
-                    'Деньги предлагают отправить непосредственно на банковскую карту.',
+                description: 'Деньги предлагают отправить непосредственно на банковскую карту.',
             },
             {
                 id: 'scarcity',
@@ -321,8 +318,7 @@ export const fakeDeliveryScenario: TrainingScenario = {
             {
                 id: 'external-page',
                 title: 'Сторонняя форма',
-                description:
-                    'Для подтверждения сделки предлагается открыть внешний сайт.',
+                description: 'Для подтверждения сделки предлагается открыть внешний сайт.',
             },
         ],
 
@@ -332,8 +328,7 @@ export const fakeDeliveryScenario: TrainingScenario = {
             'Отказаться от сделки при попытке обойти платформу',
         ],
 
-        goldenRule:
-            'Безопасная доставка оформляется и отслеживается внутри платформы.',
+        goldenRule: 'Безопасная доставка оформляется и отслеживается внутри платформы.',
     },
 }
 
@@ -411,8 +406,7 @@ export const smsCodeRequestScenario: TrainingScenario = {
             {
                 id: 'fake-reason',
                 title: 'Выдуманное подтверждение',
-                description:
-                    'Для получения оплаты покупателю не нужен код из СМС продавца.',
+                description: 'Для получения оплаты покупателю не нужен код из СМС продавца.',
             },
         ],
 
@@ -422,8 +416,7 @@ export const smsCodeRequestScenario: TrainingScenario = {
             'При подозрении прекратить общение',
         ],
 
-        goldenRule:
-            'Код из СМС — такой же секрет, как пароль. Его нельзя передавать другим людям.',
+        goldenRule: 'Код из СМС — такой же секрет, как пароль. Его нельзя передавать другим людям.',
     },
 }
 
@@ -501,8 +494,7 @@ export const fakeSupportScenario: TrainingScenario = {
             {
                 id: 'account-threat',
                 title: 'Угроза блокировкой',
-                description:
-                    'Мошенник создаёт чувство страха и требует действовать немедленно.',
+                description: 'Мошенник создаёт чувство страха и требует действовать немедленно.',
             },
         ],
 
@@ -723,8 +715,7 @@ export const artificialUrgencyScenario: TrainingScenario = {
             'Отказываться от сделки при сильном давлении',
         ],
 
-        goldenRule:
-            'Надёжная сделка не требует принимать решение за несколько минут.',
+        goldenRule: 'Надёжная сделка не требует принимать решение за несколько минут.',
     },
 }
 
@@ -808,8 +799,7 @@ export const excessPaymentScenario: TrainingScenario = {
             {
                 id: 'urgency',
                 title: 'Срочность',
-                description:
-                    'Мошенник старается добиться перевода до проверки операции.',
+                description: 'Мошенник старается добиться перевода до проверки операции.',
             },
         ],
 
@@ -916,14 +906,12 @@ export const productSubstitutionScenario: TrainingScenario = {
             {
                 id: 'unofficial-return',
                 title: 'Возврат вне платформы',
-                description:
-                    'Покупатель пытается обойти официальный процесс возврата.',
+                description: 'Покупатель пытается обойти официальный процесс возврата.',
             },
             {
                 id: 'money-first',
                 title: 'Сначала деньги',
-                description:
-                    'Покупатель требует возврат средств до проверки возвращённого товара.',
+                description: 'Покупатель требует возврат средств до проверки возвращённого товара.',
             },
         ],
 
@@ -951,8 +939,5 @@ export const trainingScenarioMocks: TrainingScenario[] = [
 ]
 
 export const trainingScenarioById = Object.fromEntries(
-    trainingScenarioMocks.map((scenario) => [
-        scenario.id,
-        scenario,
-    ]),
+    trainingScenarioMocks.map((scenario) => [scenario.id, scenario]),
 ) as Record<string, TrainingScenario>

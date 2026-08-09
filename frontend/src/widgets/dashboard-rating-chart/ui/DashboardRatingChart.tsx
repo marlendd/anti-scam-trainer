@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { AgChartOptions } from 'ag-charts-community'
 import { AgCharts } from 'ag-charts-react'
 
-import { rankingHistory } from '../model/rankingHistory'
+import { useRankHistory } from '@/entities/profile-progress'
 
 import styles from './DashboardRatingChart.module.scss'
 
@@ -10,9 +10,22 @@ const IMPROVEMENT_COLOR = '#04e061'
 const DECLINE_COLOR = '#ff4053'
 const NEUTRAL_COLOR = '#858585'
 
-function createOptions(chartColor: string): AgChartOptions {
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+})
+
+type RatingChartPoint = {
+    date: string
+    rank: number
+}
+
+function createOptions(
+    data: RatingChartPoint[],
+    chartColor: string,
+): AgChartOptions<RatingChartPoint> {
     return {
-        data: rankingHistory,
+        data,
 
         background: {
             fill: 'transparent',
@@ -103,6 +116,17 @@ function createOptions(chartColor: string): AgChartOptions {
 }
 
 export function DashboardRatingChart() {
+    const { data, isPending, isError } = useRankHistory()
+
+    const rankingHistory = useMemo(
+        () =>
+            (data?.history ?? []).map((point) => ({
+                date: dateFormatter.format(new Date(point.date)),
+                rank: point.rank,
+            })),
+        [data],
+    )
+
     const currentRank = rankingHistory[rankingHistory.length - 1]?.rank
 
     const previousRank = rankingHistory[rankingHistory.length - 2]?.rank
@@ -113,7 +137,10 @@ export function DashboardRatingChart() {
     const chartColor =
         rankDifference > 0 ? IMPROVEMENT_COLOR : rankDifference < 0 ? DECLINE_COLOR : NEUTRAL_COLOR
 
-    const options = useMemo(() => createOptions(chartColor), [chartColor])
+    const options = useMemo(
+        () => createOptions(rankingHistory, chartColor),
+        [rankingHistory, chartColor],
+    )
 
     return (
         <section className={styles.card}>
@@ -124,20 +151,36 @@ export function DashboardRatingChart() {
                     <p className={styles.description}>Чем выше линия, тем лучше результат</p>
                 </div>
 
-                <div className={styles.currentRank}>
-                    <span className={styles.rank}>{currentRank}</span>
+                {currentRank !== undefined && (
+                    <div className={styles.currentRank}>
+                        <span className={styles.rank}>{currentRank}</span>
 
-                    {rankDifference !== 0 && (
-                        <span className={rankDifference > 0 ? styles.improvement : styles.decline}>
-                            {rankDifference > 0 ? '↑' : '↓'} {Math.abs(rankDifference)}
-                        </span>
-                    )}
-                </div>
+                        {rankDifference !== 0 && (
+                            <span
+                                className={rankDifference > 0 ? styles.improvement : styles.decline}
+                            >
+                                {rankDifference > 0 ? '↑' : '↓'} {Math.abs(rankDifference)}
+                            </span>
+                        )}
+                    </div>
+                )}
             </header>
 
-            <div className={styles.chart}>
-                <AgCharts options={options} />
-            </div>
+            {isPending && <p className={styles.description}>Загружаем историю рейтинга...</p>}
+
+            {isError && (
+                <p className={styles.description}>Не удалось загрузить историю рейтинга.</p>
+            )}
+
+            {!isPending && !isError && rankingHistory.length === 0 && (
+                <p className={styles.description}>Истории рейтинга пока нет.</p>
+            )}
+
+            {!isPending && !isError && rankingHistory.length > 0 && (
+                <div className={styles.chart}>
+                    <AgCharts options={options} />
+                </div>
+            )}
         </section>
     )
 }

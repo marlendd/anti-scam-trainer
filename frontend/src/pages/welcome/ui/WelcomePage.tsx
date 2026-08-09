@@ -9,10 +9,5 @@ export function WelcomePage() {
         navigate('/training/role-selection')
     }
 
-    return (
-        <WelcomeSlider
-            onComplete={handleComplete}
-            onSkip={handleComplete}
-        />
-    )
+    return <WelcomeSlider onComplete={handleComplete} onSkip={handleComplete} />
 }

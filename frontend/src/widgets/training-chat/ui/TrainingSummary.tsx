@@ -23,61 +23,40 @@ export function TrainingSummary({
 }: TrainingSummaryProps) {
     return (
         <div className={styles.summary}>
-
             <div className={styles.top}>
                 <div className={styles.summaryHeader}>
-                    <span className={styles.summaryIcon}>
-                        ✓
-                    </span>
+                    <span className={styles.summaryIcon}>✓</span>
 
-                    <h2 className={styles.summaryTitle}>
-                        Тренировка завершена
-                    </h2>
+                    <h2 className={styles.summaryTitle}>Тренировка завершена</h2>
 
-                    {title && (
-                        <p className={styles.summaryScenario}>
-                            {title}
-                        </p>
-                    )}
+                    {title && <p className={styles.summaryScenario}>{title}</p>}
                 </div>
 
                 {isResultPending ? (
                     <p>Подсчитываем результат...</p>
                 ) : isResultError ? (
-                    <p className={styles.summaryError}>
-                        Не удалось загрузить результат.
-                    </p>
+                    <p className={styles.summaryError}>Не удалось загрузить результат.</p>
                 ) : (
                     <div className={styles.summaryScore}>
-                        <strong className={styles.summaryScoreValue}>
-                            {score ?? 0}
-                        </strong>
+                        <strong className={styles.summaryScoreValue}>{score ?? 0}</strong>
 
-                        <span className={styles.summaryScoreLabel}>
-                            баллов
-                        </span>
+                        <span className={styles.summaryScoreLabel}>баллов</span>
                     </div>
                 )}
             </div>
 
             {isFeedbackPending && (
-                <div className={styles.summaryLoading}>
-                    Анализируем прохождение...
-                </div>
+                <div className={styles.summaryLoading}>Анализируем прохождение...</div>
             )}
 
             {isFeedbackError && (
-                <p className={styles.summaryError}>
-                    Не удалось загрузить персональный разбор.
-                </p>
+                <p className={styles.summaryError}>Не удалось загрузить персональный разбор.</p>
             )}
 
             {feedback && (
                 <div className={styles.summaryContent}>
                     {feedback.motivation && (
-                        <div className={styles.summaryMotivation}>
-                            {feedback.motivation}
-                        </div>
+                        <div className={styles.summaryMotivation}>{feedback.motivation}</div>
                     )}
 
                     {feedback.strengths.length > 0 && (
@@ -86,9 +65,7 @@ export function TrainingSummary({
 
                             <ul>
                                 {feedback.strengths.map((item) => (
-                                    <li key={item}>
-                                        {item}
-                                    </li>
+                                    <li key={item}>{item}</li>
                                 ))}
                             </ul>
                         </div>
@@ -100,9 +77,7 @@ export function TrainingSummary({
 
                             <ul>
                                 {feedback.weaknesses.map((item) => (
-                                    <li key={item}>
-                                        {item}
-                                    </li>
+                                    <li key={item}>{item}</li>
                                 ))}
                             </ul>
                         </div>
@@ -114,22 +89,12 @@ export function TrainingSummary({
 
                             {feedback.riskProfile.dominantRisk && (
                                 <p>
-                                    <strong>
-                                        {
-                                            feedback.riskProfile
-                                                .dominantRisk
-                                        }
-                                    </strong>
+                                    <strong>{feedback.riskProfile.dominantRisk}</strong>
                                 </p>
                             )}
 
                             {feedback.riskProfile.description && (
-                                <p>
-                                    {
-                                        feedback.riskProfile
-                                            .description
-                                    }
-                                </p>
+                                <p>{feedback.riskProfile.description}</p>
                             )}
                         </div>
                     )}
@@ -140,9 +105,7 @@ export function TrainingSummary({
 
                             <ul>
                                 {feedback.recommendations.map((item) => (
-                                    <li key={item}>
-                                        {item}
-                                    </li>
+                                    <li key={item}>{item}</li>
                                 ))}
                             </ul>
                         </div>
@@ -154,9 +117,7 @@ export function TrainingSummary({
 
                             <ul>
                                 {feedback.learningTips.map((item) => (
-                                    <li key={item}>
-                                        {item}
-                                    </li>
+                                    <li key={item}>{item}</li>
                                 ))}
                             </ul>
                         </div>

@@ -24,7 +24,6 @@ export interface AttemptResponseDto {
     completed_at?: string
 }
 
-export interface AttemptStateResponseDto
-    extends AttemptResponseDto {
+export interface AttemptStateResponseDto extends AttemptResponseDto {
     current_node?: CurrentNodeDto
 }
