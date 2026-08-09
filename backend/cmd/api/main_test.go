@@ -286,7 +286,9 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 
 	scenarioID := insertAPITestScenario(t, testDB)
 	t.Cleanup(func() {
-		_, cleanupErr := testDB.Exec(`DELETE FROM attempts WHERE scenario_id = $1`, scenarioID)
+		_, cleanupErr := testDB.Exec(`DELETE FROM user_inventory WHERE scenario_id = $1`, scenarioID)
+		require.NoError(t, cleanupErr)
+		_, cleanupErr = testDB.Exec(`DELETE FROM attempts WHERE scenario_id = $1`, scenarioID)
 		require.NoError(t, cleanupErr)
 		_, cleanupErr = testDB.Exec(`DELETE FROM scenario_versions WHERE id = $1`, scenarioID)
 		require.NoError(t, cleanupErr)
@@ -375,7 +377,10 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 			SELECT status,
 			       score,
 			       (SELECT count(*) FROM answers WHERE attempt_id = attempts.id),
-			       (SELECT count(*) FROM user_inventory WHERE user_id = attempts.user_id)
+			       (SELECT count(*)
+			        FROM user_inventory
+			        WHERE user_id = attempts.user_id
+			          AND scenario_id = attempts.scenario_id)
 			FROM attempts
 			WHERE id = $1
 		`, started.ID).Scan(&status, &score, &answerCount, &fragmentCount))
