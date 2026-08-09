@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: antiscam_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: antiscam
+    ports:
+      - "5433:5432"
+    volumes:
+      - antiscam_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d antiscam"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - antiscam_net
+
+  backend:
+    image: backend:latest
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "18080:8080"
+    environment:
+      - ENV=local
+      - PORT=8080
+      - LOG_LEVEL=DEBUG
+      - API_TIMEOUT=5s
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/antiscam?sslmode=disable
+      - MIGRATIONS_PATH=migrations
+      - SEEDS_PATH=seeds
+      - SECURE_COOKIES=false
+      - SMTP_HOST=smtp.yandex.ru
+      - SMTP_PORT=465
+      - SMTP_USERNAME=EgorEmil@yandex.ru
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=EgorEmil@yandex.ru
+      - APP_BASE_URL=http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    networks:
+      - antiscam_net
+
+  frontend:
+    image: frontend:latest
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - antiscam_net
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: unless-stopped
+    ports:
+      - "18888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@test.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_DISABLE_POSTFIX: "true"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    networks:
+      - antiscam_net
+    depends_on:
+      - postgres
+networks:
+  antiscam_net:
+    driver: bridge
+
+volumes:
+  antiscam_data:
+  pgadmin:

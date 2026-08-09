@@ -1,0 +1,1 @@
+export { ScamSchemeCard } from './ui/ScamSchemeCard.tsx'
