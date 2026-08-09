@@ -1,0 +1,6 @@
+.env
+smtp-test/
+*.log
+coverage.out
+cover.html
+config.yaml

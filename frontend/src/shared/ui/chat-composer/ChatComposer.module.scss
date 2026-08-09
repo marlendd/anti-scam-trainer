@@ -1,0 +1,89 @@
+.composer {
+    display: flex;
+
+    gap: 10px;
+    align-items: flex-end;
+
+    width: 100%;
+
+    padding: 12px;
+
+    background-color: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 24px;
+}
+
+.input {
+    flex: 1;
+
+    min-height: 24px;
+    max-height: 160px;
+
+    padding: 8px 10px;
+
+    font: inherit;
+    font-size: 16px;
+
+    line-height: 1.4;
+
+    color: #111;
+
+    resize: none;
+    outline: none;
+
+    background: transparent;
+    border: 0;
+
+    &::placeholder {
+        color: #999;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+.sendButton {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+
+    font-size: 17px;
+
+    color: #fff;
+
+    cursor: pointer;
+
+    background-color: #ff4053;
+    border: 0;
+    border-radius: 50%;
+
+    transition:
+        background-color 150ms ease,
+        transform 100ms ease,
+        opacity 150ms ease;
+
+    &:hover:not(:disabled) {
+        background-color: #eb3044;
+    }
+
+    &:active:not(:disabled) {
+        transform: scale(0.96);
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgb(255 64 83 / 25%);
+        outline-offset: 3px;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+
+        opacity: 0.35;
+    }
+}
