@@ -12,10 +12,6 @@ export const navigationItems = [
         label: 'Сценарии',
     },
     {
-        to: '/training/puzzle',
-        label: 'Магазин',
-    },
-    {
         to: '/glossary',
         label: 'Глоссарий',
     },

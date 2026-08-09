@@ -19,7 +19,6 @@ export const Header = () => {
             <div className={styles.left}>
                 <nav className={styles.navigation}>
                     <Link to="/training/role-selection">Сценарии</Link>
-                    <Link to="/puzzle">Магазин</Link>
                     <Link to="/glossary">Глоссарий</Link>
                     <Link to="/leaderboard">Лидеры</Link>
                     {!isPending && !isError && user !== null && (
@@ -47,8 +46,6 @@ export const Header = () => {
                     {isError && <LoginButton/>}
 
                     <BurgerNavigation/>
-
-                    {/*<PlayButton/>*/}
                 </div>
             </div>
         </header>
