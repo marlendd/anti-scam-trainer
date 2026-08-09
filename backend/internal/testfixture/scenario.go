@@ -7,26 +7,29 @@ import (
 )
 
 const (
-	StartNodeID        scenario.NodeID   = "node-start"
-	MiddleNodeID       scenario.NodeID   = "node-middle"
-	FinalNodeID        scenario.NodeID   = "node-final"
-	StartChoiceID      scenario.ChoiceID = "start-choice-1"
-	FinalChoiceID      scenario.ChoiceID = "final-choice-1"
-	RiskyFinalChoiceID scenario.ChoiceID = "final-choice-3"
-	SafeEndingID       scenario.EndingID = "ending-safe"
-	RiskyEndingID      scenario.EndingID = "ending-risk"
+	StartNodeID        scenario.NodeID     = "node-start"
+	MiddleNodeID       scenario.NodeID     = "node-middle"
+	FinalNodeID        scenario.NodeID     = "node-final"
+	StartChoiceID      scenario.ChoiceID   = "start-choice-1"
+	FinalChoiceID      scenario.ChoiceID   = "final-choice-1"
+	RiskyFinalChoiceID scenario.ChoiceID   = "final-choice-3"
+	SafeEndingID       scenario.EndingID   = "ending-safe"
+	RiskyEndingID      scenario.EndingID   = "ending-risk"
+	RewardFragmentID   scenario.FragmentID = "safe-deal-piece-test"
 )
 
 // ValidScenario - валидный сценарий для тестов backend-модулей.
 func ValidScenario() scenario.Scenario {
 	return scenario.Scenario{
-		ID:          "scenario-v1",
-		LogicalID:   "scenario",
-		Version:     1,
-		Role:        scenario.RoleBuyer,
-		Title:       "Тестовый сценарий",
-		Description: "Валидный граф для тестов backend-модулей.",
-		StartNodeID: StartNodeID,
+		ID:                  "scenario-v1",
+		LogicalID:           "scenario",
+		Version:             1,
+		Role:                scenario.RoleBuyer,
+		Title:               "Тестовый сценарий",
+		Description:         "Валидный граф для тестов backend-модулей.",
+		RewardFragmentID:    RewardFragmentID,
+		SuccessfulEndingIDs: []scenario.EndingID{SafeEndingID},
+		StartNodeID:         StartNodeID,
 		Nodes: []scenario.Node{
 			{
 				ID:      StartNodeID,

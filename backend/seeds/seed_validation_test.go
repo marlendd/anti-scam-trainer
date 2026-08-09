@@ -17,8 +17,14 @@ func TestScenarioSeedsAreValid(t *testing.T) {
 	require.Len(t, seeds, 4)
 
 	roleCounts := map[scenario.Role]int{}
+	fragmentIDs := map[scenario.FragmentID]struct{}{}
 	for _, seed := range seeds {
 		roleCounts[seed.Role]++
+		require.NotEmpty(t, seed.RewardFragmentID)
+		require.Len(t, seed.Content.SuccessfulEndingIDs, 2)
+		_, duplicate := fragmentIDs[seed.RewardFragmentID]
+		require.False(t, duplicate, "reward fragment IDs must be unique")
+		fragmentIDs[seed.RewardFragmentID] = struct{}{}
 	}
 	require.Equal(t, 2, roleCounts[scenario.RoleBuyer])
 	require.Equal(t, 2, roleCounts[scenario.RoleSeller])
@@ -81,6 +87,26 @@ func TestLoadSeedFilesRejectsInvalidFiles(t *testing.T) {
 			name:    "invalid id UUID",
 			content: replaceOnce(t, validSeed, "11111111-1111-4111-8111-111111111111", "not-a-uuid"),
 			wantErr: "invalid id UUID",
+		},
+		{
+			name: "reward without successful endings",
+			content: replaceOnce(
+				t,
+				validSeed,
+				`"is_active":true`,
+				`"is_active":true,"reward_fragment_id":"piece-1"`,
+			),
+			wantErr: "rewarded scenario has no successful endings",
+		},
+		{
+			name: "unknown successful ending",
+			content: replaceOnce(
+				t,
+				validSeed,
+				`"start_node_id":"start"`,
+				`"start_node_id":"start","successful_ending_ids":["unknown"]`,
+			),
+			wantErr: "unknown successful ending",
 		},
 	}
 

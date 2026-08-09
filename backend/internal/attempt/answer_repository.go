@@ -320,6 +320,40 @@ func (pg *PgRepository) CompleteAttempt(
 	return requireOneAffectedRow(result, "complete attempt")
 }
 
+func (pg *PgRepository) GrantFragment(
+	ctx context.Context,
+	userID string,
+	scenarioID scenario.ScenarioID,
+	fragmentID scenario.FragmentID,
+) (bool, error) {
+	const query = `INSERT INTO user_inventory (
+						user_id,
+						scenario_id,
+						fragment_id
+					)
+					VALUES ($1, $2, $3)
+					ON CONFLICT DO NOTHING
+	`
+
+	result, err := pg.executor.ExecContext(
+		ctx,
+		query,
+		userID,
+		scenarioID,
+		fragmentID,
+	)
+	if err != nil {
+		return false, fmt.Errorf("grant reward fragment: %w", err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return false, fmt.Errorf("get granted fragment rows affected: %w", err)
+	}
+
+	return affected == 1, nil
+}
+
 func scanAnswer(row rowScanner) (Answer, error) {
 	var (
 		answer             Answer

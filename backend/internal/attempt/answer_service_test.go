@@ -32,6 +32,12 @@ type completeAttemptCall struct {
 	score         int
 }
 
+type grantFragmentCall struct {
+	userID     string
+	scenarioID scenario.ScenarioID
+	fragmentID scenario.FragmentID
+}
+
 type answerRepositoryFake struct {
 	transactionErr   error
 	transactionCalls int
@@ -60,6 +66,10 @@ type answerRepositoryFake struct {
 
 	completeCall *completeAttemptCall
 	completeErr  error
+
+	grantCall    *grantFragmentCall
+	grantAwarded bool
+	grantErr     error
 }
 
 func (r *answerRepositoryFake) WithinAnswerTransaction(
@@ -167,6 +177,21 @@ func (r *answerRepositoryFake) CompleteAttempt(
 	return r.completeErr
 }
 
+func (r *answerRepositoryFake) GrantFragment(
+	_ context.Context,
+	userID string,
+	scenarioID scenario.ScenarioID,
+	fragmentID scenario.FragmentID,
+) (bool, error) {
+	r.grantCall = &grantFragmentCall{
+		userID:     userID,
+		scenarioID: scenarioID,
+		fragmentID: fragmentID,
+	}
+
+	return r.grantAwarded, r.grantErr
+}
+
 type submitAnswerSetup struct {
 	input      attempt.SubmitAnswerInput
 	scenario   scenario.Scenario
@@ -193,7 +218,8 @@ func newSubmitAnswerSetup() *submitAnswerSetup {
 			Status:        attempt.StatusInProgress,
 			CurrentNodeID: &currentNodeID,
 		},
-		nodeErr: attempt.ErrAnswerNotFound,
+		nodeErr:      attempt.ErrAnswerNotFound,
+		grantAwarded: true,
 	}
 	provider := &scenarioProviderStub{
 		getByIDFn: func(
@@ -280,6 +306,8 @@ func TestServiceSubmitAnswer_CompletesAttemptAndCalculatesScore(t *testing.T) {
 	require.Equal(t, testfixture.SafeEndingID, *result.EndingID)
 	require.NotNil(t, result.Score)
 	require.Equal(t, 67, *result.Score)
+	require.NotNil(t, result.RewardFragmentID)
+	require.Equal(t, testfixture.RewardFragmentID, *result.RewardFragmentID)
 	require.Equal(t, 1, setup.repository.scoreCalls)
 	require.NotNil(t, setup.repository.createdAnswer)
 	require.Equal(t, result, setup.repository.createdAnswer.Response)
@@ -287,6 +315,27 @@ func TestServiceSubmitAnswer_CompletesAttemptAndCalculatesScore(t *testing.T) {
 	require.NotNil(t, setup.repository.completeCall)
 	require.Equal(t, testfixture.SafeEndingID, setup.repository.completeCall.endingID)
 	require.Equal(t, 67, setup.repository.completeCall.score)
+	require.NotNil(t, setup.repository.grantCall)
+	require.Equal(t, setup.input.UserID, setup.repository.grantCall.userID)
+	require.Equal(t, setup.scenario.ID, setup.repository.grantCall.scenarioID)
+	require.Equal(t, testfixture.RewardFragmentID, setup.repository.grantCall.fragmentID)
+}
+
+func TestServiceSubmitAnswer_DoesNotGrantFragmentForRiskyEnding(t *testing.T) {
+	t.Parallel()
+
+	setup := newSubmitAnswerSetup()
+	setup.moveAttemptToFinalNode()
+	setup.input.ChoiceID = testfixture.RiskyFinalChoiceID
+
+	result, err := setup.service.SubmitAnswer(context.Background(), setup.input)
+
+	require.NoError(t, err)
+	require.True(t, result.Completed)
+	require.NotNil(t, result.EndingID)
+	require.Equal(t, testfixture.RiskyEndingID, *result.EndingID)
+	require.Nil(t, result.RewardFragmentID)
+	require.Nil(t, setup.repository.grantCall)
 }
 
 func TestServiceSubmitAnswer_Idempotency(t *testing.T) {
@@ -578,5 +627,21 @@ func TestServiceSubmitAnswer_PreservesDependencyErrors(t *testing.T) {
 		require.ErrorIs(t, err, completeErr)
 		require.Empty(t, result)
 		require.Equal(t, 1, setup.repository.createCalls)
+	})
+
+	t.Run("fragment grant failure", func(t *testing.T) {
+		t.Parallel()
+
+		setup := newSubmitAnswerSetup()
+		setup.moveAttemptToFinalNode()
+		grantErr := errors.New("fragment grant failed")
+		setup.repository.grantErr = grantErr
+
+		result, err := setup.service.SubmitAnswer(context.Background(), setup.input)
+
+		require.ErrorIs(t, err, grantErr)
+		require.Empty(t, result)
+		require.Zero(t, setup.repository.createCalls)
+		require.Nil(t, setup.repository.completeCall)
 	})
 }

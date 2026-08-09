@@ -10,6 +10,7 @@ type RoleStats struct {
 }
 
 type PuzzleFragment struct {
+	ScenarioID string    `json:"scenario_id"`
 	FragmentID string    `json:"fragment_id"`
 	EarnedAt   time.Time `json:"earned_at"`
 }

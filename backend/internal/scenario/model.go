@@ -6,6 +6,7 @@ type Weight uint8
 
 type ScenarioID string
 type LogicalScenarioID string
+type FragmentID string
 type NodeID string
 type ChoiceID string
 type EndingID string
@@ -36,15 +37,17 @@ const (
 type Role string
 
 type Scenario struct {
-	ID          ScenarioID        // ID версии сценария
-	LogicalID   LogicalScenarioID // ID сценария
-	Version     int
-	Role        Role
-	Title       string
-	Description string
-	StartNodeID NodeID
-	Nodes       []Node
-	Endings     []Ending
+	ID                  ScenarioID        // ID версии сценария
+	LogicalID           LogicalScenarioID // ID сценария
+	Version             int
+	Role                Role
+	Title               string
+	Description         string
+	RewardFragmentID    FragmentID
+	SuccessfulEndingIDs []EndingID
+	StartNodeID         NodeID
+	Nodes               []Node
+	Endings             []Ending
 }
 
 type Node struct {
@@ -74,7 +77,18 @@ type Ending struct {
 }
 
 type Content struct {
-	StartNodeID NodeID   `json:"start_node_id"`
-	Nodes       []Node   `json:"nodes"`
-	Endings     []Ending `json:"endings"`
+	StartNodeID         NodeID     `json:"start_node_id"`
+	SuccessfulEndingIDs []EndingID `json:"successful_ending_ids,omitempty"`
+	Nodes               []Node     `json:"nodes"`
+	Endings             []Ending   `json:"endings"`
+}
+
+func (s Scenario) IsSuccessfulEnding(endingID EndingID) bool {
+	for _, successfulEndingID := range s.SuccessfulEndingIDs {
+		if successfulEndingID == endingID {
+			return true
+		}
+	}
+
+	return false
 }
