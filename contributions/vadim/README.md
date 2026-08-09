@@ -5,7 +5,8 @@
 **«Антискам-тренажёр»** – учебное веб-приложение для отработки безопасного поведения на классифайде через ветвящиеся диалоги.
 
 - [Исходный репозиторий](https://github.com/marlendd/anti-scam-trainer)
-- [Коммиты автора в ветке `main`](https://github.com/marlendd/anti-scam-trainer/commits/main/?author=marlendd)
+- [Личный репозиторий с материалами вклада](https://github.com/marlendd/anti-scam-trainer-vadim-contribution)
+- [Коммиты автора в ветке `develop`](https://github.com/marlendd/anti-scam-trainer/commits/develop/?author=marlendd)
 - GitHub: [@marlendd](https://github.com/marlendd)
 
 ## Моя роль
@@ -114,6 +115,21 @@
 - [`backend/cmd/api/main_test.go`](../../backend/cmd/api/main_test.go)
 - [`.github/workflows/check.yml`](../../.github/workflows/check.yml)
 
+### 6. OpenAPI-контракт backend
+
+Я дополнял общий [`backend/openapi.yaml`](../../backend/openapi.yaml) контрактами реализованных мной сценарных API. В частности, описал:
+
+- запуск новой попытки прохождения сценария;
+- продолжение активной попытки и её перезапуск;
+- отправку ответа и формат результата перехода;
+- каталог сценариев с фильтрацией по роли пользователя;
+- получение текущего состояния попытки;
+- структуры запросов, ответов и типовые ошибки этих endpoint-ов.
+
+Также я синхронизировал контракт с изменением границ модулей, убрав `best_score` из каталога сценариев после переноса этой ответственности в модуль прогресса.
+
+`openapi.yaml` является общим командным файлом: контракт авторизации в нём подготовлен другим участником. Мой вклад относится к разделам сценариев и попыток и подтверждается коммитами [`ece26d6`](https://github.com/marlendd/anti-scam-trainer/commit/ece26d6), [`fed6c5e`](https://github.com/marlendd/anti-scam-trainer/commit/fed6c5e), [`0acb77f`](https://github.com/marlendd/anti-scam-trainer/commit/0acb77f) и [`f4fbcb4`](https://github.com/marlendd/anti-scam-trainer/commit/f4fbcb4).
+
 ## Основные Pull Requests
 
 | PR | Результат |
@@ -139,6 +155,10 @@
 - [`dad64f5`](https://github.com/marlendd/anti-scam-trainer/commit/dad64f5) – переходы сценарного движка;
 - [`c620e6f`](https://github.com/marlendd/anti-scam-trainer/commit/c620e6f) – расчёт итоговой оценки;
 - [`01a1686`](https://github.com/marlendd/anti-scam-trainer/commit/01a1686) – сервис обработки ответа и набор тестов;
+- [`ece26d6`](https://github.com/marlendd/anti-scam-trainer/commit/ece26d6) – API попыток и соответствующий OpenAPI-контракт;
+- [`fed6c5e`](https://github.com/marlendd/anti-scam-trainer/commit/fed6c5e) – каталог сценариев и его OpenAPI-контракт;
+- [`0acb77f`](https://github.com/marlendd/anti-scam-trainer/commit/0acb77f) – синхронизация контракта с границами модуля прогресса;
+- [`f4fbcb4`](https://github.com/marlendd/anti-scam-trainer/commit/f4fbcb4) – API и OpenAPI-схема текущего состояния попытки;
 - [`0f20a67`](https://github.com/marlendd/anti-scam-trainer/commit/0f20a67) – строгий seed-loader;
 - [`09a9119`](https://github.com/marlendd/anti-scam-trainer/commit/09a9119) – E2E-тест прохождения seed-сценария;
 - [`4acfe5a`](https://github.com/marlendd/anti-scam-trainer/commit/4acfe5a) – выдача фрагментов пазла;
