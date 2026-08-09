@@ -48,7 +48,7 @@
 
 1. Скопируй `.env.example` в `.env` и заполни значения:
    ```bash
-   cp .env.example .env
+   config.example.yaml
    ```
 2. Подними:
    ```bash
