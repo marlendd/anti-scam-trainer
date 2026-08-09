@@ -43,6 +43,7 @@ type Scenario struct {
 	Role                Role
 	Title               string
 	Description         string
+	Product             Product
 	RewardFragmentID    FragmentID
 	SuccessfulEndingIDs []EndingID
 	StartNodeID         NodeID
@@ -50,11 +51,33 @@ type Scenario struct {
 	Endings             []Ending
 }
 
+// Product содержит данные объявления, которые фронтенд показывает в шапке диалога.
+// Price хранится в целых рублях.
+type Product struct {
+	Title    string `json:"title"`
+	Price    int    `json:"price"`
+	ImageURL string `json:"image_url,omitempty"`
+}
+
+type Message struct {
+	Author AuthorID `json:"author"`
+	Text   string   `json:"text"`
+}
+
 type Node struct {
-	ID      NodeID   `json:"id"`
-	Author  AuthorID `json:"author"`
-	Text    string   `json:"text"`
-	Choices []Choice `json:"choices"`
+	ID       NodeID    `json:"id"`
+	Author   AuthorID  `json:"author,omitempty"`
+	Text     string    `json:"text,omitempty"`
+	Messages []Message `json:"messages,omitempty"`
+	Choices  []Choice  `json:"choices"`
+}
+
+func (n Node) DialogueMessages() []Message {
+	if len(n.Messages) > 0 {
+		return n.Messages
+	}
+
+	return []Message{{Author: n.Author, Text: n.Text}}
 }
 
 type Choice struct {
@@ -77,6 +100,7 @@ type Ending struct {
 }
 
 type Content struct {
+	Product             Product    `json:"product"`
 	StartNodeID         NodeID     `json:"start_node_id"`
 	SuccessfulEndingIDs []EndingID `json:"successful_ending_ids,omitempty"`
 	Nodes               []Node     `json:"nodes"`

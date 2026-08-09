@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/marlendd/anti-scam-trainer/internal/attempt"
 	"github.com/marlendd/anti-scam-trainer/internal/scenario"
@@ -135,11 +136,18 @@ func (s *scenarioProviderStub) GetByID(
 func TestServiceGetState(t *testing.T) {
 	t.Parallel()
 
-	t.Run("returns current node with safe choice fields", func(t *testing.T) {
+	t.Run("returns current node and answered dialogue history", func(t *testing.T) {
 		t.Parallel()
 
 		fixture := testfixture.ValidScenario()
-		currentNodeID := fixture.StartNodeID
+		fixture.Nodes[0].Author = ""
+		fixture.Nodes[0].Text = ""
+		fixture.Nodes[0].Messages = []scenario.Message{
+			{Author: "buyer", Text: "Вопрос покупателя"},
+			{Author: "seller", Text: "Ответ продавца"},
+		}
+		currentNodeID := testfixture.MiddleNodeID
+		answeredAt := time.Date(2026, time.August, 9, 12, 0, 0, 0, time.UTC)
 		currentAttempt := attempt.Attempt{
 			ID:            "attempt-1",
 			UserID:        userID,
@@ -168,30 +176,65 @@ func TestServiceGetState(t *testing.T) {
 				return fixture, nil
 			},
 		}
-		service := attempt.NewService(repository, nil, provider)
+		answers := &answerRepositoryFake{
+			historyAnswers: []attempt.Answer{
+				{
+					NodeID:      testfixture.StartNodeID,
+					ChoiceID:    testfixture.StartChoiceID,
+					Consequence: "Последствие выбора",
+					CreatedAt:   answeredAt,
+				},
+			},
+		}
+		service := attempt.NewService(repository, answers, provider)
 
 		state, err := service.GetState(context.Background(), userID, currentAttempt.ID)
 
 		require.NoError(t, err)
 		require.Equal(t, currentAttempt, state.Attempt)
+		require.Equal(t, attempt.ScenarioHeader{
+			Title:       fixture.Title,
+			Description: fixture.Description,
+			Role:        fixture.Role,
+			Product:     fixture.Product,
+		}, state.Scenario)
 		require.NotNil(t, state.CurrentNode)
-		require.Equal(t, fixture.StartNodeID, state.CurrentNode.ID)
-		require.Equal(t, fixture.Nodes[0].Author, state.CurrentNode.Author)
-		require.Equal(t, fixture.Nodes[0].Text, state.CurrentNode.Text)
-		require.Len(t, state.CurrentNode.Choices, len(fixture.Nodes[0].Choices))
+		require.Equal(t, testfixture.MiddleNodeID, state.CurrentNode.ID)
+		require.Equal(t, fixture.Nodes[1].Author, state.CurrentNode.Author)
+		require.Equal(t, fixture.Nodes[1].Text, state.CurrentNode.Text)
+		require.Equal(t, fixture.Nodes[1].DialogueMessages(), state.CurrentNode.Messages)
+		require.Len(t, state.CurrentNode.Choices, len(fixture.Nodes[1].Choices))
 		require.Equal(t, attempt.ChoiceOption{
-			ID:   fixture.Nodes[0].Choices[0].ID,
-			Text: fixture.Nodes[0].Choices[0].Text,
+			ID:   fixture.Nodes[1].Choices[0].ID,
+			Text: fixture.Nodes[1].Choices[0].Text,
 		}, state.CurrentNode.Choices[0])
+		require.Equal(t, []attempt.HistoryItem{
+			{
+				Node: attempt.HistoryNode{
+					ID:       fixture.Nodes[0].ID,
+					Author:   fixture.Nodes[0].Messages[1].Author,
+					Text:     fixture.Nodes[0].Messages[1].Text,
+					Messages: fixture.Nodes[0].Messages,
+				},
+				SelectedChoice: attempt.ChoiceOption{
+					ID:   fixture.Nodes[0].Choices[0].ID,
+					Text: fixture.Nodes[0].Choices[0].Text,
+				},
+				Consequence: "Последствие выбора",
+				AnsweredAt:  answeredAt,
+			},
+		}, state.History)
+		require.Equal(t, 1, answers.historyCalls)
 	})
 
-	t.Run("does not load scenario for completed attempt", func(t *testing.T) {
+	t.Run("returns history without current node for completed attempt", func(t *testing.T) {
 		t.Parallel()
 
+		fixture := testfixture.ValidScenario()
 		currentAttempt := attempt.Attempt{
 			ID:         "attempt-1",
 			UserID:     userID,
-			ScenarioID: scenarioID,
+			ScenarioID: fixture.ID,
 			Status:     attempt.StatusCompleted,
 		}
 		repository := &attemptRepositoryStub{
@@ -203,13 +246,31 @@ func TestServiceGetState(t *testing.T) {
 				return currentAttempt, nil
 			},
 		}
-		service := attempt.NewService(repository, nil, &scenarioProviderStub{})
+		provider := &scenarioProviderStub{
+			getByIDFn: func(
+				context.Context,
+				scenario.ScenarioID,
+			) (scenario.Scenario, error) {
+				return fixture, nil
+			},
+		}
+		answers := &answerRepositoryFake{
+			historyAnswers: []attempt.Answer{
+				{
+					NodeID:      testfixture.StartNodeID,
+					ChoiceID:    testfixture.StartChoiceID,
+					Consequence: "Последствие выбора",
+				},
+			},
+		}
+		service := attempt.NewService(repository, answers, provider)
 
 		state, err := service.GetState(context.Background(), userID, currentAttempt.ID)
 
 		require.NoError(t, err)
 		require.Equal(t, currentAttempt, state.Attempt)
 		require.Nil(t, state.CurrentNode)
+		require.Len(t, state.History, 1)
 	})
 
 	t.Run("preserves repository error", func(t *testing.T) {
@@ -236,16 +297,28 @@ func TestServiceGetState(t *testing.T) {
 	t.Run("rejects missing current node", func(t *testing.T) {
 		t.Parallel()
 
+		fixture := testfixture.ValidScenario()
 		repository := &attemptRepositoryStub{
 			getByIDFn: func(
 				context.Context,
 				attempt.AttemptID,
 				string,
 			) (attempt.Attempt, error) {
-				return attempt.Attempt{Status: attempt.StatusInProgress}, nil
+				return attempt.Attempt{
+					ScenarioID: fixture.ID,
+					Status:     attempt.StatusInProgress,
+				}, nil
 			},
 		}
-		service := attempt.NewService(repository, nil, &scenarioProviderStub{})
+		provider := &scenarioProviderStub{
+			getByIDFn: func(
+				context.Context,
+				scenario.ScenarioID,
+			) (scenario.Scenario, error) {
+				return fixture, nil
+			},
+		}
+		service := attempt.NewService(repository, &answerRepositoryFake{}, provider)
 
 		_, err := service.GetState(context.Background(), userID, "attempt-1")
 

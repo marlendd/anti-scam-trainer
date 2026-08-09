@@ -34,13 +34,37 @@ type ChoiceOption struct {
 }
 
 type CurrentNode struct {
-	ID      scenario.NodeID
-	Author  scenario.AuthorID
-	Text    string
-	Choices []ChoiceOption
+	ID       scenario.NodeID
+	Author   scenario.AuthorID
+	Text     string
+	Messages []scenario.Message
+	Choices  []ChoiceOption
+}
+
+type HistoryNode struct {
+	ID       scenario.NodeID
+	Author   scenario.AuthorID
+	Text     string
+	Messages []scenario.Message
+}
+
+type HistoryItem struct {
+	Node           HistoryNode
+	SelectedChoice ChoiceOption
+	Consequence    string
+	AnsweredAt     time.Time
+}
+
+type ScenarioHeader struct {
+	Title       string
+	Description string
+	Role        scenario.Role
+	Product     scenario.Product
 }
 
 type State struct {
 	Attempt     Attempt
+	Scenario    ScenarioHeader
 	CurrentNode *CurrentNode
+	History     []HistoryItem
 }

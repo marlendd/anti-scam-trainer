@@ -52,15 +52,44 @@ type choiceOptionResponse struct {
 }
 
 type currentNodeResponse struct {
-	ID      scenario.NodeID        `json:"id"`
-	Author  scenario.AuthorID      `json:"author"`
-	Text    string                 `json:"text"`
-	Choices []choiceOptionResponse `json:"choices"`
+	ID       scenario.NodeID        `json:"id"`
+	Author   scenario.AuthorID      `json:"author"`
+	Text     string                 `json:"text"`
+	Messages []messageResponse      `json:"messages"`
+	Choices  []choiceOptionResponse `json:"choices"`
+}
+
+type messageResponse struct {
+	Author scenario.AuthorID `json:"author"`
+	Text   string            `json:"text"`
+}
+
+type historyNodeResponse struct {
+	ID       scenario.NodeID   `json:"id"`
+	Author   scenario.AuthorID `json:"author"`
+	Text     string            `json:"text"`
+	Messages []messageResponse `json:"messages"`
+}
+
+type historyItemResponse struct {
+	Node           historyNodeResponse  `json:"node"`
+	SelectedChoice choiceOptionResponse `json:"selected_choice"`
+	Consequence    string               `json:"consequence"`
+	AnsweredAt     time.Time            `json:"answered_at"`
+}
+
+type scenarioHeaderResponse struct {
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
+	Role        scenario.Role    `json:"role"`
+	Product     scenario.Product `json:"product"`
 }
 
 type attemptStateResponse struct {
 	attemptResponse
-	CurrentNode *currentNodeResponse `json:"current_node,omitempty"`
+	Scenario    scenarioHeaderResponse `json:"scenario"`
+	CurrentNode *currentNodeResponse   `json:"current_node,omitempty"`
+	History     []historyItemResponse  `json:"history"`
 }
 
 type Handler struct {
@@ -104,6 +133,27 @@ func newAttemptResponse(currentAttempt Attempt) attemptResponse {
 func newAttemptStateResponse(state State) attemptStateResponse {
 	response := attemptStateResponse{
 		attemptResponse: newAttemptResponse(state.Attempt),
+		Scenario: scenarioHeaderResponse{
+			Title:       state.Scenario.Title,
+			Description: state.Scenario.Description,
+			Role:        state.Scenario.Role,
+			Product:     state.Scenario.Product,
+		},
+		History: make([]historyItemResponse, 0, len(state.History)),
+	}
+
+	for _, item := range state.History {
+		response.History = append(response.History, historyItemResponse{
+			Node: historyNodeResponse{
+				ID:       item.Node.ID,
+				Author:   item.Node.Author,
+				Text:     item.Node.Text,
+				Messages: newMessageResponses(item.Node.Messages),
+			},
+			SelectedChoice: choiceOptionResponse(item.SelectedChoice),
+			Consequence:    item.Consequence,
+			AnsweredAt:     item.AnsweredAt,
+		})
 	}
 
 	if state.CurrentNode == nil {
@@ -116,10 +166,23 @@ func newAttemptStateResponse(state State) attemptStateResponse {
 	}
 
 	response.CurrentNode = &currentNodeResponse{
-		ID:      state.CurrentNode.ID,
-		Author:  state.CurrentNode.Author,
-		Text:    state.CurrentNode.Text,
-		Choices: choices,
+		ID:       state.CurrentNode.ID,
+		Author:   state.CurrentNode.Author,
+		Text:     state.CurrentNode.Text,
+		Messages: newMessageResponses(state.CurrentNode.Messages),
+		Choices:  choices,
+	}
+
+	return response
+}
+
+func newMessageResponses(messages []scenario.Message) []messageResponse {
+	response := make([]messageResponse, 0, len(messages))
+	for _, message := range messages {
+		response = append(response, messageResponse{
+			Author: message.Author,
+			Text:   message.Text,
+		})
 	}
 
 	return response

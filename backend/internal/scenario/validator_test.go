@@ -19,6 +19,18 @@ func TestValidate_ValidScenarioWithThreeChoicesAndBranching(t *testing.T) {
 	}
 }
 
+func TestValidate_ValidScenarioWithMultipleMessagesInNode(t *testing.T) {
+	s := testfixture.ValidScenario()
+	s.Nodes[0].Author = ""
+	s.Nodes[0].Text = ""
+	s.Nodes[0].Messages = []scenario.Message{
+		{Author: "buyer", Text: "Вопрос покупателя"},
+		{Author: "seller", Text: "Ответ продавца"},
+	}
+
+	require.NoError(t, scenario.Validate(s))
+}
+
 func TestValidate_KnownRiskCategories(t *testing.T) {
 	categories := []scenario.RiskCategory{
 		scenario.RiskExternalMessenger,
@@ -70,11 +82,45 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 			wantErr: scenario.ErrEmptyNodeID,
 		},
 		{
+			name: "empty node author",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Author = ""
+			},
+			wantErr: scenario.ErrEmptyNodeAuthor,
+		},
+		{
 			name: "empty node text",
 			mutate: func(s *scenario.Scenario) {
 				s.Nodes[0].Text = "  "
 			},
 			wantErr: scenario.ErrEmptyNodeText,
+		},
+		{
+			name: "empty message author",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Author = ""
+				s.Nodes[0].Text = ""
+				s.Nodes[0].Messages = []scenario.Message{{Text: "Реплика"}}
+			},
+			wantErr: scenario.ErrEmptyNodeAuthor,
+		},
+		{
+			name: "empty message text",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Author = ""
+				s.Nodes[0].Text = ""
+				s.Nodes[0].Messages = []scenario.Message{{Author: "seller", Text: " "}}
+			},
+			wantErr: scenario.ErrEmptyNodeText,
+		},
+		{
+			name: "mixed node message formats",
+			mutate: func(s *scenario.Scenario) {
+				s.Nodes[0].Messages = []scenario.Message{
+					{Author: "seller", Text: "Другая реплика"},
+				}
+			},
+			wantErr: scenario.ErrMixedNodeMessageFormat,
 		},
 		{
 			name: "duplicated node ID",
@@ -237,6 +283,7 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 				}
 				s.Nodes = append(s.Nodes, scenario.Node{
 					ID:      "node-disconnected",
+					Author:  "seller",
 					Text:    "Недостижимый узел",
 					Choices: choices,
 				})

@@ -142,6 +142,55 @@ func (pg *PgRepository) GetAnswerByAttemptNode(
 	return answer, nil
 }
 
+func (pg *PgRepository) ListAnswersByAttempt(
+	ctx context.Context,
+	attemptID AttemptID,
+	userID string,
+) (answers []Answer, err error) {
+	const query = `SELECT
+						a.id,
+						a.attempt_id,
+						a.node_id,
+						a.choice_id,
+						a.idempotency_key,
+						a.weight,
+						a.choice_score,
+						a.risk_categories,
+						a.consequence,
+						a.explanation,
+						a.response,
+						a.created_at
+					FROM answers AS a
+					JOIN attempts AS att ON att.id = a.attempt_id
+					WHERE a.attempt_id = $1 AND att.user_id = $2
+					ORDER BY a.created_at, a.id
+	`
+
+	rows, err := pg.executor.QueryContext(ctx, query, attemptID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("list answers by attempt: %w", err)
+	}
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil && err == nil {
+			err = fmt.Errorf("close answer history rows: %w", closeErr)
+		}
+	}()
+
+	answers = make([]Answer, 0)
+	for rows.Next() {
+		answer, scanErr := scanAnswer(rows)
+		if scanErr != nil {
+			return nil, fmt.Errorf("scan answer history: %w", scanErr)
+		}
+		answers = append(answers, answer)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate answer history: %w", err)
+	}
+
+	return answers, nil
+}
+
 func (pg *PgRepository) GetScoreTotals(
 	ctx context.Context,
 	attemptID AttemptID,

@@ -53,6 +53,10 @@ type answerRepositoryFake struct {
 	nodeErr    error
 	nodeCalls  int
 
+	historyAnswers []attempt.Answer
+	historyErr     error
+	historyCalls   int
+
 	scoreTotals attempt.ScoreTotals
 	scoreErr    error
 	scoreCalls  int
@@ -117,6 +121,15 @@ func (r *answerRepositoryFake) GetAnswerByAttemptNode(
 ) (attempt.Answer, error) {
 	r.nodeCalls++
 	return r.nodeAnswer, r.nodeErr
+}
+
+func (r *answerRepositoryFake) ListAnswersByAttempt(
+	context.Context,
+	attempt.AttemptID,
+	string,
+) ([]attempt.Answer, error) {
+	r.historyCalls++
+	return r.historyAnswers, r.historyErr
 }
 
 func (r *answerRepositoryFake) GetScoreTotals(

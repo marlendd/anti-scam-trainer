@@ -18,16 +18,32 @@ func TestScenarioSeedsAreValid(t *testing.T) {
 
 	roleCounts := map[scenario.Role]int{}
 	fragmentIDs := map[scenario.FragmentID]struct{}{}
+	multiMessageNodeCount := 0
 	for _, seed := range seeds {
 		roleCounts[seed.Role]++
 		require.NotEmpty(t, seed.RewardFragmentID)
 		require.Len(t, seed.Content.SuccessfulEndingIDs, 2)
+		require.NotEmpty(t, seed.Content.Product.Title)
+		require.Positive(t, seed.Content.Product.Price)
 		_, duplicate := fragmentIDs[seed.RewardFragmentID]
 		require.False(t, duplicate, "reward fragment IDs must be unique")
 		fragmentIDs[seed.RewardFragmentID] = struct{}{}
+
+		for _, node := range seed.Content.Nodes {
+			messages := node.DialogueMessages()
+			require.NotEmpty(t, messages)
+			if len(messages) > 1 {
+				multiMessageNodeCount++
+			}
+			for _, message := range messages {
+				require.NotContains(t, message.Text, "Покупатель:")
+				require.NotContains(t, message.Text, "Продавец:")
+			}
+		}
 	}
 	require.Equal(t, 2, roleCounts[scenario.RoleBuyer])
 	require.Equal(t, 2, roleCounts[scenario.RoleSeller])
+	require.Equal(t, 12, multiMessageNodeCount)
 }
 
 func TestLoadSeedFilesRejectsInvalidFiles(t *testing.T) {
@@ -40,6 +56,7 @@ func TestLoadSeedFilesRejectsInvalidFiles(t *testing.T) {
 		"description":"Test seed",
 		"is_active":true,
 		"content":{
+			"product":{"title":"Test product","price":1000},
 			"start_node_id":"start",
 			"nodes":[
 				{"id":"start","author":"seller","text":"Start","choices":[
@@ -87,6 +104,16 @@ func TestLoadSeedFilesRejectsInvalidFiles(t *testing.T) {
 			name:    "invalid id UUID",
 			content: replaceOnce(t, validSeed, "11111111-1111-4111-8111-111111111111", "not-a-uuid"),
 			wantErr: "invalid id UUID",
+		},
+		{
+			name:    "missing product title",
+			content: replaceOnce(t, validSeed, `"title":"Test product"`, `"title":""`),
+			wantErr: "product title is required",
+		},
+		{
+			name:    "non-positive product price",
+			content: replaceOnce(t, validSeed, `"price":1000`, `"price":0`),
+			wantErr: "product price must be positive",
 		},
 		{
 			name: "reward without successful endings",

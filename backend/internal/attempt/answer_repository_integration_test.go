@@ -107,6 +107,14 @@ func TestPgRepository_AnswerLifecycle_Integration(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, savedFirstAnswer, byNode)
 
+	history, err := repository.ListAnswersByAttempt(
+		ctx,
+		createdAttempt.ID,
+		testUserID,
+	)
+	require.NoError(t, err)
+	require.Equal(t, []attempt.Answer{savedFirstAnswer}, history)
+
 	totals, err := repository.GetScoreTotals(ctx, createdAttempt.ID)
 	require.NoError(t, err)
 	require.Equal(t, 200, totals.WeightedScoreSum)
@@ -177,6 +185,29 @@ func TestPgRepository_AnswerLifecycle_Integration(t *testing.T) {
 	require.NotNil(t, completedAttempt.Score)
 	require.Equal(t, finalScore, *completedAttempt.Score)
 	require.NotNil(t, completedAttempt.CompletedAt)
+
+	history, err = repository.ListAnswersByAttempt(
+		ctx,
+		createdAttempt.ID,
+		testUserID,
+	)
+	require.NoError(t, err)
+	require.Len(t, history, 2)
+	require.Equal(t, savedFirstAnswer, history[0])
+	require.Equal(t, secondAnswer.NodeID, history[1].NodeID)
+	require.Equal(t, secondAnswer.ChoiceID, history[1].ChoiceID)
+
+	otherUserID := insertTestUser(t, ctx, db)
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, `DELETE FROM users WHERE id = $1`, otherUserID)
+	})
+	otherHistory, err := repository.ListAnswersByAttempt(
+		ctx,
+		createdAttempt.ID,
+		otherUserID,
+	)
+	require.NoError(t, err)
+	require.Empty(t, otherHistory)
 
 	duplicateKeyAnswer := secondAnswer
 	duplicateKeyAnswer.NodeID = "another-node"

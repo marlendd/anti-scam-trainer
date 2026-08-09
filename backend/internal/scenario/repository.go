@@ -36,6 +36,9 @@ func (pg *PgRepository) ListActiveByRole(
 		       active.role,
 		       active.title,
 		       active.description,
+		       COALESCE(active.content -> 'product' ->> 'title', ''),
+		       COALESCE((active.content -> 'product' ->> 'price')::integer, 0),
+		       COALESCE(active.content -> 'product' ->> 'image_url', ''),
 		       CASE
 		           WHEN bool_or(a.status = 'in_progress') THEN 'in_progress'
 		           WHEN bool_or(a.status = 'completed') THEN 'completed'
@@ -71,6 +74,9 @@ func (pg *PgRepository) ListActiveByRole(
 			&item.Role,
 			&item.Title,
 			&item.Description,
+			&item.Product.Title,
+			&item.Product.Price,
+			&item.Product.ImageURL,
 			&item.Status,
 		); err != nil {
 			return nil, fmt.Errorf("scan scenario catalog item: %w", err)
@@ -176,6 +182,7 @@ func (pg *PgRepository) decodeContent(rawContent json.RawMessage) (Content, erro
 
 func (pg *PgRepository) getScenarioFromContent(scenario Scenario, content Content) (Scenario, error) {
 	scenario.StartNodeID = content.StartNodeID
+	scenario.Product = content.Product
 	scenario.SuccessfulEndingIDs = content.SuccessfulEndingIDs
 	scenario.Nodes = content.Nodes
 	scenario.Endings = content.Endings
