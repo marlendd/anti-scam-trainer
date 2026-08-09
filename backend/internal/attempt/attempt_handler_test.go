@@ -100,6 +100,7 @@ func TestHandler_GetState(t *testing.T) {
 	t.Parallel()
 
 	currentNodeID := scenario.NodeID("node-start")
+	answeredAt := time.Date(2026, time.August, 8, 10, 0, 30, 0, time.UTC)
 	service := &answerSubmitterStub{
 		stateResult: attempt.State{
 			Attempt: attempt.Attempt{
@@ -116,6 +117,21 @@ func TestHandler_GetState(t *testing.T) {
 				Text:   "Выберите действие",
 				Choices: []attempt.ChoiceOption{
 					{ID: "choice-safe", Text: "Остаться на платформе"},
+				},
+			},
+			History: []attempt.HistoryItem{
+				{
+					Node: attempt.HistoryNode{
+						ID:     "node-previous",
+						Author: "seller",
+						Text:   "Предыдущее сообщение",
+					},
+					SelectedChoice: attempt.ChoiceOption{
+						ID:   "choice-previous",
+						Text: "Предыдущий ответ",
+					},
+					Consequence: "Последствие предыдущего ответа",
+					AnsweredAt:  answeredAt,
 				},
 			},
 		},
@@ -150,6 +166,20 @@ func TestHandler_GetState(t *testing.T) {
 	require.NotContains(t, choice, "explanation")
 	require.NotContains(t, choice, "next_node_id")
 	require.NotContains(t, choice, "ending_id")
+	history := payload["history"].([]any)
+	require.Len(t, history, 1)
+	historyItem := history[0].(map[string]any)
+	require.Equal(t, map[string]any{
+		"id":     "node-previous",
+		"author": "seller",
+		"text":   "Предыдущее сообщение",
+	}, historyItem["node"])
+	require.Equal(t, map[string]any{
+		"id":   "choice-previous",
+		"text": "Предыдущий ответ",
+	}, historyItem["selected_choice"])
+	require.Equal(t, "Последствие предыдущего ответа", historyItem["consequence"])
+	require.Equal(t, answeredAt.Format(time.RFC3339), historyItem["answered_at"])
 }
 
 func TestHandler_GetStateRejectsInvalidRequest(t *testing.T) {

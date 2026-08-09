@@ -79,15 +79,6 @@ func (s *Service) GetState(
 		return State{}, fmt.Errorf("get attempt by id: %w", err)
 	}
 
-	state := State{Attempt: currentAttempt}
-	if currentAttempt.Status != StatusInProgress {
-		return state, nil
-	}
-
-	if currentAttempt.CurrentNodeID == nil {
-		return State{}, ErrInvalidAttemptState
-	}
-
 	currentScenario, err := s.scenarios.GetByID(ctx, currentAttempt.ScenarioID)
 	if err != nil {
 		return State{}, fmt.Errorf("get scenario by id: %w", err)
@@ -97,30 +88,94 @@ func (s *Service) GetState(
 		return State{}, fmt.Errorf("validate scenario: %w", err)
 	}
 
-	for _, node := range currentScenario.Nodes {
-		if node.ID != *currentAttempt.CurrentNodeID {
-			continue
+	answers, err := s.answers.ListAnswersByAttempt(ctx, attemptID, userID)
+	if err != nil {
+		return State{}, fmt.Errorf("list attempt answers: %w", err)
+	}
+
+	state := State{
+		Attempt: currentAttempt,
+		History: make([]HistoryItem, 0, len(answers)),
+	}
+
+	for _, answer := range answers {
+		node, found := findScenarioNode(currentScenario, answer.NodeID)
+		if !found {
+			return State{}, ErrInvalidAttemptState
 		}
 
-		choices := make([]ChoiceOption, 0, len(node.Choices))
-		for _, choice := range node.Choices {
-			choices = append(choices, ChoiceOption{
+		choice, found := findNodeChoice(node, answer.ChoiceID)
+		if !found {
+			return State{}, ErrInvalidAttemptState
+		}
+
+		state.History = append(state.History, HistoryItem{
+			Node: HistoryNode{
+				ID:     node.ID,
+				Author: node.Author,
+				Text:   node.Text,
+			},
+			SelectedChoice: ChoiceOption{
 				ID:   choice.ID,
 				Text: choice.Text,
-			})
-		}
+			},
+			Consequence: answer.Consequence,
+			AnsweredAt:  answer.CreatedAt,
+		})
+	}
 
-		state.CurrentNode = &CurrentNode{
-			ID:      node.ID,
-			Author:  node.Author,
-			Text:    node.Text,
-			Choices: choices,
-		}
-
+	if currentAttempt.Status != StatusInProgress {
 		return state, nil
 	}
 
-	return State{}, ErrInvalidAttemptState
+	if currentAttempt.CurrentNodeID == nil {
+		return State{}, ErrInvalidAttemptState
+	}
+
+	node, found := findScenarioNode(currentScenario, *currentAttempt.CurrentNodeID)
+	if !found {
+		return State{}, ErrInvalidAttemptState
+	}
+
+	choices := make([]ChoiceOption, 0, len(node.Choices))
+	for _, choice := range node.Choices {
+		choices = append(choices, ChoiceOption{
+			ID:   choice.ID,
+			Text: choice.Text,
+		})
+	}
+
+	state.CurrentNode = &CurrentNode{
+		ID:      node.ID,
+		Author:  node.Author,
+		Text:    node.Text,
+		Choices: choices,
+	}
+
+	return state, nil
+}
+
+func findScenarioNode(
+	currentScenario scenario.Scenario,
+	nodeID scenario.NodeID,
+) (scenario.Node, bool) {
+	for _, node := range currentScenario.Nodes {
+		if node.ID == nodeID {
+			return node, true
+		}
+	}
+
+	return scenario.Node{}, false
+}
+
+func findNodeChoice(node scenario.Node, choiceID scenario.ChoiceID) (scenario.Choice, bool) {
+	for _, choice := range node.Choices {
+		if choice.ID == choiceID {
+			return choice, true
+		}
+	}
+
+	return scenario.Choice{}, false
 }
 
 func (s *Service) Start(

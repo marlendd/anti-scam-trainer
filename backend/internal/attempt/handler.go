@@ -58,9 +58,23 @@ type currentNodeResponse struct {
 	Choices []choiceOptionResponse `json:"choices"`
 }
 
+type historyNodeResponse struct {
+	ID     scenario.NodeID   `json:"id"`
+	Author scenario.AuthorID `json:"author"`
+	Text   string            `json:"text"`
+}
+
+type historyItemResponse struct {
+	Node           historyNodeResponse  `json:"node"`
+	SelectedChoice choiceOptionResponse `json:"selected_choice"`
+	Consequence    string               `json:"consequence"`
+	AnsweredAt     time.Time            `json:"answered_at"`
+}
+
 type attemptStateResponse struct {
 	attemptResponse
-	CurrentNode *currentNodeResponse `json:"current_node,omitempty"`
+	CurrentNode *currentNodeResponse  `json:"current_node,omitempty"`
+	History     []historyItemResponse `json:"history"`
 }
 
 type Handler struct {
@@ -104,6 +118,20 @@ func newAttemptResponse(currentAttempt Attempt) attemptResponse {
 func newAttemptStateResponse(state State) attemptStateResponse {
 	response := attemptStateResponse{
 		attemptResponse: newAttemptResponse(state.Attempt),
+		History:         make([]historyItemResponse, 0, len(state.History)),
+	}
+
+	for _, item := range state.History {
+		response.History = append(response.History, historyItemResponse{
+			Node: historyNodeResponse{
+				ID:     item.Node.ID,
+				Author: item.Node.Author,
+				Text:   item.Node.Text,
+			},
+			SelectedChoice: choiceOptionResponse(item.SelectedChoice),
+			Consequence:    item.Consequence,
+			AnsweredAt:     item.AnsweredAt,
+		})
 	}
 
 	if state.CurrentNode == nil {
