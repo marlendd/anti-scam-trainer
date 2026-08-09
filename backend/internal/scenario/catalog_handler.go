@@ -34,6 +34,7 @@ type catalogItemResponse struct {
 	Role        Role              `json:"role"`
 	Title       string            `json:"title"`
 	Description string            `json:"description"`
+	Product     Product           `json:"product"`
 	Status      ProgressStatus    `json:"status"`
 }
 

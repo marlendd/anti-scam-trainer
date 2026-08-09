@@ -8,6 +8,10 @@
   "is_active": true,
   "reward_fragment_id": "safe-deal-piece-1",
   "content": {
+    "product": {
+      "title": "GeForce RTX 4070",
+      "price": 48990
+    },
     "start_node_id": "n1_scarcity_pressure",
     "successful_ending_ids": ["ending_safe", "ending_recovered"],
     "nodes": [

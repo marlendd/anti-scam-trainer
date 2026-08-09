@@ -20,6 +20,7 @@ type CatalogItem struct {
 	Role        Role
 	Title       string
 	Description string
+	Product     Product
 	Status      ProgressStatus
 }
 

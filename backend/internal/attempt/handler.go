@@ -78,10 +78,18 @@ type historyItemResponse struct {
 	AnsweredAt     time.Time            `json:"answered_at"`
 }
 
+type scenarioHeaderResponse struct {
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
+	Role        scenario.Role    `json:"role"`
+	Product     scenario.Product `json:"product"`
+}
+
 type attemptStateResponse struct {
 	attemptResponse
-	CurrentNode *currentNodeResponse  `json:"current_node,omitempty"`
-	History     []historyItemResponse `json:"history"`
+	Scenario    scenarioHeaderResponse `json:"scenario"`
+	CurrentNode *currentNodeResponse   `json:"current_node,omitempty"`
+	History     []historyItemResponse  `json:"history"`
 }
 
 type Handler struct {
@@ -125,7 +133,13 @@ func newAttemptResponse(currentAttempt Attempt) attemptResponse {
 func newAttemptStateResponse(state State) attemptStateResponse {
 	response := attemptStateResponse{
 		attemptResponse: newAttemptResponse(state.Attempt),
-		History:         make([]historyItemResponse, 0, len(state.History)),
+		Scenario: scenarioHeaderResponse{
+			Title:       state.Scenario.Title,
+			Description: state.Scenario.Description,
+			Role:        state.Scenario.Role,
+			Product:     state.Scenario.Product,
+		},
+		History: make([]historyItemResponse, 0, len(state.History)),
 	}
 
 	for _, item := range state.History {

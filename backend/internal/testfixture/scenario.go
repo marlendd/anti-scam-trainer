@@ -21,12 +21,16 @@ const (
 // ValidScenario - валидный сценарий для тестов backend-модулей.
 func ValidScenario() scenario.Scenario {
 	return scenario.Scenario{
-		ID:                  "scenario-v1",
-		LogicalID:           "scenario",
-		Version:             1,
-		Role:                scenario.RoleBuyer,
-		Title:               "Тестовый сценарий",
-		Description:         "Валидный граф для тестов backend-модулей.",
+		ID:          "scenario-v1",
+		LogicalID:   "scenario",
+		Version:     1,
+		Role:        scenario.RoleBuyer,
+		Title:       "Тестовый сценарий",
+		Description: "Валидный граф для тестов backend-модулей.",
+		Product: scenario.Product{
+			Title: "Тестовый товар",
+			Price: 42000,
+		},
 		RewardFragmentID:    RewardFragmentID,
 		SuccessfulEndingIDs: []scenario.EndingID{SafeEndingID},
 		StartNodeID:         StartNodeID,

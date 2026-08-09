@@ -37,6 +37,7 @@ func TestPgRepository_GetScenario_Integration(t *testing.T) {
 		require.Equal(t, scenario.RoleBuyer, got.Role)
 		require.Equal(t, testfixture.StartNodeID, got.StartNodeID)
 		require.Equal(t, testfixture.RewardFragmentID, got.RewardFragmentID)
+		require.Equal(t, testfixture.ValidScenario().Product, got.Product)
 		require.Equal(t, []scenario.EndingID{testfixture.SafeEndingID}, got.SuccessfulEndingIDs)
 		require.Len(t, got.Nodes, 3)
 		require.Len(t, got.Endings, 2)
@@ -94,6 +95,7 @@ func insertScenario(
 
 	fixture := testfixture.ValidScenario()
 	content, err := json.Marshal(scenario.Content{
+		Product:             fixture.Product,
 		StartNodeID:         fixture.StartNodeID,
 		SuccessfulEndingIDs: fixture.SuccessfulEndingIDs,
 		Nodes:               fixture.Nodes,

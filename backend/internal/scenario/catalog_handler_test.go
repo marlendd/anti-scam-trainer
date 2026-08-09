@@ -46,7 +46,12 @@ func TestCatalogHandler_List(t *testing.T) {
 			Role:        scenario.RoleBuyer,
 			Title:       "Safe delivery",
 			Description: "Recognize a fake delivery link",
-			Status:      scenario.ProgressCompleted,
+			Product: scenario.Product{
+				Title:    "GeForce RTX 4070",
+				Price:    48990,
+				ImageURL: "/scenario-images/rtx-4070.webp",
+			},
+			Status: scenario.ProgressCompleted,
 		},
 	}}
 	handler := scenario.NewCatalogHandler(service, catalogDiscardLogger())
@@ -69,6 +74,11 @@ func TestCatalogHandler_List(t *testing.T) {
 	require.Len(t, payload.Items, 1)
 	require.Equal(t, "scenario-1", payload.Items[0]["id"])
 	require.Equal(t, "completed", payload.Items[0]["status"])
+	require.Equal(t, map[string]any{
+		"title":     "GeForce RTX 4070",
+		"price":     float64(48990),
+		"image_url": "/scenario-images/rtx-4070.webp",
+	}, payload.Items[0]["product"])
 	require.NotContains(t, payload.Items[0], "best_score")
 }
 

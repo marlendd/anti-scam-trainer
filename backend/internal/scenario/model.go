@@ -43,11 +43,20 @@ type Scenario struct {
 	Role                Role
 	Title               string
 	Description         string
+	Product             Product
 	RewardFragmentID    FragmentID
 	SuccessfulEndingIDs []EndingID
 	StartNodeID         NodeID
 	Nodes               []Node
 	Endings             []Ending
+}
+
+// Product содержит данные объявления, которые фронтенд показывает в шапке диалога.
+// Price хранится в целых рублях.
+type Product struct {
+	Title    string `json:"title"`
+	Price    int    `json:"price"`
+	ImageURL string `json:"image_url,omitempty"`
 }
 
 type Message struct {
@@ -91,6 +100,7 @@ type Ending struct {
 }
 
 type Content struct {
+	Product             Product    `json:"product"`
 	StartNodeID         NodeID     `json:"start_node_id"`
 	SuccessfulEndingIDs []EndingID `json:"successful_ending_ids,omitempty"`
 	Nodes               []Node     `json:"nodes"`

@@ -111,6 +111,15 @@ func TestHandler_GetState(t *testing.T) {
 				StartedAt:     time.Date(2026, time.August, 8, 10, 0, 0, 0, time.UTC),
 				UpdatedAt:     time.Date(2026, time.August, 8, 10, 1, 0, 0, time.UTC),
 			},
+			Scenario: attempt.ScenarioHeader{
+				Title:       "Поддельная оплата",
+				Description: "Проверка оплаты внутри приложения.",
+				Role:        scenario.RoleSeller,
+				Product: scenario.Product{
+					Title: "iPhone 15 Pro 256 ГБ",
+					Price: 84990,
+				},
+			},
 			CurrentNode: &attempt.CurrentNode{
 				ID:       currentNodeID,
 				Author:   "seller",
@@ -157,6 +166,15 @@ func TestHandler_GetState(t *testing.T) {
 	var payload map[string]any
 	require.NoError(t, json.NewDecoder(response.Body).Decode(&payload))
 	require.Equal(t, "attempt-1", payload["id"])
+	require.Equal(t, map[string]any{
+		"title":       "Поддельная оплата",
+		"description": "Проверка оплаты внутри приложения.",
+		"role":        "seller",
+		"product": map[string]any{
+			"title": "iPhone 15 Pro 256 ГБ",
+			"price": float64(84990),
+		},
+	}, payload["scenario"])
 	currentNode := payload["current_node"].(map[string]any)
 	require.Equal(t, "node-start", currentNode["id"])
 	choices := currentNode["choices"].([]any)
