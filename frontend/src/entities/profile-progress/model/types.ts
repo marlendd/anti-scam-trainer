@@ -36,3 +36,8 @@ export type RankHistoryPoint = {
 export type RankHistory = {
     history: RankHistoryPoint[]
 }
+
+export type ProfileSummary = {
+    totalScore: number
+    totalFragments: number
+}

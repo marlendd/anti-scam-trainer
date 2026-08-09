@@ -36,3 +36,8 @@ export type RankHistoryPointDto = {
 export type RankHistoryResponseDto = {
     history?: RankHistoryPointDto[]
 }
+
+export type ProfileSummaryResponseDto = {
+    total_score: number
+    total_fragments: number
+}

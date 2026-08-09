@@ -1,20 +1,19 @@
-﻿import { Link } from 'react-router-dom'
-import { Logo } from '@/shared/ui/logo'
+﻿import {Link} from 'react-router-dom'
+import {Logo} from '@/shared/ui/logo'
 import styles from './Header.module.scss'
-import { FragmentCounter } from './FragmentCounter'
-import { PointsCounter } from './PointsCounter'
-import { LoginButton } from '@/features/login-button'
-import { BurgerNavigation } from '@/widgets/header'
-import { useCurrentUser } from '@/entities/user'
-import { Avatar } from '@/shared/ui/avatar'
+import {LoginButton} from '@/features/login-button'
+import {BurgerNavigation} from '@/widgets/header'
+import {useCurrentUser} from '@/entities/user'
+import {Avatar} from '@/shared/ui/avatar'
+import {HeaderCounters} from "@/widgets/header/ui/HeaderCounters.tsx";
 
 export const Header = () => {
-    const { data: user, isPending, isError } = useCurrentUser()
+    const {data: user, isPending, isError} = useCurrentUser()
 
     return (
         <header className={styles.header}>
             <Link to="/">
-                <Logo />
+                <Logo/>
             </Link>
 
             <div className={styles.left}>
@@ -30,23 +29,22 @@ export const Header = () => {
 
                 <div className={styles.info}>
                     <div className={styles.counters}>
-                        <FragmentCounter value={0} />
-                        <PointsCounter value={0} />
+                        <HeaderCounters/>
                     </div>
 
-                    {isPending && <LoginButton />}
+                    {isPending && <LoginButton/>}
 
-                    {!isPending && !isError && user === null && <LoginButton />}
+                    {!isPending && !isError && user === null && <LoginButton/>}
 
                     {!isPending && !isError && user !== null && (
                         <Link to={'/dashboard'}>
-                            <Avatar />
+                            <Avatar/>
                         </Link>
                     )}
 
-                    {isError && <LoginButton />}
+                    {isError && <LoginButton/>}
 
-                    <BurgerNavigation />
+                    <BurgerNavigation/>
 
                     {/*<PlayButton/>*/}
                 </div>
