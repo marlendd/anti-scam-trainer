@@ -64,11 +64,8 @@ func run(cfg *config.Config, log *slog.Logger) error {
 
 	// ---------- wiring mailer ----------
 	m := mailer.New(mailer.Config{
-		Host:     cfg.SMTPHost,
-		Port:     cfg.SMTPPort,
-		Username: cfg.SMTPUsername,
-		Password: cfg.SMTPPassword,
-		From:     cfg.SMTPFrom,
+		APIKey: cfg.ResendAPIKey,
+		From:   cfg.ResendFrom,
 	})
 
 	// ---------- wiring auth ----------

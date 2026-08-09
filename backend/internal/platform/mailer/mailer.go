@@ -1,100 +1,95 @@
 package mailer
 
 import (
+	"bytes"
 	"context"
-	"crypto/tls"
+	"encoding/json"
 	"fmt"
-	"net/smtp"
+	"io"
+	"net/http"
+	"time"
 )
 
+const resendAPIURL = "https://api.resend.com/emails"
+
 type Config struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-	From     string
+	APIKey string
+	From   string
 }
 
 type Mailer struct {
-	cfg Config
+	cfg    Config
+	client *http.Client
 }
 
 func New(cfg Config) *Mailer {
-	return &Mailer{cfg: cfg}
+	return &Mailer{
+		cfg: cfg,
+		client: &http.Client{
+			Timeout: 15 * time.Second,
+		},
+	}
+}
+
+type resendRequest struct {
+	From    string   `json:"from"`
+	To      []string `json:"to"`
+	Subject string   `json:"subject"`
+	HTML    string   `json:"html"`
+	Text    string   `json:"text"`
 }
 
 func (m *Mailer) SendPasswordReset(ctx context.Context, toEmail, resetLink string) error {
 	subject := "Восстановление пароля — Anti-Scam Trainer"
-	body := fmt.Sprintf(
-		"Здравствуйте!\r\n\r\n"+
-			"Вы запросили восстановление пароля. Перейдите по ссылке ниже, чтобы задать новый пароль:\r\n\r\n"+
-			"%s\r\n\r\n"+
+
+	text := fmt.Sprintf(
+		"Здравствуйте!\n\n"+
+			"Вы запросили восстановление пароля. Перейдите по ссылке ниже, чтобы задать новый пароль:\n\n"+
+			"%s\n\n"+
 			"Ссылка действительна 1 час. Если вы не запрашивали восстановление — просто проигнорируйте это письмо.",
 		resetLink,
 	)
 
-	msg := fmt.Sprintf(
-		"From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s",
-		m.cfg.From, toEmail, subject, body,
+	html := fmt.Sprintf(
+		`<p>Здравствуйте!</p>
+<p>Вы запросили восстановление пароля. Перейдите по ссылке ниже, чтобы задать новый пароль:</p>
+<p><a href="%s">%s</a></p>
+<p>Ссылка действительна 1 час. Если вы не запрашивали восстановление — просто проигнорируйте это письмо.</p>`,
+		resetLink, resetLink,
 	)
 
-	return m.sendViaImplicitTLS(ctx, toEmail, []byte(msg))
-}
-
-// sendViaImplicitTLS отправляет письмо через SMTPS (порт 465) —
-// в отличие от STARTTLS (587), тут TLS устанавливается сразу при подключении,
-// именно так требует Яндекс для порта 465.
-func (m *Mailer) sendViaImplicitTLS(ctx context.Context, toEmail string, msg []byte) error {
-	addr := fmt.Sprintf("%s:%d", m.cfg.Host, m.cfg.Port)
-
-	tlsConfig := &tls.Config{
-		ServerName: m.cfg.Host,
+	payload := resendRequest{
+		From:    m.cfg.From,
+		To:      []string{toEmail},
+		Subject: subject,
+		HTML:    html,
+		Text:    text,
 	}
 
-	dialer := &tls.Dialer{Config: tlsConfig}
-	conn, err := dialer.DialContext(ctx, "tcp", addr)
+	body, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("tls dial failed: %w", err)
+		return fmt.Errorf("failed to marshal resend payload: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, resendAPIURL, bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("failed to build resend request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+m.cfg.APIKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("resend request failed: %w", err)
 	}
 	defer func() {
-		if cerr := conn.Close(); cerr != nil {
-			// соединение уже могло быть закрыто через client.Quit() ниже — это не критично
-			_ = cerr
-		}
+		_ = resp.Body.Close()
 	}()
 
-	client, err := smtp.NewClient(conn, m.cfg.Host)
-	if err != nil {
-		return fmt.Errorf("smtp client init failed: %w", err)
-	}
-	defer func() {
-		if cerr := client.Close(); cerr != nil {
-			_ = cerr
-		}
-	}()
-
-	auth := smtp.PlainAuth("", m.cfg.Username, m.cfg.Password, m.cfg.Host)
-	if err := client.Auth(auth); err != nil {
-		return fmt.Errorf("smtp auth failed: %w", err)
+	if resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("resend returned status %d: %s", resp.StatusCode, string(respBody))
 	}
 
-	if err := client.Mail(m.cfg.From); err != nil {
-		return fmt.Errorf("smtp MAIL FROM failed: %w", err)
-	}
-	if err := client.Rcpt(toEmail); err != nil {
-		return fmt.Errorf("smtp RCPT TO failed: %w", err)
-	}
-
-	w, err := client.Data()
-	if err != nil {
-		return fmt.Errorf("smtp DATA failed: %w", err)
-	}
-	if _, err := w.Write(msg); err != nil {
-		return fmt.Errorf("smtp write body failed: %w", err)
-	}
-	if err := w.Close(); err != nil {
-		return fmt.Errorf("smtp close writer failed: %w", err)
-	}
-
-	return client.Quit()
+	return nil
 }

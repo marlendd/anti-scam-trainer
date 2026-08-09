@@ -449,11 +449,8 @@ func newTestService(
 	sessions auth.SessionRepository,
 ) *auth.Service {
 	m := mailer.New(mailer.Config{
-		Host:     "smtp.test",
-		Port:     465,
-		Username: "test",
-		Password: "test",
-		From:     "test@test.com",
+		APIKey: "test-api-key",
+		From:   "test@test.com",
 	})
 
 	return auth.NewService(

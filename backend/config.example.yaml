@@ -14,10 +14,6 @@ conn_max_idle_time: "5m"
 
 secure_cookies: false
 
-smtp_host: "smtp.yandex.ru"
-smtp_port: 465
-smtp_username: ""
-smtp_password: ""
-smtp_from: ""
+resend_from: "onboarding@resend.dev"
 
 app_base_url: "http://localhost:3000"

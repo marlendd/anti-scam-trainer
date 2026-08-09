@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # config.example.yaml — скопируй в config.yaml и заполни своими значениями
 env: "local"
 port: "8080"
@@ -15,14 +14,7 @@ conn_max_idle_time: "5m"
 
 secure_cookies: false
 
-smtp_host: "smtp.yandex.ru"
-smtp_port: 465
-smtp_username: "EgorEmil@yandex.ru"
-smtp_password: "lesekfpcxkjtoqrj"
-smtp_from: "EgorEmil@yandex.ru"
 
+resend_from: "onboarding@resend.dev"
 
 app_base_url: "http://localhost:3000"
-=======
-log_level: DEBUG
->>>>>>> feature/add-llm-feedback-recomendation
