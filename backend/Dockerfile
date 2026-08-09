@@ -18,6 +18,9 @@ COPY --from=build /api /app/api
 COPY migrations ./migrations
 COPY seeds ./seeds
 
+# Копируем конфиг прямо в рабочую директорию /app
+COPY config.yaml ./config.yaml
+
 EXPOSE 8080
 
 ENTRYPOINT ["/app/api"]
