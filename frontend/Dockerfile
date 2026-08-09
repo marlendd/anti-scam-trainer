@@ -1,3 +1,18 @@
+# === Stage 1: Build ===
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Копируем файлы зависимостей и устанавливаем их
+COPY package*.json ./
+RUN npm ci
+
+# Копируем исходный код и собираем dist
+COPY . .
+RUN npm run build
+
+
+# === Stage 2: Runtime ===
 FROM nginx:1.27-alpine AS runtime
 
 ENV BACKEND_HOST=backend
