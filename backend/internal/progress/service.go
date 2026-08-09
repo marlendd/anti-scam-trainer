@@ -50,6 +50,13 @@ func (s *Service) GetUserPuzzleProgress(ctx context.Context, userID string) (Puz
 	}, nil
 }
 
+func (s *Service) GrantRewardIfEligible(ctx context.Context, userID, scenarioID, fragmentID string, isSuccess bool) error {
+	if !isSuccess || fragmentID == "" {
+		return nil
+	}
+	return s.repo.SaveReward(ctx, userID, scenarioID, fragmentID)
+}
+
 func (s *Service) GetUserCategoryDashboard(ctx context.Context, userID string) (DashboardData, error) {
 	stats, err := s.repo.GetUserStatsByCategory(ctx, userID)
 	if err != nil {

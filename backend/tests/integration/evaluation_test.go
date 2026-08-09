@@ -3,16 +3,30 @@ package evaluation_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log/slog"
 	"os"
 	"testing"
 
 	_ "github.com/lib/pq"
 	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
+	"github.com/marlendd/anti-scam-trainer/internal/feedback"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 	"github.com/marlendd/anti-scam-trainer/internal/progress"
 	"github.com/stretchr/testify/require"
 )
+
+type mockLLM struct {
+	shouldFail bool
+	respJSON   string
+}
+
+func (m *mockLLM) GenerateJSON(ctx context.Context, sys, user string) (string, error) {
+	if m.shouldFail {
+		return "", errors.New("mock llm timeout or error")
+	}
+	return m.respJSON, nil
+}
 
 func setupTestDB(t *testing.T, dbURL string) *sql.DB {
 	t.Helper()
@@ -121,5 +135,119 @@ func TestEvaluation_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Empty(t, resp.Entries)
+	})
+
+	t.Run("Category Dashboard Progress", func(t *testing.T) {
+		_, err := db.Exec("TRUNCATE users, scenario_versions, attempts, answers CASCADE")
+		require.NoError(t, err)
+
+		seedSQL := `
+			INSERT INTO users (id, email, password_hash) VALUES ('00000000-0000-0000-0000-000000000001', 'cat@test.com', 'hash');
+			INSERT INTO scenario_versions (id, logical_id, version, role, title, description, content)
+			VALUES ('00000000-0000-0000-0000-000000000002', gen_random_uuid(), 1, 'buyer', 'title', 'desc', '{"risk_categories": ["phishing", "fake_payment"]}'::jsonb);
+			INSERT INTO attempts (id, user_id, scenario_id, status, score, completed_at, ending_id)
+			VALUES ('120b7935-62bf-4fd8-828a-6bbe7ef7a19a', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'completed', 100, now(), 'end1');
+		`
+		_, err = db.Exec(seedSQL)
+		require.NoError(t, err)
+
+		dash, err := svc.GetUserCategoryDashboard(ctx, "00000000-0000-0000-0000-000000000001")
+		require.NoError(t, err)
+
+		require.Equal(t, 1, dash.TotalCompleted)
+		require.Len(t, dash.Stats, 2)
+		require.ElementsMatch(t, []string{"phishing", "fake_payment"}, []string{dash.Stats[0].Category, dash.Stats[1].Category})
+	})
+
+	t.Run("Leaderboard and Rank History", func(t *testing.T) {
+		_, err := db.Exec("TRUNCATE users, scenario_versions, attempts, answers, user_inventory CASCADE")
+		require.NoError(t, err)
+
+		u1 := "11111111-0000-0000-0000-000000000001"
+		u2 := "22222222-0000-0000-0000-000000000002"
+
+		seedSQL := `
+			INSERT INTO users (id, email, password_hash) VALUES 
+			  ('` + u1 + `', 'u1@test.com', 'h'),
+			  ('` + u2 + `', 'u2@test.com', 'h');
+			
+			INSERT INTO scenario_versions (id, logical_id, version, role, title, description, content) VALUES 
+			  ('aaaa0000-0000-0000-0000-000000000000', gen_random_uuid(), 1, 'buyer', 't1', 'd', '{}'::jsonb),
+			  ('bbbb0000-0000-0000-0000-000000000000', gen_random_uuid(), 1, 'buyer', 't2', 'd', '{}'::jsonb);
+
+			-- Вчерашние попытки (INTERVAL '2 days', чтобы точно считалось как "до вчерашнего дня")
+			INSERT INTO attempts (id, user_id, scenario_id, status, score, completed_at, ending_id) VALUES 
+			  (gen_random_uuid(), '` + u2 + `', 'aaaa0000-0000-0000-0000-000000000000', 'completed', 100, NOW() - INTERVAL '2 days', 'end'),
+			  (gen_random_uuid(), '` + u1 + `', 'aaaa0000-0000-0000-0000-000000000000', 'completed', 50, NOW() - INTERVAL '2 days', 'end');
+
+			-- Сегодняшняя попытка: Юзер 1 прошел второй сценарий и набрал 100 очков (итого 150)
+			INSERT INTO attempts (id, user_id, scenario_id, status, score, completed_at, ending_id) VALUES 
+			  (gen_random_uuid(), '` + u1 + `', 'bbbb0000-0000-0000-0000-000000000000', 'completed', 100, NOW(), 'end');
+		`
+		_, err = db.Exec(seedSQL)
+		require.NoError(t, err)
+
+		lb, err := svc.GetLeaderboard(ctx, 10, 0)
+		require.NoError(t, err)
+		require.Len(t, lb.Entries, 2)
+
+		require.Equal(t, 1, lb.Entries[0].Rank)
+		require.Equal(t, "u1@test.com", lb.Entries[0].Player)
+		require.Equal(t, 150, lb.Entries[0].Score)
+		require.NotNil(t, lb.Entries[0].RankChange)
+		require.Equal(t, 1, *lb.Entries[0].RankChange)
+
+		require.Equal(t, 2, lb.Entries[1].Rank)
+		require.Equal(t, "u2@test.com", lb.Entries[1].Player)
+		require.Equal(t, 100, lb.Entries[1].Score)
+		require.NotNil(t, lb.Entries[1].RankChange)
+		require.Equal(t, -1, *lb.Entries[1].RankChange)
+
+		history, err := svc.GetMyRankHistory(ctx, u1)
+		require.NoError(t, err)
+		require.NotEmpty(t, history.History)
+
+		lastIdx := len(history.History) - 1
+		require.Equal(t, 1, history.History[lastIdx].Rank)
+	})
+
+	t.Run("Feedback Fallback Logic", func(t *testing.T) {
+		_, err := db.Exec("TRUNCATE users, scenario_versions, attempts, answers CASCADE")
+		require.NoError(t, err)
+
+		uid := "fbfbfbfb-0000-0000-0000-000000000001"
+		aid := "a1a1a1a1-0000-0000-0000-000000000001"
+		scenarioID := "33333333-3333-3333-3333-333333333333"
+
+		seedSQL := `
+			INSERT INTO users (id, email, password_hash) VALUES ('` + uid + `', 'fb@test.com', 'h');
+			INSERT INTO scenario_versions (id, logical_id, version, role, title, description, content)
+			VALUES ('` + scenarioID + `', gen_random_uuid(), 1, 'buyer', 'FB', 'desc', '{}'::jsonb);
+			
+			INSERT INTO attempts (id, user_id, scenario_id, status, score, completed_at, ending_id)
+			VALUES ('` + aid + `', '` + uid + `', '` + scenarioID + `', 'completed', 50, now(), 'end');
+
+			-- Плохой ответ (попался на фишинг)
+			INSERT INTO answers (attempt_id, node_id, choice_id, idempotency_key, weight, choice_score, risk_categories, consequence, explanation, response)
+			VALUES ('` + aid + `', 'node1', 'c1', gen_random_uuid(), 1, 0, '["phishing"]'::jsonb, 'Перешел по поддельной ссылке', 'Сайт украл данные', '{"node_question":"q1", "choice_text":"c1"}');
+			
+			-- Хороший ответ (не перевел деньги)
+			INSERT INTO answers (attempt_id, node_id, choice_id, idempotency_key, weight, choice_score, risk_categories, consequence, explanation, response)
+			VALUES ('` + aid + `', 'node2', 'c2', gen_random_uuid(), 1, 100, '[]'::jsonb, 'Деньги сохранены', 'Не перевел предоплату', '{"node_question":"q2", "choice_text":"c2"}');
+		`
+		_, err = db.Exec(seedSQL)
+		require.NoError(t, err)
+
+		fbRepo := feedback.NewPgRepository(db, slog.Default())
+		fbService := feedback.NewService(fbRepo, &mockLLM{shouldFail: true}, slog.Default())
+
+		fb, err := fbService.Generate(ctx, uid, aid)
+		require.NoError(t, err)
+
+		require.Contains(t, fb.Weaknesses, "Перешел по поддельной ссылке")
+		require.Contains(t, fb.Strengths, "Не перевел предоплату")
+		require.Equal(t, "phishing", fb.RiskProfile.DominantRisk)
+		require.Equal(t, 1, fb.RiskProfile.RiskCount)
+		require.NotEmpty(t, fb.Recommendations)
 	})
 }
