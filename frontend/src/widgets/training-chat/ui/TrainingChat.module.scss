@@ -7,13 +7,17 @@
     min-width: 0;
     height: 100%;
     min-height: 420px;
-    max-height: 100%;
+    max-height: calc(90dvh - 80px);
 
     overflow: hidden;
 
     background-color: #f7f7f7;
     border: 1px solid #e8e8e8;
     border-radius: 28px;
+}
+
+.image {
+    width: 120px;
 }
 
 .empty {
@@ -97,5 +101,436 @@
 
     .emptyTitle {
         font-size: 18px;
+    }
+}
+
+.summary {
+    display: flex;
+
+    flex: 1;
+    flex-direction: column;
+
+    gap: 28px;
+
+    min-height: 0;
+
+    padding: 36px;
+
+    overflow-y: auto;
+
+    background-color: #fff;
+}
+
+.top {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+}
+
+.summaryHeader {
+    display: flex;
+
+    flex-direction: row;
+
+    gap: 16px;
+    align-items: center;
+    justify-content: start;
+
+    text-align: center;
+}
+
+.summaryIcon {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    aspect-ratio: 1 / 1;
+
+    margin-bottom: 4px;
+
+    font-size: 24px;
+    font-weight: 700;
+
+    color: #fff;
+
+    background-color: #04e061;
+    border-radius: 50%;
+}
+
+.summaryTitle {
+    margin: 0;
+
+    font-size: 26px;
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    color: #111;
+}
+
+.summaryScenario {
+    margin: 0;
+
+    font-size: 14px;
+
+    line-height: 1.4;
+
+    color: #858585;
+}
+
+.summaryScore {
+    display: flex;
+
+    align-items: baseline;
+    justify-content: center;
+
+    width: fit-content;
+    min-width: 180px;
+
+    padding: 18px 28px;
+
+    background-color: #f2faff;
+    border-radius: 20px;
+}
+
+.summaryScoreValue {
+    font-size: 48px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    color: #0af;
+}
+
+.summaryScoreLabel {
+    margin-left: 8px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    color: #858585;
+}
+
+.summaryContent {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 14px;
+
+    width: 100%;
+
+    margin: 0 auto;
+}
+
+.summaryMotivation {
+    position: relative;
+
+    grid-column: 1/-1;
+
+    padding: 18px 20px 18px 22px;
+
+    font-size: 15px;
+
+    line-height: 1.55;
+
+    color: #222;
+
+    text-align: left;
+
+    background-color: #f2faff;
+    border-radius: 16px;
+
+    &::before {
+        position: absolute;
+        top: 18px;
+        bottom: 18px;
+        left: 0;
+
+        width: 4px;
+
+        content: '';
+
+        background-color: #0af;
+        border-radius: 0 4px 4px 0;
+    }
+}
+
+.summarySection {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    padding: 18px 20px;
+
+    text-align: left;
+
+    background-color: #f7f7f7;
+    border-radius: 16px;
+
+    h3 {
+        margin: 0;
+
+        font-size: 16px;
+        font-weight: 600;
+
+        line-height: 1.3;
+
+        color: #111;
+    }
+
+    p {
+        margin: 0;
+
+        font-size: 14px;
+
+        line-height: 1.55;
+
+        color: #555;
+    }
+
+    ul {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 8px;
+
+        padding-left: 20px;
+        margin: 0;
+    }
+
+    li {
+        padding-left: 2px;
+
+        font-size: 14px;
+
+        line-height: 1.5;
+
+        color: #555;
+
+        &::marker {
+            color: #0af;
+        }
+    }
+
+    strong {
+        font-weight: 600;
+
+        color: #222;
+    }
+
+    &:nth-child(2),
+    &:nth-child(5),
+    &:nth-child(6) {
+        grid-column: 1/-1;
+    }
+}
+
+.summaryLoading {
+    width: fit-content;
+
+    padding: 10px 16px;
+    margin: 0 auto;
+
+    font-size: 14px;
+
+    color: #858585;
+
+    background-color: #f7f7f7;
+    border-radius: 12px;
+}
+
+.summaryError {
+    width: 100%;
+    max-width: 680px;
+
+    padding: 14px 16px;
+    margin: 0 auto;
+
+    font-size: 14px;
+
+    line-height: 1.45;
+
+    color: #d32f2f;
+
+    text-align: center;
+
+    background-color: #fff2f2;
+    border-radius: 14px;
+}
+
+@media (width <= 1000px) {
+    .summary {
+        gap: 24px;
+
+        padding: 28px;
+    }
+
+    .summaryTitle {
+        font-size: 24px;
+    }
+
+    .summaryScore {
+        min-width: 160px;
+
+        padding: 16px 22px;
+    }
+
+    .summaryScoreValue {
+        font-size: 42px;
+    }
+
+    .summarySection {
+        padding: 16px 18px;
+    }
+}
+
+@media (width <= 760px) {
+    .summary {
+        gap: 22px;
+
+        padding: 24px;
+    }
+
+    .top {
+        flex-direction: column;
+
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .summaryHeader {
+        justify-content: flex-start;
+
+        text-align: left;
+    }
+
+    .summaryScore {
+        width: 100%;
+        min-width: 0;
+
+        padding: 16px 20px;
+    }
+
+    .summaryContent {
+        grid-template-columns: 1fr;
+    }
+
+    .summaryMotivation,
+    .summarySection {
+        grid-column: 1;
+    }
+
+    .summarySection {
+        &:nth-child(2),
+        &:nth-child(5),
+        &:nth-child(6) {
+            grid-column: 1;
+        }
+    }
+}
+
+@media (width <= 480px) {
+    .summary {
+        gap: 18px;
+
+        padding: 20px 16px;
+    }
+
+    .top {
+        gap: 16px;
+    }
+
+    .summaryHeader {
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .summaryIcon {
+        width: 32px;
+        min-width: 32px;
+
+        margin-bottom: 0;
+
+        font-size: 18px;
+    }
+
+    .summaryTitle {
+        font-size: 20px;
+
+        line-height: 1.25;
+    }
+
+    .summaryScenario {
+        font-size: 13px;
+    }
+
+    .summaryScore {
+        padding: 14px 16px;
+
+        border-radius: 16px;
+    }
+
+    .summaryScoreValue {
+        font-size: 36px;
+    }
+
+    .summaryScoreLabel {
+        margin-left: 6px;
+
+        font-size: 13px;
+    }
+
+    .summaryContent {
+        gap: 12px;
+    }
+
+    .summaryMotivation {
+        padding: 14px 16px 14px 20px;
+
+        font-size: 14px;
+
+        border-radius: 14px;
+
+        &::before {
+            top: 14px;
+            bottom: 14px;
+        }
+    }
+
+    .summarySection {
+        gap: 10px;
+
+        padding: 14px 16px;
+
+        border-radius: 14px;
+
+        h3 {
+            font-size: 15px;
+        }
+
+        p,
+        li {
+            font-size: 13px;
+        }
+
+        ul {
+            gap: 6px;
+
+            padding-left: 18px;
+        }
+    }
+
+    .summaryLoading,
+    .summaryError {
+        font-size: 13px;
     }
 }

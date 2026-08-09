@@ -71,9 +71,7 @@ export function ForgotPasswordForm() {
                 </header>
 
                 {forgot.isError && (
-                    <p className={styles.error}>
-                        Не удалось отправить письмо. Попробуйте ещё раз.
-                    </p>
+                    <p className={styles.error}>Не удалось отправить письмо. Попробуйте ещё раз.</p>
                 )}
 
                 <div className={styles.controls}>
@@ -86,11 +84,7 @@ export function ForgotPasswordForm() {
                         Изменить почту
                     </Button>
 
-                    <Button
-                        type="button"
-                        onClick={handleResend}
-                        disabled={forgot.isPending}
-                    >
+                    <Button type="button" onClick={handleResend} disabled={forgot.isPending}>
                         {forgot.isPending ? 'Отправляем...' : 'Отправить ещё раз'}
                     </Button>
                 </div>
@@ -112,9 +106,7 @@ export function ForgotPasswordForm() {
                     <Logo />
                 </Link>
 
-                <p className={styles.description}>
-                    Введите почту, чтобы восстановить аккаунт
-                </p>
+                <p className={styles.description}>Введите почту, чтобы восстановить аккаунт</p>
             </header>
 
             <form className={styles.form} onSubmit={handleSubmit}>
@@ -135,11 +127,7 @@ export function ForgotPasswordForm() {
                     </p>
                 )}
 
-                <Button
-                    className={styles.submit}
-                    type="submit"
-                    disabled={forgot.isPending}
-                >
+                <Button className={styles.submit} type="submit" disabled={forgot.isPending}>
                     {forgot.isPending ? 'Отправляем...' : 'Восстановить пароль'}
                 </Button>
             </form>

@@ -1,6 +1,7 @@
 import { apiRequest } from '@/shared/api'
 
 export interface RegisterRequest {
+    name: string
     email: string
     password: string
 }

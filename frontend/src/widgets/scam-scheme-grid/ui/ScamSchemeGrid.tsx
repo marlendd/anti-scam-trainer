@@ -1,6 +1,6 @@
 import styles from './ScamSchemeGrid.module.scss'
-import {ScamSchemeCard} from "@/entities/scam-scheme-card";
-import { scamSchemes } from '../model/mock.ts';
+import { ScamSchemeCard } from '@/entities/scam-scheme-card'
+import { scamSchemes } from '../model/mock.ts'
 
 export function ScamSchemeGrid() {
     return (

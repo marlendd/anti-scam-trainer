@@ -22,6 +22,34 @@ export type ScenarioMessage = {
     delayMs?: number
 }
 
+export type TrainingRole = 'buyer' | 'seller'
+
+export type TrainingScenarioStatus = 'not_started' | 'in_progress' | 'completed'
+
+export interface TrainingScenarioSummary {
+    id: string
+    logicalId: string
+    version: number
+    role: TrainingRole
+    title: string
+    description: string
+    status: TrainingScenarioStatus
+}
+
+export interface ScenarioDto {
+    id: string
+    logical_id: string
+    version: number
+    role: TrainingRole
+    title: string
+    description: string
+    status: TrainingScenarioStatus
+}
+
+export interface ScenariosResponseDto {
+    items: ScenarioDto[]
+}
+
 export type ScenarioAnswerOption = {
     id: string
     text: string

@@ -3,12 +3,11 @@ import { faChevronLeft, faPause } from '@fortawesome/free-solid-svg-icons'
 import { Icon } from '@/shared/ui/icon'
 
 import styles from './GameHeader.module.scss'
-import { FragmentCounter } from '@/widgets/header/ui/FragmentCounter.tsx'
-import { PointsCounter } from '@/widgets/header/ui/PointsCounter.tsx'
 import { Button } from '@/shared/ui/button'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { faHome } from '@fortawesome/free-regular-svg-icons'
 import { SessionTime } from '@/entities/session-timer/ui/SessionTime.tsx'
+import {HeaderCounters} from "@/widgets/header";
 
 export type GameHeaderVariant = 'setup' | 'session'
 
@@ -24,8 +23,6 @@ export type GameHeaderProps = {
 
 export function GameHeader({
     variant = 'setup',
-    currentQuestion = 1,
-    totalQuestions = 10,
 }: GameHeaderProps) {
     const isSession = variant === 'session'
 
@@ -70,46 +67,8 @@ export function GameHeader({
                     <span className={styles.separator} aria-hidden="true" />
 
                     <div className={styles.stats}>
-                        <FragmentCounter value={0} />
-                        <PointsCounter value={0} />
+                        <HeaderCounters/>
                     </div>
-                </div>
-
-                <div className={styles.right}>
-                    {isSession ? (
-                        <>
-                            <span className={styles.question}>
-                                {currentQuestion} из {totalQuestions}
-                            </span>
-
-                            <div
-                                className={styles.progress}
-                                aria-label={`Вопрос ${currentQuestion} из ${totalQuestions}`}
-                            >
-                                {Array.from({
-                                    length: totalQuestions,
-                                }).map((_, index) => {
-                                    const questionNumber = index + 1
-
-                                    const state =
-                                        questionNumber < currentQuestion
-                                            ? 'completed'
-                                            : questionNumber === currentQuestion
-                                              ? 'current'
-                                              : 'pending'
-
-                                    return (
-                                        <span
-                                            key={questionNumber}
-                                            className={styles.progressDot}
-                                            data-state={state}
-                                            aria-hidden="true"
-                                        />
-                                    )
-                                })}
-                            </div>
-                        </>
-                    ) : null}
                 </div>
             </div>
         </header>
