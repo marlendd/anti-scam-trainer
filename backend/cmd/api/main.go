@@ -141,9 +141,6 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		requireAuth(http.HandlerFunc(attemptHandler.GetState)),
 	)
 
-	// protected routes
-	mux.Handle("GET /api/v1/users/me", requireAuth(http.HandlerFunc(authHandler.Me)))
-
 	// progress not protected routes
 	mux.HandleFunc("GET /api/v1/leaderboard", progressHandler.GetLeaderboard)
 	// progress protected routes
