@@ -6,9 +6,18 @@ export { useAttemptFeedback } from './api/use-attempt-feedback'
 
 export type { AttemptResult } from './api/get-attempt-result'
 
-export type { AttemptFeedback, RiskProfile } from './api/get-attempt-feedback'
+export type {
+    AttemptFeedback,
+    RiskProfile,
+} from './api/get-attempt-feedback'
 
 export type {
+    AttemptActor,
+    AttemptHistoryItem,
+    AttemptHistoryNode,
+    AttemptMessage,
+    AttemptScenario,
+    AttemptScenarioProduct,
     AttemptStatus,
     ChoiceOption,
     CurrentNode,

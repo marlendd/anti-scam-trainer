@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useMemo, useRef, useEffect } from 'react'
 
-import { type TrainingAttemptState, useSubmitAnswer } from '@/entities/training-attempt'
+import {
+    type AttemptActor,
+    type TrainingAttemptState,
+    useSubmitAnswer,
+} from '@/entities/training-attempt'
 import { ChatMessage } from '@/shared/ui/chat-message'
 
 import styles from './AttemptPlayer.module.scss'
@@ -10,120 +14,164 @@ type AttemptPlayerProps = {
     onComplete?: () => void
 }
 
-type HistoryMessage = {
+type ChatEntry = {
     id: string
-    direction: 'incoming' | 'outgoing'
+    author: AttemptActor
     text: string
-    avatarText?: string
 }
 
-export function AttemptPlayer({ attempt, onComplete }: AttemptPlayerProps) {
-    const messagesEndRef = useRef<HTMLDivElement>(null)
+function getMessagePosition(
+    messages: ChatEntry[],
+    index: number,
+) {
+    const current = messages[index]
+    const previous = messages[index - 1]
+    const next = messages[index + 1]
 
-    const [history, setHistory] = useState<HistoryMessage[]>([])
+    const sameAsPrevious =
+        previous?.author === current?.author
+
+    const sameAsNext =
+        next?.author === current?.author
+
+    if (!sameAsPrevious && !sameAsNext) {
+        return 'single' as const
+    }
+
+    if (!sameAsPrevious && sameAsNext) {
+        return 'first' as const
+    }
+
+    if (sameAsPrevious && sameAsNext) {
+        return 'middle' as const
+    }
+
+    return 'last' as const
+}
+
+function getAuthorName(author: AttemptActor) {
+    return author === 'buyer'
+        ? 'Покупатель'
+        : 'Продавец'
+}
+
+export function AttemptPlayer({
+    attempt,
+    onComplete,
+}: AttemptPlayerProps) {
+    const messagesEndRef = useRef<HTMLDivElement>(null)
 
     const submitAnswer = useSubmitAnswer()
 
     const node = attempt.currentNode
-    const isCompleted = attempt.status === 'completed'
+    const playerRole = attempt.scenario.role
 
-    useEffect(() => {
-        setHistory([])
-    }, [attempt.id])
+    const messages = useMemo<ChatEntry[]>(() => {
+        const historyMessages =
+            attempt.history.flatMap((historyItem) => [
+                ...historyItem.node.messages.map(
+                    (message, index) => ({
+                        id: `${historyItem.node.id}-message-${index}`,
+                        author: message.author,
+                        text: message.text,
+                    }),
+                ),
 
-    useEffect(() => {
-        if (!node) {
-            return
-        }
-
-        setHistory((currentHistory) => {
-            const messageId = `node-${node.id}`
-
-            const alreadyExists = currentHistory.some((message) => message.id === messageId)
-
-            if (alreadyExists) {
-                return currentHistory
-            }
-
-            return [
-                ...currentHistory,
                 {
-                    id: messageId,
-                    direction: 'incoming',
-                    text: node.text,
-                    avatarText: node.author,
+                    id: `${historyItem.node.id}-choice-${historyItem.selectedChoice.id}`,
+                    author: playerRole,
+                    text: historyItem.selectedChoice.text,
                 },
-            ]
-        })
-    }, [node])
+            ])
+
+        const currentMessages =
+            node?.messages.map((message, index) => ({
+                id: `${node.id}-message-${index}`,
+                author: message.author,
+                text: message.text,
+            })) ?? []
+
+        return [
+            ...historyMessages,
+            ...currentMessages,
+        ]
+    }, [attempt.history, node, playerRole])
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({
             behavior: 'smooth',
             block: 'end',
         })
-    }, [history.length])
+    }, [messages.length])
 
-    async function handleChoiceSelect(choiceId: string, choiceText: string) {
+    async function handleChoiceSelect(
+        choiceId: string,
+    ) {
         if (!node || submitAnswer.isPending) {
             return
         }
 
-        const messageId = `choice-${node.id}-${choiceId}`
+        const result = await submitAnswer.mutateAsync({
+            attemptId: attempt.id,
+            nodeId: node.id,
+            choiceId,
+        })
 
-        setHistory((currentHistory) => [
-            ...currentHistory,
-            {
-                id: messageId,
-                direction: 'outgoing',
-                text: choiceText,
-            },
-        ])
-
-        try {
-            const result = await submitAnswer.mutateAsync({
-                attemptId: attempt.id,
-                nodeId: node.id,
-                choiceId,
-            })
-
-            if (result.completed) {
-                onComplete?.()
-            }
-        } catch {
-            setHistory((currentHistory) =>
-                currentHistory.filter((message) => message.id !== messageId),
-            )
+        if (result.completed) {
+            onComplete?.()
         }
     }
 
-    if (isCompleted) {
+    if (attempt.status === 'completed') {
         return null
     }
 
     if (!node) {
         return (
             <div className={styles.messages}>
-                <div className={styles.error}>Не удалось получить текущий шаг сценария.</div>
+                <div className={styles.error}>
+                    Не удалось получить текущий шаг сценария.
+                </div>
             </div>
         )
     }
 
     return (
         <div className={styles.messages}>
-            {history.map((message) => (
-                <ChatMessage
-                    key={message.id}
-                    direction={message.direction}
-                    position="single"
-                    text={message.text}
-                    avatarText={message.avatarText}
-                    showAvatar={message.direction === 'incoming'}
-                />
-            ))}
+            {messages.map((message, index) => {
+                const direction =
+                    message.author === playerRole
+                        ? 'outgoing'
+                        : 'incoming'
+
+                const position = getMessagePosition(
+                    messages,
+                    index,
+                )
+
+                const showAvatar =
+                    direction === 'incoming' &&
+                    (position === 'single' ||
+                        position === 'last')
+
+                return (
+                    <ChatMessage
+                        key={message.id}
+                        direction={direction}
+                        position={position}
+                        text={message.text}
+                        avatarText={getAuthorName(
+                            message.author,
+                        )}
+                        showAvatar={showAvatar}
+                    />
+                )
+            })}
 
             <div className={styles.answers}>
-                <span className={styles.answersLabel}>Выберите ответ</span>
+                <span className={styles.answersLabel}>
+                    Выберите ответ
+                </span>
 
                 {node.choices.map((choice) => (
                     <button
@@ -132,7 +180,9 @@ export function AttemptPlayer({ attempt, onComplete }: AttemptPlayerProps) {
                         className={styles.answer}
                         disabled={submitAnswer.isPending}
                         onClick={() => {
-                            void handleChoiceSelect(choice.id, choice.text)
+                            void handleChoiceSelect(
+                                choice.id,
+                            )
                         }}
                     >
                         {choice.text}
@@ -141,7 +191,8 @@ export function AttemptPlayer({ attempt, onComplete }: AttemptPlayerProps) {
 
                 {submitAnswer.isError && (
                     <span className={styles.error}>
-                        Не удалось отправить ответ. Попробуйте ещё раз.
+                        Не удалось отправить ответ.
+                        Попробуйте ещё раз.
                     </span>
                 )}
             </div>
