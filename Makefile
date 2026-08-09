@@ -16,14 +16,9 @@ clean:
 test:
 	cd backend && go test -v -race -cover ./...
 
-test-e2e:
-	${CONTAINER_RUNTIME} compose down -v --remove-orphans
-	${CONTAINER_RUNTIME} volume rm -f anti-scam-trainer_antiscam_data 2>/dev/null || true
-	${CONTAINER_RUNTIME} compose up --build -d
+test-e2e: clean up
 	@echo "wait cluster to start..." && sleep 5
-	cd backend && RUN_INTEGRATION_TESTS=1 \
-		TEST_DATABASE_URL="postgres://postgres:postgres@127.0.0.1:5433/antiscam?sslmode=disable" \
-		go test -p 1 -v -race ./...
+	cd backend && go test -v -race ./...
 	$(MAKE) clean
 	@echo "e2e tests finished"
 

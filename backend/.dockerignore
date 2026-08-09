@@ -1,6 +1,0 @@
-.env
-config.yaml
-smtp-test/
-*.log
-coverage.out
-cover.html

@@ -1,1 +1,0 @@
-export { TrainingSchemeList } from './ui/TrainingSchemeList'
