@@ -52,3 +52,8 @@ type RankHistoryPoint struct {
 type RankHistoryResponse struct {
 	History []RankHistoryPoint `json:"history"`
 }
+
+type UserSummary struct {
+	TotalScore     int `json:"total_score"`
+	TotalFragments int `json:"total_fragments"`
+}

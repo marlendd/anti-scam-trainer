@@ -500,6 +500,19 @@ paths:
                 $ref: '#/components/schemas/RankHistoryResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /api/v1/profile/summary:
+    get:
+      tags: [progress]
+      summary: Краткая сводка очков и фрагментов пользователя
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Сводные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummary'
 
 components:
   securitySchemes:
@@ -971,3 +984,11 @@ components:
             type: string
         motivation:
           type: string
+    
+    UserSummary:
+      type: object
+      properties:
+        total_score:
+          type: integer
+        total_fragments:
+          type: integer

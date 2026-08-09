@@ -18,6 +18,7 @@ type Repository interface {
 	GetUserTotalCompletedCount(ctx context.Context, userID string) (int, error)
 	GetLeaderboard(ctx context.Context, limit, offset int) ([]LeaderboardEntry, error)
 	GetUserRankHistory(ctx context.Context, userID string, days int) ([]RankHistoryPoint, error)
+	GetUserSummary(ctx context.Context, userID string) (UserSummary, error)
 }
 
 type PgRepository struct {
@@ -329,4 +330,35 @@ func (r *PgRepository) GetUserRankHistory(ctx context.Context, userID string, da
 	}
 
 	return history, nil
+}
+
+func (r *PgRepository) GetUserSummary(ctx context.Context, userID string) (UserSummary, error) {
+	const q = `
+		WITH scores AS (
+			SELECT sv.logical_id, MAX(a.score) as max_score
+			FROM attempts a
+			JOIN scenario_versions sv ON a.scenario_id = sv.id
+			WHERE a.user_id = $1 AND a.status = 'completed'
+			GROUP BY sv.logical_id
+		),
+		totals AS (
+			SELECT SUM(max_score) as total_score FROM scores
+		),
+		fragments AS (
+			SELECT COUNT(DISTINCT fragment_id) as fragments_count
+			FROM user_inventory
+			WHERE user_id = $1
+		)
+		SELECT 
+			COALESCE((SELECT total_score FROM totals), 0),
+			COALESCE((SELECT fragments_count FROM fragments), 0);
+	`
+
+	var summary UserSummary
+	err := r.db.QueryRowContext(ctx, q, userID).Scan(&summary.TotalScore, &summary.TotalFragments)
+	if err != nil {
+		return UserSummary{}, err
+	}
+
+	return summary, nil
 }

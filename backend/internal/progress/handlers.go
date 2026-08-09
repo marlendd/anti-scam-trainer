@@ -120,6 +120,23 @@ func (h *Handler) GetMyRankHistory(w http.ResponseWriter, r *http.Request) {
 	h.respondJSON(w, http.StatusOK, data)
 }
 
+func (h *Handler) GetMySummary(w http.ResponseWriter, r *http.Request) {
+	userID, ok := auth.UserIDFromContext(r.Context())
+	if !ok {
+		h.respondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	summary, err := h.service.GetPersonalSummary(r.Context(), userID)
+	if err != nil {
+		h.log.Error("failed to get user summary", "user_id", userID, "error", err)
+		h.respondError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+
+	h.respondJSON(w, http.StatusOK, summary)
+}
+
 func (h *Handler) respondJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
