@@ -1,0 +1,62 @@
+.messages {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+
+    min-height: 0;
+    padding: 16px;
+
+    overflow-y: auto;
+}
+
+.answers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-top: 8px;
+}
+
+.answersLabel {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.answer {
+    width: 100%;
+    padding: 12px 16px;
+
+    font: inherit;
+    text-align: left;
+
+    cursor: pointer;
+
+    color: black;
+    font-size: 16px;
+
+    border: 1px solid #d6d6d6;
+    border-radius: 12px;
+    background: #fff;
+
+    &:hover:not(:disabled) {
+        background: #f5f5f5;
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.6;
+    }
+}
+
+.completed {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding: 16px;
+}
+
+.error {
+    font-size: 14px;
+}

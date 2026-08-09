@@ -24,8 +24,8 @@ export type GameHeaderProps = {
 
 export function GameHeader({
     variant = 'setup',
-    currentQuestion = 1,
-    totalQuestions = 10,
+    // currentQuestion = 1,
+    // totalQuestions = 10,
 }: GameHeaderProps) {
     const isSession = variant === 'session'
 
@@ -75,42 +75,42 @@ export function GameHeader({
                     </div>
                 </div>
 
-                <div className={styles.right}>
-                    {isSession ? (
-                        <>
-                            <span className={styles.question}>
-                                {currentQuestion} из {totalQuestions}
-                            </span>
+                {/*<div className={styles.right}>*/}
+                {/*    {isSession ? (*/}
+                {/*        <>*/}
+                {/*            <span className={styles.question}>*/}
+                {/*                {currentQuestion} из {totalQuestions}*/}
+                {/*            </span>*/}
 
-                            <div
-                                className={styles.progress}
-                                aria-label={`Вопрос ${currentQuestion} из ${totalQuestions}`}
-                            >
-                                {Array.from({
-                                    length: totalQuestions,
-                                }).map((_, index) => {
-                                    const questionNumber = index + 1
+                {/*            <div*/}
+                {/*                className={styles.progress}*/}
+                {/*                aria-label={`Вопрос ${currentQuestion} из ${totalQuestions}`}*/}
+                {/*            >*/}
+                {/*                {Array.from({*/}
+                {/*                    length: totalQuestions,*/}
+                {/*                }).map((_, index) => {*/}
+                {/*                    const questionNumber = index + 1*/}
 
-                                    const state =
-                                        questionNumber < currentQuestion
-                                            ? 'completed'
-                                            : questionNumber === currentQuestion
-                                              ? 'current'
-                                              : 'pending'
+                {/*                    const state =*/}
+                {/*                        questionNumber < currentQuestion*/}
+                {/*                            ? 'completed'*/}
+                {/*                            : questionNumber === currentQuestion*/}
+                {/*                              ? 'current'*/}
+                {/*                              : 'pending'*/}
 
-                                    return (
-                                        <span
-                                            key={questionNumber}
-                                            className={styles.progressDot}
-                                            data-state={state}
-                                            aria-hidden="true"
-                                        />
-                                    )
-                                })}
-                            </div>
-                        </>
-                    ) : null}
-                </div>
+                {/*                    return (*/}
+                {/*                        <span*/}
+                {/*                            key={questionNumber}*/}
+                {/*                            className={styles.progressDot}*/}
+                {/*                            data-state={state}*/}
+                {/*                            aria-hidden="true"*/}
+                {/*                        />*/}
+                {/*                    )*/}
+                {/*                })}*/}
+                {/*            </div>*/}
+                {/*        </>*/}
+                {/*    ) : null}*/}
+                {/*</div>*/}
             </div>
         </header>
     )

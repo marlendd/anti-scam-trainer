@@ -19,6 +19,7 @@ export function RegisterForm() {
 
         const formData = new FormData(event.currentTarget)
 
+        const name = String(formData.get('name') ?? '')
         const email = String(formData.get('email') ?? '')
         const password = String(formData.get('password') ?? '')
         const passwordConfirmation = String(formData.get('passwordConfirmation') ?? '')
@@ -32,6 +33,7 @@ export function RegisterForm() {
 
         register.mutate(
             {
+                name,
                 email,
                 password,
             },
