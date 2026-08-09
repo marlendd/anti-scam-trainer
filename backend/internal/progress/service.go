@@ -109,3 +109,7 @@ func (s *Service) GetMyRankHistory(ctx context.Context, userID string) (RankHist
 
 	return RankHistoryResponse{History: history}, nil
 }
+
+func (s *Service) GetPersonalSummary(ctx context.Context, userID string) (UserSummary, error) {
+	return s.repo.GetUserSummary(ctx, userID)
+}

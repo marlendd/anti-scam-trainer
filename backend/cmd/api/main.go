@@ -166,6 +166,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.Handle("GET /api/v1/profile/puzzle", requireAuth(http.HandlerFunc(progressHandler.GetMyPuzzleProgress)))
 	mux.Handle("GET /api/v1/attempts/{id}/result", requireAuth(http.HandlerFunc(progressHandler.GetStatsOfAttempt)))
 	mux.Handle("GET /api/v1/profile/rank-history", requireAuth(http.HandlerFunc(progressHandler.GetMyRankHistory)))
+	mux.Handle("GET /api/v1/profile/summary", requireAuth(http.HandlerFunc(progressHandler.GetMySummary)))
 	// feedback routes
 	mux.Handle("GET /api/v1/attempts/{id}/feedback", requireAuth(http.HandlerFunc(feedbackHandler.GetAttemptFeedback)))
 	addr := ":" + cfg.Port
