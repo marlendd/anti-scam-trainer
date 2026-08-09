@@ -25,7 +25,7 @@ export function DashboardOverview() {
 
                 <div className={styles.text}>
                     <p className={styles.name}>
-                        {user.email}
+                        {user.name || user.email}
                     </p>
 
                     <p className={styles.rank}>
