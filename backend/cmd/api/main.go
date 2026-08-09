@@ -77,6 +77,9 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	authHandler := auth.NewHandler(authService, log, cfg.SecureCookies)
 	requireAuth := auth.RequireAuth(authService, log)
 
+	// ---------- evaluation ----------
+	evaluator := evaluation.NewEvaluator()
+
 	// ---------- wiring attempts ----------
 	scenarioRepository := scenario.NewPgRepository(db)
 	scenarioCatalogService := scenario.NewCatalogService(&scenarioRepository)
@@ -86,11 +89,9 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		attemptRepository,
 		attemptRepository,
 		&scenarioRepository,
+		evaluator,
 	)
 	attemptHandler := attempt.NewHandler(attemptService, log)
-
-	// ---------- evaluation ----------
-	evaluator := evaluation.NewEvaluator()
 
 	// ---------- progress ----------
 	progressRepo := progress.NewPgRepository(db, log)
