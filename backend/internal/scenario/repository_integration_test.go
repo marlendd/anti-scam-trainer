@@ -36,6 +36,8 @@ func TestPgRepository_GetScenario_Integration(t *testing.T) {
 		require.Equal(t, activeID, got.ID)
 		require.Equal(t, scenario.RoleBuyer, got.Role)
 		require.Equal(t, testfixture.StartNodeID, got.StartNodeID)
+		require.Equal(t, testfixture.RewardFragmentID, got.RewardFragmentID)
+		require.Equal(t, []scenario.EndingID{testfixture.SafeEndingID}, got.SuccessfulEndingIDs)
 		require.Len(t, got.Nodes, 3)
 		require.Len(t, got.Endings, 2)
 	})
@@ -92,17 +94,19 @@ func insertScenario(
 
 	fixture := testfixture.ValidScenario()
 	content, err := json.Marshal(scenario.Content{
-		StartNodeID: fixture.StartNodeID,
-		Nodes:       fixture.Nodes,
-		Endings:     fixture.Endings,
+		StartNodeID:         fixture.StartNodeID,
+		SuccessfulEndingIDs: fixture.SuccessfulEndingIDs,
+		Nodes:               fixture.Nodes,
+		Endings:             fixture.Endings,
 	})
 	require.NoError(t, err)
 
 	const query = `
 		INSERT INTO scenario_versions (
-			logical_id, version, role, title, description, is_active, content
+			logical_id, version, role, title, description, is_active,
+			reward_fragment_id, content
 		)
-		VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5)
+		VALUES (gen_random_uuid(), 1, $1, $2, $3, $4, $5, $6)
 		RETURNING id
 	`
 
@@ -114,6 +118,7 @@ func insertScenario(
 		fixture.Title,
 		fixture.Description,
 		isActive,
+		fixture.RewardFragmentID,
 		string(content),
 	).Scan(&id)
 	require.NoError(t, err)

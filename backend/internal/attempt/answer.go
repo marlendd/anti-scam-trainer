@@ -38,12 +38,13 @@ type SubmitAnswerInput struct {
 }
 
 type SubmitAnswerResult struct {
-	AttemptID   AttemptID          `json:"attempt_id"`
-	NodeID      scenario.NodeID    `json:"node_id"`
-	ChoiceID    scenario.ChoiceID  `json:"choice_id"`
-	Consequence string             `json:"consequence"`
-	NextNodeID  *scenario.NodeID   `json:"next_node_id,omitempty"`
-	EndingID    *scenario.EndingID `json:"ending_id,omitempty"`
-	Completed   bool               `json:"completed"`
-	Score       *int               `json:"score,omitempty"`
+	AttemptID        AttemptID            `json:"attempt_id"`
+	NodeID           scenario.NodeID      `json:"node_id"`
+	ChoiceID         scenario.ChoiceID    `json:"choice_id"`
+	Consequence      string               `json:"consequence"`
+	NextNodeID       *scenario.NodeID     `json:"next_node_id,omitempty"`
+	EndingID         *scenario.EndingID   `json:"ending_id,omitempty"`
+	Completed        bool                 `json:"completed"`
+	Score            *int                 `json:"score,omitempty"`
+	RewardFragmentID *scenario.FragmentID `json:"reward_fragment_id,omitempty"`
 }

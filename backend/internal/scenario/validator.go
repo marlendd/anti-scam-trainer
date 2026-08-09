@@ -13,6 +13,9 @@ func Validate(s Scenario) error {
 	if s.StartNodeID == "" {
 		return ErrEmptyStartNodeID
 	}
+	if s.RewardFragmentID != "" && strings.TrimSpace(string(s.RewardFragmentID)) == "" {
+		return ErrInvalidRewardFragment
+	}
 
 	nodesByID := make(map[NodeID]Node, len(s.Nodes))
 	for _, node := range s.Nodes {
@@ -44,6 +47,20 @@ func Validate(s Scenario) error {
 			return fmt.Errorf("%w: %q", ErrDuplicateEndingID, ending.ID)
 		}
 		seenEndings[ending.ID] = struct{}{}
+	}
+
+	seenSuccessfulEndings := make(map[EndingID]struct{}, len(s.SuccessfulEndingIDs))
+	for _, endingID := range s.SuccessfulEndingIDs {
+		if _, exists := seenEndings[endingID]; !exists {
+			return fmt.Errorf("%w: %q", ErrUnknownSuccessfulEnding, endingID)
+		}
+		if _, exists := seenSuccessfulEndings[endingID]; exists {
+			return fmt.Errorf("%w: %q", ErrDuplicateSuccessfulEnding, endingID)
+		}
+		seenSuccessfulEndings[endingID] = struct{}{}
+	}
+	if s.RewardFragmentID != "" && len(seenSuccessfulEndings) == 0 {
+		return ErrMissingSuccessfulEnding
 	}
 
 	if _, ok := nodesByID[s.StartNodeID]; !ok {
