@@ -58,6 +58,8 @@ type scenarioCatalogAPIResponse struct {
 	Items []scenarioCatalogAPIItem `json:"items"`
 }
 
+const buyerGPUSeedScenarioID = "45d4cc8c-f604-4a7c-b8c5-f2464717b71f"
+
 func TestRunIntegration_APIFlow(t *testing.T) {
 	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
 		t.Skip("skipping integration test; set RUN_INTEGRATION_TESTS=1 to run")
@@ -84,6 +86,7 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 
 	logger := mustMakeLogger(cfg.LogLevel)
 
+	require.NoError(t, postgres.RunMigrations(databaseURL, cfg.MigrationsPath))
 	cleanupTestDatabase(t, databaseURL)
 
 	errCh := make(chan error, 1)
@@ -104,14 +107,6 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		require.NoError(t, testDB.Close())
-	})
-
-	scenarioID := insertAPITestScenario(t, testDB)
-	t.Cleanup(func() {
-		_, cleanupErr := testDB.Exec(`DELETE FROM attempts WHERE scenario_id = $1`, scenarioID)
-		require.NoError(t, cleanupErr)
-		_, cleanupErr = testDB.Exec(`DELETE FROM scenario_versions WHERE id = $1`, scenarioID)
-		require.NoError(t, cleanupErr)
 	})
 
 	jar, err := cookiejar.New(nil)
@@ -183,8 +178,121 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 		require.Equal(t, email, payload.Email)
 	})
 
+	t.Run("catalog exposes two seeded scenarios per role", func(t *testing.T) {
+		buyerCatalog := getScenarioCatalog(t, client, baseURL, scenario.RoleBuyer)
+		require.Len(t, buyerCatalog.Items, 2)
+
+		sellerCatalog := getScenarioCatalog(t, client, baseURL, scenario.RoleSeller)
+		require.Len(t, sellerCatalog.Items, 2)
+	})
+
+	t.Run("completes loaded seed through HTTP API", func(t *testing.T) {
+		catalogItem := getScenarioCatalogItem(t, client, baseURL, scenario.RoleBuyer, buyerGPUSeedScenarioID)
+		require.Equal(t, "not_started", catalogItem.Status)
+
+		startResponse, err := client.Post(
+			baseURL+"/api/v1/scenarios/"+buyerGPUSeedScenarioID+"/attempts",
+			"application/json",
+			nil,
+		)
+		require.NoError(t, err)
+		defer closeBody(t, startResponse)
+		require.Equal(t, http.StatusCreated, startResponse.StatusCode)
+
+		var started attemptAPIResponse
+		require.NoError(t, json.NewDecoder(startResponse.Body).Decode(&started))
+		require.Equal(t, buyerGPUSeedScenarioID, started.ScenarioID)
+		require.Equal(t, "in_progress", started.Status)
+		require.NotNil(t, started.CurrentNodeID)
+		require.Equal(t, "n1_scarcity_pressure", *started.CurrentNodeID)
+
+		steps := []struct {
+			nodeID     string
+			choiceID   string
+			nextNodeID string
+		}{
+			{
+				nodeID:     "n1_scarcity_pressure",
+				choiceID:   "n1_take_time_to_review",
+				nextNodeID: "n2_platform_issue",
+			},
+			{
+				nodeID:     "n2_platform_issue",
+				choiceID:   "n2p_contact_support_independently",
+				nextNodeID: "n3_official_verification",
+			},
+			{
+				nodeID:     "n3_official_verification",
+				choiceID:   "n3v_refuse_and_report",
+				nextNodeID: "n4_protected",
+			},
+		}
+
+		for _, step := range steps {
+			result := submitAnswerThroughAPI(
+				t,
+				client,
+				baseURL,
+				testDB,
+				started.ID,
+				step.nodeID,
+				step.choiceID,
+			)
+			require.False(t, result.Completed)
+			require.NotNil(t, result.NextNodeID)
+			require.Equal(t, step.nextNodeID, *result.NextNodeID)
+		}
+
+		final := submitAnswerThroughAPI(
+			t,
+			client,
+			baseURL,
+			testDB,
+			started.ID,
+			"n4_protected",
+			"n4p_block_and_report",
+		)
+		require.True(t, final.Completed)
+		require.Nil(t, final.NextNodeID)
+		require.NotNil(t, final.EndingID)
+		require.Equal(t, "ending_safe", *final.EndingID)
+		require.NotNil(t, final.Score)
+		require.Equal(t, 100, *final.Score)
+
+		var status string
+		var score int
+		var answerCount int
+		require.NoError(t, testDB.QueryRow(`
+			SELECT status,
+			       score,
+			       (SELECT count(*) FROM answers WHERE attempt_id = attempts.id)
+			FROM attempts
+			WHERE id = $1
+		`, started.ID).Scan(&status, &score, &answerCount))
+		require.Equal(t, "completed", status)
+		require.Equal(t, 100, score)
+		require.Equal(t, 4, answerCount)
+
+		catalogItem = getScenarioCatalogItem(
+			t,
+			client,
+			baseURL,
+			scenario.RoleBuyer,
+			buyerGPUSeedScenarioID,
+		)
+		require.Equal(t, "completed", catalogItem.Status)
+	})
+
+	scenarioID := insertAPITestScenario(t, testDB)
+	t.Cleanup(func() {
+		_, cleanupErr := testDB.Exec(`DELETE FROM attempts WHERE scenario_id = $1`, scenarioID)
+		require.NoError(t, cleanupErr)
+		_, cleanupErr = testDB.Exec(`DELETE FROM scenario_versions WHERE id = $1`, scenarioID)
+		require.NoError(t, cleanupErr)
+	})
+
 	t.Run("completes scenario through HTTP API", func(t *testing.T) {
-		catalogItem := getScenarioCatalogItem(t, client, baseURL, scenarioID)
+		catalogItem := getScenarioCatalogItem(t, client, baseURL, scenario.RoleBuyer, scenarioID)
 		require.Equal(t, "not_started", catalogItem.Status)
 
 		startResponse, err := client.Post(
@@ -270,7 +378,7 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 		require.Equal(t, 100, score)
 		require.Equal(t, 3, answerCount)
 
-		catalogItem = getScenarioCatalogItem(t, client, baseURL, scenarioID)
+		catalogItem = getScenarioCatalogItem(t, client, baseURL, scenario.RoleBuyer, scenarioID)
 		require.Equal(t, "completed", catalogItem.Status)
 
 		state = getAttemptStateThroughAPI(t, client, baseURL, started.ID)
@@ -357,17 +465,12 @@ func getScenarioCatalogItem(
 	t *testing.T,
 	client *http.Client,
 	baseURL string,
+	role scenario.Role,
 	scenarioID string,
 ) scenarioCatalogAPIItem {
 	t.Helper()
 
-	response, err := client.Get(baseURL + "/api/v1/scenarios?role=buyer")
-	require.NoError(t, err)
-	defer closeBody(t, response)
-	require.Equal(t, http.StatusOK, response.StatusCode)
-
-	var catalog scenarioCatalogAPIResponse
-	require.NoError(t, json.NewDecoder(response.Body).Decode(&catalog))
+	catalog := getScenarioCatalog(t, client, baseURL, role)
 	for _, item := range catalog.Items {
 		if item.ID == scenarioID {
 			return item
@@ -376,6 +479,24 @@ func getScenarioCatalogItem(
 
 	t.Fatalf("scenario %s not found in catalog", scenarioID)
 	return scenarioCatalogAPIItem{}
+}
+
+func getScenarioCatalog(
+	t *testing.T,
+	client *http.Client,
+	baseURL string,
+	role scenario.Role,
+) scenarioCatalogAPIResponse {
+	t.Helper()
+
+	response, err := client.Get(baseURL + "/api/v1/scenarios?role=" + string(role))
+	require.NoError(t, err)
+	defer closeBody(t, response)
+	require.Equal(t, http.StatusOK, response.StatusCode)
+
+	var catalog scenarioCatalogAPIResponse
+	require.NoError(t, json.NewDecoder(response.Body).Decode(&catalog))
+	return catalog
 }
 
 func insertAPITestScenario(t *testing.T, db interface {
