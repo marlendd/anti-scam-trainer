@@ -52,16 +52,23 @@ type choiceOptionResponse struct {
 }
 
 type currentNodeResponse struct {
-	ID      scenario.NodeID        `json:"id"`
-	Author  scenario.AuthorID      `json:"author"`
-	Text    string                 `json:"text"`
-	Choices []choiceOptionResponse `json:"choices"`
+	ID       scenario.NodeID        `json:"id"`
+	Author   scenario.AuthorID      `json:"author"`
+	Text     string                 `json:"text"`
+	Messages []messageResponse      `json:"messages"`
+	Choices  []choiceOptionResponse `json:"choices"`
+}
+
+type messageResponse struct {
+	Author scenario.AuthorID `json:"author"`
+	Text   string            `json:"text"`
 }
 
 type historyNodeResponse struct {
-	ID     scenario.NodeID   `json:"id"`
-	Author scenario.AuthorID `json:"author"`
-	Text   string            `json:"text"`
+	ID       scenario.NodeID   `json:"id"`
+	Author   scenario.AuthorID `json:"author"`
+	Text     string            `json:"text"`
+	Messages []messageResponse `json:"messages"`
 }
 
 type historyItemResponse struct {
@@ -124,9 +131,10 @@ func newAttemptStateResponse(state State) attemptStateResponse {
 	for _, item := range state.History {
 		response.History = append(response.History, historyItemResponse{
 			Node: historyNodeResponse{
-				ID:     item.Node.ID,
-				Author: item.Node.Author,
-				Text:   item.Node.Text,
+				ID:       item.Node.ID,
+				Author:   item.Node.Author,
+				Text:     item.Node.Text,
+				Messages: newMessageResponses(item.Node.Messages),
 			},
 			SelectedChoice: choiceOptionResponse(item.SelectedChoice),
 			Consequence:    item.Consequence,
@@ -144,10 +152,23 @@ func newAttemptStateResponse(state State) attemptStateResponse {
 	}
 
 	response.CurrentNode = &currentNodeResponse{
-		ID:      state.CurrentNode.ID,
-		Author:  state.CurrentNode.Author,
-		Text:    state.CurrentNode.Text,
-		Choices: choices,
+		ID:       state.CurrentNode.ID,
+		Author:   state.CurrentNode.Author,
+		Text:     state.CurrentNode.Text,
+		Messages: newMessageResponses(state.CurrentNode.Messages),
+		Choices:  choices,
+	}
+
+	return response
+}
+
+func newMessageResponses(messages []scenario.Message) []messageResponse {
+	response := make([]messageResponse, 0, len(messages))
+	for _, message := range messages {
+		response = append(response, messageResponse{
+			Author: message.Author,
+			Text:   message.Text,
+		})
 	}
 
 	return response

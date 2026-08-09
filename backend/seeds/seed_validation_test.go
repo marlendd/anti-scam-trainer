@@ -18,6 +18,7 @@ func TestScenarioSeedsAreValid(t *testing.T) {
 
 	roleCounts := map[scenario.Role]int{}
 	fragmentIDs := map[scenario.FragmentID]struct{}{}
+	multiMessageNodeCount := 0
 	for _, seed := range seeds {
 		roleCounts[seed.Role]++
 		require.NotEmpty(t, seed.RewardFragmentID)
@@ -25,9 +26,22 @@ func TestScenarioSeedsAreValid(t *testing.T) {
 		_, duplicate := fragmentIDs[seed.RewardFragmentID]
 		require.False(t, duplicate, "reward fragment IDs must be unique")
 		fragmentIDs[seed.RewardFragmentID] = struct{}{}
+
+		for _, node := range seed.Content.Nodes {
+			messages := node.DialogueMessages()
+			require.NotEmpty(t, messages)
+			if len(messages) > 1 {
+				multiMessageNodeCount++
+			}
+			for _, message := range messages {
+				require.NotContains(t, message.Text, "Покупатель:")
+				require.NotContains(t, message.Text, "Продавец:")
+			}
+		}
 	}
 	require.Equal(t, 2, roleCounts[scenario.RoleBuyer])
 	require.Equal(t, 2, roleCounts[scenario.RoleSeller])
+	require.Equal(t, 12, multiMessageNodeCount)
 }
 
 func TestLoadSeedFilesRejectsInvalidFiles(t *testing.T) {
