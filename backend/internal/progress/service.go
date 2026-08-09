@@ -43,9 +43,12 @@ func (s *Service) GetUserPuzzleProgress(ctx context.Context, userID string) (Puz
 		return PuzzleProgress{}, err
 	}
 
+	isCompleted := total > 0 && len(fragments) >= total
+
 	return PuzzleProgress{
 		EarnedCount: len(fragments),
 		TotalCount:  total,
+		IsCompleted: isCompleted,
 		Fragments:   fragments,
 	}, nil
 }
