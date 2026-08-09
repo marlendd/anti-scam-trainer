@@ -56,6 +56,13 @@ type AnswerRepository interface {
 		endingID scenario.EndingID,
 		score int,
 	) error
+
+	GrantFragment(
+		ctx context.Context,
+		userID string,
+		scenarioID scenario.ScenarioID,
+		fragmentID scenario.FragmentID,
+	) (bool, error)
 }
 
 type idempotencyAnswerGetter interface {
@@ -216,6 +223,24 @@ func (s *Service) SubmitAnswer(ctx context.Context, input SubmitAnswerInput) (Su
 		} else {
 			nextNodeID := transitionResult.NextNodeID
 			result.NextNodeID = &nextNodeID
+		}
+
+		if transitionResult.Completed &&
+			currentScenario.RewardFragmentID != "" &&
+			currentScenario.IsSuccessfulEnding(transitionResult.EndingID) {
+			awarded, err := ar.GrantFragment(
+				ctx,
+				currentAttempt.UserID,
+				currentAttempt.ScenarioID,
+				currentScenario.RewardFragmentID,
+			)
+			if err != nil {
+				return fmt.Errorf("grant reward fragment: %w", err)
+			}
+			if awarded {
+				fragmentID := currentScenario.RewardFragmentID
+				result.RewardFragmentID = &fragmentID
+			}
 		}
 
 		answer := Answer{

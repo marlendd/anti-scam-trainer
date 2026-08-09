@@ -6,8 +6,10 @@
   "title": "Фиктивная переплата и возврат разницы",
   "description": "Продажа игровой консоли, при которой покупатель заявляет о случайной переплате и требует срочно вернуть несуществующую разницу прямым переводом.",
   "is_active": true,
+  "reward_fragment_id": "safe-deal-piece-4",
   "content": {
     "start_node_id": "n1_overpayment_claim",
+    "successful_ending_ids": ["ending_safe", "ending_recovered"],
     "nodes": [
       {
         "id": "n1_overpayment_claim",

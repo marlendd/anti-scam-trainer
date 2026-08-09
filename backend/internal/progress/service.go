@@ -50,14 +50,6 @@ func (s *Service) GetUserPuzzleProgress(ctx context.Context, userID string) (Puz
 	}, nil
 }
 
-// Эту функцию нужно вызывать в конце сценария
-func (s *Service) GrantRewardIfEligible(ctx context.Context, userID, fragmentID string, isSuccess bool) error {
-	if !isSuccess || fragmentID == "" {
-		return nil
-	}
-	return s.repo.SaveReward(ctx, userID, fragmentID)
-}
-
 func (s *Service) GetUserCategoryDashboard(ctx context.Context, userID string) (DashboardData, error) {
 	stats, err := s.repo.GetUserStatsByCategory(ctx, userID)
 	if err != nil {

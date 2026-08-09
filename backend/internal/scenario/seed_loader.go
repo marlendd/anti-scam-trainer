@@ -17,14 +17,15 @@ import (
 // SeedFile описывает одну версию сценария в каталоге seeds.
 // Указатель IsActive позволяет отличить false от отсутствующего обязательного поля.
 type SeedFile struct {
-	ID          ScenarioID        `json:"id"`
-	LogicalID   LogicalScenarioID `json:"logical_id"`
-	Version     int               `json:"version"`
-	Role        Role              `json:"role"`
-	Title       string            `json:"title"`
-	Description string            `json:"description"`
-	IsActive    *bool             `json:"is_active"`
-	Content     Content           `json:"content"`
+	ID               ScenarioID        `json:"id"`
+	LogicalID        LogicalScenarioID `json:"logical_id"`
+	Version          int               `json:"version"`
+	Role             Role              `json:"role"`
+	Title            string            `json:"title"`
+	Description      string            `json:"description"`
+	IsActive         *bool             `json:"is_active"`
+	RewardFragmentID FragmentID        `json:"reward_fragment_id,omitempty"`
+	Content          Content           `json:"content"`
 }
 
 // LoadSeedFiles строго декодирует и проверяет все JSON-файлы каталога.
@@ -91,7 +92,9 @@ func LoadSeedFiles(directory string) ([]SeedFile, error) {
 	return seeds, nil
 }
 
-// ApplySeedFiles загружает все seeds одной транзакцией и не изменяет уже существующие версии.
+// ApplySeedFiles загружает все seeds одной транзакцией.
+// Для существующих версий загрузчик только дополняет отсутствующие метаданные награды,
+// не изменяя граф, тексты и уже заданные значения.
 func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, error) {
 	seeds, err := LoadSeedFiles(directory)
 	if err != nil {
@@ -115,10 +118,28 @@ func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, err
 			title,
 			description,
 			is_active,
+			reward_fragment_id,
 			content
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		ON CONFLICT (id) DO NOTHING
+		VALUES ($1, $2, $3, $4, $5, $6, $7, NULLIF($8, ''), $9)
+		ON CONFLICT (id) DO UPDATE SET
+			reward_fragment_id = COALESCE(
+				scenario_versions.reward_fragment_id,
+				EXCLUDED.reward_fragment_id
+			),
+			content = CASE
+				WHEN scenario_versions.content ? 'successful_ending_ids'
+					THEN scenario_versions.content
+				ELSE jsonb_set(
+					scenario_versions.content,
+					'{successful_ending_ids}',
+					COALESCE(
+						EXCLUDED.content -> 'successful_ending_ids',
+						'[]'::jsonb
+					),
+					TRUE
+				)
+			END
 	`
 
 	for _, seed := range seeds {
@@ -137,6 +158,7 @@ func ApplySeedFiles(ctx context.Context, db *sql.DB, directory string) (int, err
 			seed.Title,
 			seed.Description,
 			*seed.IsActive,
+			seed.RewardFragmentID,
 			content,
 		); err != nil {
 			return 0, fmt.Errorf("upsert scenario seed %q: %w", seed.ID, err)
@@ -202,15 +224,17 @@ func validateSeedMetadata(seed SeedFile) error {
 	}
 
 	s := Scenario{
-		ID:          seed.ID,
-		LogicalID:   seed.LogicalID,
-		Version:     seed.Version,
-		Role:        seed.Role,
-		Title:       seed.Title,
-		Description: seed.Description,
-		StartNodeID: seed.Content.StartNodeID,
-		Nodes:       seed.Content.Nodes,
-		Endings:     seed.Content.Endings,
+		ID:                  seed.ID,
+		LogicalID:           seed.LogicalID,
+		Version:             seed.Version,
+		Role:                seed.Role,
+		Title:               seed.Title,
+		Description:         seed.Description,
+		RewardFragmentID:    seed.RewardFragmentID,
+		SuccessfulEndingIDs: seed.Content.SuccessfulEndingIDs,
+		StartNodeID:         seed.Content.StartNodeID,
+		Nodes:               seed.Content.Nodes,
+		Endings:             seed.Content.Endings,
 	}
 	if err := Validate(s); err != nil {
 		return fmt.Errorf("invalid scenario graph: %w", err)

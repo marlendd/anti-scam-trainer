@@ -40,13 +40,14 @@ type attemptStateAPIResponse struct {
 }
 
 type submitAnswerAPIResponse struct {
-	AttemptID  string  `json:"attempt_id"`
-	NodeID     string  `json:"node_id"`
-	ChoiceID   string  `json:"choice_id"`
-	NextNodeID *string `json:"next_node_id"`
-	EndingID   *string `json:"ending_id"`
-	Completed  bool    `json:"completed"`
-	Score      *int    `json:"score"`
+	AttemptID        string  `json:"attempt_id"`
+	NodeID           string  `json:"node_id"`
+	ChoiceID         string  `json:"choice_id"`
+	NextNodeID       *string `json:"next_node_id"`
+	EndingID         *string `json:"ending_id"`
+	Completed        bool    `json:"completed"`
+	Score            *int    `json:"score"`
+	RewardFragmentID *string `json:"reward_fragment_id"`
 }
 
 type scenarioCatalogAPIItem struct {
@@ -363,20 +364,25 @@ func TestRunIntegration_APIFlow(t *testing.T) {
 		require.Equal(t, string(testfixture.SafeEndingID), *final.EndingID)
 		require.NotNil(t, final.Score)
 		require.Equal(t, 100, *final.Score)
+		require.NotNil(t, final.RewardFragmentID)
+		require.Equal(t, string(testfixture.RewardFragmentID), *final.RewardFragmentID)
 
 		var status string
 		var score int
 		var answerCount int
+		var fragmentCount int
 		require.NoError(t, testDB.QueryRow(`
 			SELECT status,
 			       score,
-			       (SELECT count(*) FROM answers WHERE attempt_id = attempts.id)
+			       (SELECT count(*) FROM answers WHERE attempt_id = attempts.id),
+			       (SELECT count(*) FROM user_inventory WHERE user_id = attempts.user_id)
 			FROM attempts
 			WHERE id = $1
-		`, started.ID).Scan(&status, &score, &answerCount))
+		`, started.ID).Scan(&status, &score, &answerCount, &fragmentCount))
 		require.Equal(t, "completed", status)
 		require.Equal(t, 100, score)
 		require.Equal(t, 3, answerCount)
+		require.Equal(t, 1, fragmentCount)
 
 		catalogItem = getScenarioCatalogItem(t, client, baseURL, scenario.RoleBuyer, scenarioID)
 		require.Equal(t, "completed", catalogItem.Status)
@@ -506,9 +512,10 @@ func insertAPITestScenario(t *testing.T, db interface {
 
 	fixture := testfixture.ValidScenario()
 	content, err := json.Marshal(scenario.Content{
-		StartNodeID: fixture.StartNodeID,
-		Nodes:       fixture.Nodes,
-		Endings:     fixture.Endings,
+		StartNodeID:         fixture.StartNodeID,
+		SuccessfulEndingIDs: fixture.SuccessfulEndingIDs,
+		Nodes:               fixture.Nodes,
+		Endings:             fixture.Endings,
 	})
 	require.NoError(t, err)
 
@@ -521,11 +528,12 @@ func insertAPITestScenario(t *testing.T, db interface {
 			title,
 			description,
 			is_active,
+			reward_fragment_id,
 			content
 		)
-		VALUES (gen_random_uuid(), 1, $1, $2, $3, TRUE, $4::jsonb)
+		VALUES (gen_random_uuid(), 1, $1, $2, $3, TRUE, $4, $5::jsonb)
 		RETURNING id
-	`, fixture.Role, fixture.Title, fixture.Description, content).Scan(&scenarioID))
+	`, fixture.Role, fixture.Title, fixture.Description, fixture.RewardFragmentID, content).Scan(&scenarioID))
 
 	return scenarioID
 }

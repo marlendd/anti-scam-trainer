@@ -59,8 +59,8 @@ func TestEvaluation_Integration(t *testing.T) {
 	t.Run("Seed and Calculate Score", func(t *testing.T) {
 		seedSQL := `
 			INSERT INTO users (id, email, password_hash) VALUES ('00000000-0000-0000-0000-000000000001', 'test@test.com', 'hash');
-			INSERT INTO scenario_versions (id, logical_id, version, role, title, description, content) 
-			VALUES ('00000000-0000-0000-0000-000000000002', gen_random_uuid(), 1, 'buyer', 'title', 'desc', '{}'::jsonb);
+			INSERT INTO scenario_versions (id, logical_id, version, role, title, description, reward_fragment_id, content)
+			VALUES ('00000000-0000-0000-0000-000000000002', gen_random_uuid(), 1, 'buyer', 'title', 'desc', 'safe-deal-piece-test', '{}'::jsonb);
 			INSERT INTO attempts (id, user_id, scenario_id, status, current_node_id) 
 			VALUES ('120b7935-62bf-4fd8-828a-6bbe7ef7a19a', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'in_progress', 'start_node');
 			
@@ -90,6 +90,30 @@ func TestEvaluation_Integration(t *testing.T) {
 		require.Equal(t, "buyer", stats[0].Role)
 		require.Equal(t, int64(1), stats[0].InProgressCount)
 		require.Equal(t, int64(0), stats[0].CompletedCount)
+	})
+
+	t.Run("Read Puzzle Progress", func(t *testing.T) {
+		_, err := db.Exec(`
+			INSERT INTO user_inventory (user_id, scenario_id, fragment_id)
+			VALUES (
+				'00000000-0000-0000-0000-000000000001',
+				'00000000-0000-0000-0000-000000000002',
+				'safe-deal-piece-test'
+			)
+		`)
+		require.NoError(t, err)
+
+		puzzleProgress, err := svc.GetUserPuzzleProgress(ctx, userID)
+		require.NoError(t, err)
+		require.Equal(t, 1, puzzleProgress.EarnedCount)
+		require.Equal(t, 1, puzzleProgress.TotalCount)
+		require.Len(t, puzzleProgress.Fragments, 1)
+		require.Equal(
+			t,
+			"00000000-0000-0000-0000-000000000002",
+			puzzleProgress.Fragments[0].ScenarioID,
+		)
+		require.Equal(t, "safe-deal-piece-test", puzzleProgress.Fragments[0].FragmentID)
 	})
 
 	t.Run("Verify Leaderboard Empty State", func(t *testing.T) {
