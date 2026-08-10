@@ -28,7 +28,6 @@ type TrainingChatProps = {
 
 export function TrainingChat({
     scenario = null,
-    scenarioSummary = null,
     attempt = null,
     mode = 'preview',
     onScenarioComplete,
@@ -71,6 +70,8 @@ export function TrainingChat({
         )
     }
 
+    const tempImage = 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia.karousell.com%2Fmedia%2Fphotos%2Fproducts%2F2023%2F6%2F24%2Fbarely_used_huawei_matebook_d__1687577820_f8691867_progressive.jpg&f=1&nofb=1&ipt=528ad03097a65b4fb0bbf0b26a65a431ef3c04eceb43ccaa58e140d83db78151'
+
     if (isCompleted && attempt) {
         return (
             <section className={styles.chat}>
@@ -95,7 +96,7 @@ export function TrainingChat({
                     participantStatus="В сети"
                     productTitle={attempt.scenario.product.title}
                     productPrice={attempt.scenario.product.price}
-                    imageUrl={attempt.scenario.product.imageUrl}
+                    imageUrl={tempImage}
                 />
 
                 <AttemptPlayer
