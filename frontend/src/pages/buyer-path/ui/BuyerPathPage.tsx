@@ -73,18 +73,6 @@ export function BuyerPathPage() {
             </div>
 
             <div className={styles.chatColumn}>
-                {/*
-                    Здесь единственное место, которое я сейчас
-                    не могу корректно дописать вслепую.
-
-                    Нужные реальные данные чата теперь лежат в:
-
-                    attempt?.currentNode
-
-                    а твой TrainingChat сейчас всё ещё ожидает
-                    старый prop `scenario`.
-                */}
-
                 <TrainingChat mode="interactive" attempt={attempt} onScenarioComplete={() => {}} />
             </div>
         </main>

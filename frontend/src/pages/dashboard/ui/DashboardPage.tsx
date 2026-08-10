@@ -13,8 +13,8 @@ export function DashboardPage() {
         <main className={styles.page}>
             <DashboardOverview />
             <DashboardRatingChart />
-            <DashboardBalanceChart />
             <DashboardScenariosBarChart />
+            <DashboardBalanceChart />
             <DashboardPathProgress />
         </main>
     )
