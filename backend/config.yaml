@@ -1,0 +1,20 @@
+# config.example.yaml — скопируй в config.yaml и заполни своими значениями
+env: "local"
+port: "8080"
+timeout: "5s"
+log_level: "DEBUG"
+
+migrations_path: "migrations"
+seeds_path: "seeds"
+
+max_open_conns: 50
+max_idle_conns: 25
+conn_max_lifetime: "60m"
+conn_max_idle_time: "5m"
+
+secure_cookies: false
+
+
+resend_from: "onboarding@resend.dev"
+
+app_base_url: "http://localhost:3000"

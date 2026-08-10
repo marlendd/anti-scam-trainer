@@ -1,0 +1,23 @@
+@font-face {
+    font-family: Manrope;
+    font-style: normal;
+    font-weight: 500;
+
+    src:
+        url('../../shared/assets/fonts/manrope/Manrope_Cut_008-Medium.woff2') format('woff2'),
+        url('../../shared/assets/fonts/manrope/Manrope_Cut_008-Medium.woff') format('woff'),
+        url('../../shared/assets/fonts/manrope/Manrope_Cut_008-Medium.ttf') format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: Manrope;
+    font-style: normal;
+    font-weight: 800;
+
+    src:
+        url('../../shared/assets/fonts/manrope/Manrope_Cut_008-ExtraBold.woff2') format('woff2'),
+        url('../../shared/assets/fonts/manrope/Manrope_Cut_008-ExtraBold.woff') format('woff'),
+        url('../../shared/assets/fonts/manrope/Manrope_Cut_008-ExtraBold.ttf') format('truetype');
+    font-display: swap;
+}

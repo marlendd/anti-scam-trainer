@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -14,17 +15,35 @@ type Config struct {
 	LogLevel       string        `yaml:"log_level" env:"LOG_LEVEL" env-default:"DEBUG"`
 	DatabaseURL    string        `yaml:"database_url" env:"DATABASE_URL" env-required:"true"`
 	MigrationsPath string        `yaml:"migrations_path" env:"MIGRATIONS_PATH" env-default:"migrations"`
+	SeedsPath      string        `yaml:"seeds_path" env:"SEEDS_PATH" env-default:"seeds"`
 	// Connection pool
 	MaxOpenConns    int           `yaml:"max_open_conns" env:"DB_MAX_OPEN_CONNS" env-default:"50"`
 	MaxIdleConns    int           `yaml:"max_idle_conns" env:"DB_MAX_IDLE_CONNS" env-default:"25"`
 	ConnMaxLifetime time.Duration `yaml:"conn_max_lifetime" env:"DB_CONN_MAX_LIFETIME" env-default:"60m"`
 	ConnMaxIdleTime time.Duration `yaml:"conn_max_idle_time" env:"DB_CONN_MAX_IDLE_TIME" env-default:"5m"`
+
+	SecureCookies bool `yaml:"secure_cookies" env:"SECURE_COOKIES" env-default:"false"`
+	// CORS
+	AllowedOrigins string `yaml:"allowed_origins" env:"ALLOWED_ORIGINS" env-default:"http://localhost:3000"`
+	// Resend (email)
+	ResendAPIKey string `yaml:"resend_api_key" env:"RESEND_API_KEY"`
+	ResendFrom   string `yaml:"resend_from" env:"RESEND_FROM" env-default:"onboarding@resend.dev"`
+
+	AppBaseURL string `yaml:"app_base_url" env:"APP_BASE_URL" env-default:"http://localhost:3000"`
 }
 
 func MustLoad(configPath string) Config {
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config %q: %s", configPath, err)
+	if _, err := os.Stat(configPath); err == nil {
+		if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+			log.Fatalf("cannot read config %q: %s", configPath, err)
+		}
+		return cfg
+	}
+
+	// файла нет — читаем конфигурацию только из переменных окружения
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		log.Fatalf("cannot read config from environment: %s", err)
 	}
 	return cfg
 }

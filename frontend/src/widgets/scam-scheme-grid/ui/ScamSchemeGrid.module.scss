@@ -1,0 +1,17 @@
+.grid {
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-auto-rows: 200px;
+
+    gap: 18px;
+}
+
+@media (width <= 500px) {
+    .grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: auto;
+
+        gap: 12px;
+    }
+}

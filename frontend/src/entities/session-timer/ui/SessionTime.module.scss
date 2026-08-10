@@ -1,0 +1,18 @@
+.time {
+    display: inline-flex;
+
+    gap: 8px;
+    align-items: center;
+
+    color: #111;
+
+    user-select: none;
+}
+
+.value {
+    min-width: 44px;
+
+    font-size: 16px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
