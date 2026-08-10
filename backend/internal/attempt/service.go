@@ -4,8 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/marlendd/anti-scam-trainer/internal/evaluation"
 	"github.com/marlendd/anti-scam-trainer/internal/scenario"
 )
+
+type ScoreEvaluator interface {
+	CalculateScoreFromTotals(weightedScoreSum, weightSum int) (int, error)
+}
 
 type AttemptRepository interface {
 	WithinTransaction(
@@ -55,17 +60,25 @@ type Service struct {
 	attempts  AttemptRepository
 	answers   AnswerRepository
 	scenarios ScenarioProvider
+	evaluator ScoreEvaluator
 }
 
 func NewService(
 	attempts AttemptRepository,
 	answers AnswerRepository,
 	scenario ScenarioProvider,
+	evaluators ...ScoreEvaluator,
 ) *Service {
+	evaluator := ScoreEvaluator(evaluation.NewEvaluator())
+	if len(evaluators) > 0 {
+		evaluator = evaluators[0]
+	}
+
 	return &Service{
 		attempts:  attempts,
 		answers:   answers,
 		scenarios: scenario,
+		evaluator: evaluator,
 	}
 }
 

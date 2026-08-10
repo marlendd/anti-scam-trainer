@@ -35,7 +35,12 @@ paths:
               $ref: '#/components/schemas/RegisterRequest'
       responses:
         '201':
-          description: Пользователь создан
+          description: Пользователь создан, сессия начата автоматически
+          headers:
+            Set-Cookie:
+              description: "session_id=<uuid>; HttpOnly; SameSite=Lax"
+              schema:
+                type: string
           content:
             application/json:
               schema:
