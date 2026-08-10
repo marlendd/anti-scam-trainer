@@ -23,12 +23,18 @@
 - `golangci-lint` — линтинг (конфигурация в `.golangci.yaml` в корне проекта)
 
 ### Frontend
-*[ЗАПОЛНИТЬ: участник(и) фронтенда]*
-- React 18+ / TypeScript
-- Vite
-- *[стейт-менеджмент: Redux Toolkit / MobX / Effector — уточнить]*
-- *[UI-kit, если использовался]*
-- React Query — асинхронные HTTP-запросы
+**Егор (@https-abuser)**
+
+- **React 19 / TypeScript**
+- **Vite** — dev-server и production-сборка
+- **React Router** — клиентский роутинг
+- **TanStack Query (React Query)** — server state, кэширование и асинхронные HTTP-запросы
+- **SCSS Modules** — изолированные стили компонентов
+- **Feature-Sliced Design** — организация frontend по слоям `app`, `pages`, `widgets`, `features`, `entities`, `shared`
+- Собственный UI-kit в `frontend/src/shared/ui`
+- **Font Awesome** — иконки
+- **AG Grid Community / AG Charts Community** — табличные и графические представления статистики
+- Отдельный глобальный state-менеджер (Redux/MobX/Effector) не используется: server state хранится в TanStack Query, локальное UI-состояние — в React
 
 ### Инфраструктура
 - Docker / Docker Compose (backend + frontend + PostgreSQL, единая сеть `bridge`)
@@ -36,6 +42,8 @@
 
 ### Использование ИИ
 Backend / Deploy: использовался Claude (Anthropic) для написания и ревью unit/integration-тестов, разбора и устранения багов (в том числе прод-инцидентов после деплоя), помощи с конфигурацией инфраструктуры (Docker, nginx, переменные окружения), ревью безопасности и документации (README, OpenAPI). Архитектурные решения и бизнес-логика принимались самостоятельно.
+
+Frontend: использовались Claude Code и ChatGPT для ускорения разработки UI-компонентов, проработки адаптивной вёрстки, рефакторинга React/TypeScript-кода, отладки интеграции с API и проработки игровых механик. Архитектура frontend, структура по Feature-Sliced Design, пользовательские сценарии, визуальные решения и итоговая интеграция принимались и проверялись самостоятельно.
 
 ---
 
@@ -67,11 +75,19 @@ go run ./cmd/api --config config.yaml
 ```
 
 ### Frontend отдельно
-*[ЗАПОЛНИТЬ: команды запуска фронтенда в dev-режиме]*
+
 ```bash
 cd frontend
 npm install
 npm run dev
+```
+
+Production-сборка и проверки:
+
+```bash
+npm run build
+npm run lint
+npm run format:check
 ```
 
 ---
@@ -136,7 +152,7 @@ make test-e2e
 
 Конфигурация – `.golangci.yaml` в корне проекта. Помимо стандартного набора `govet`, `errcheck`, `staticcheck`, `ineffassign` и `unused`, включены проверки закрытия HTTP- и SQL-ресурсов, корректной обработки ошибок, наличия контекста у HTTP-запросов, орфографии и форматирования. Это снижает риск утечек ресурсов и пропущенных ошибок в транзакционной backend-логике.
 
-Frontend: ESLint + Prettier, конфигурация — *[ЗАПОЛНИТЬ путь]*.
+Frontend: ESLint + Prettier + Stylelint. Конфигурация находится в `frontend/eslint.config.js`, `frontend/.prettierrc` и конфигурации Stylelint в директории `frontend`.
 
 ---
 
@@ -192,8 +208,10 @@ anti-scam-trainer/
 │   ├── vite.config.ts             # конфигурация Vite
 │   └── Dockerfile                 # сборка frontend и Nginx-образ
 ├── contributions/
-│   └── vadim/
-│       └── README.md              # подтверждение личного вклада Вадима
+│   ├── vadim/
+│   │   └── README.md              # подтверждение личного вклада Вадима
+│   └── egor/
+│       └── README.md              # подтверждение личного вклада Егора
 ├── docs/
 │   ├── api/                       # материалы API
 │   └── requirements.md            # требования и границы MVP
@@ -245,7 +263,7 @@ anti-scam-trainer/
 | Рзаев Эмиль   | Backend: авторизация (регистрация/вход/выход), сессии, middleware авторизации, восстановление пароля по email c помощью сервиса resend.com, CORS и безопасные cookie, health/ready-хендлеры, graceful shutdown, Docker-инфраструктура (Dockerfile backend/frontend, docker-compose, bridge-сеть), CI (GitHub Actions), OpenAPI-контракты, unit/integration-тесты auth-модуля. Деплой backend/frontend/PostgreSQL на Railway, nginx reverse-proxy на фронте, настройка сети и переменных окружения PostgreSQL, автозапуск миграций и сидов, диагностика и устранение прод-инцидентов (502 из-за Host-заголовка в nginx, блокировка SMTP-портов — миграция на Resend API). |
 | Лезинов Вадим | Техническая координация: декомпозиция MVP, распределение задач, принятие архитектурных решений и интеграция изменений. Backend: модель и строгая валидация сценариев, PostgreSQL persistence, движок переходов и расчёт score, каталог сценариев, жизненный цикл попыток, транзакционная и идемпотентная обработка ответов, seed-loader и четыре сценария, выдача фрагментов, OpenAPI-контракты сценариев и попыток, unit/integration/E2E-тесты, backend lint и включение PostgreSQL-тестов в CI. [Подробное описание и код](https://github.com/marlendd/anti-scam-trainer-vadim-contribution)                                                                           |
 | Люлин Ярослав | Backend: разработка модуля прогресса (лидерборд, история рангов, пазлы, сводка профиля), реализация бизнес-логики расчета метрик успешности прохождения сценариев и доработка SQL-миграций для системы наград. Интеграция LLM-модели для генерации персонализированного фидбека по результатам попыток и создание детерминированного fallback-механизма на случай недоступности нейросети. Подготовка OpenAPI-спецификаций для эндпоинтов прогресса и обратной связи, настройка CI-пайплайна и написание интеграционных тестов для проверки логики прогресса.                                                                                                            |
-| *[Имя]*       | *[Frontend — заполнить]*                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Егор | Frontend: архитектура и реализация клиентской части на React + TypeScript + Vite с организацией кода по Feature-Sliced Design; настройка роутинга, layout и переиспользуемого UI-kit; адаптивный header и burger-навигация; onboarding и выбор роли; страницы тренировочных путей покупателя/продавца; интерактивный чат и отображение ветвящихся сценариев; экран результатов с персональным feedback; глоссарий мошеннических схем; dashboard и пользовательский прогресс; механика коллекционных пазлов и наград; адаптивная вёрстка desktop/mobile. Интеграция frontend с backend API через TanStack Query и общий `apiRequest`, работа с `HttpOnly` session-cookie (`credentials: 'include'`), авторизация, получение текущего пользователя и logout. Настройка ESLint, Prettier, Stylelint, SCSS Modules, production-сборки Vite и SPA через Nginx. [Pull Requests](https://github.com/marlendd/anti-scam-trainer/pulls?q=is%3Apr%20is%3Aclosed%20author%3Ahttps-abuser) |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## История коммитов
 
