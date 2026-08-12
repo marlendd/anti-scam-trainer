@@ -204,7 +204,7 @@
             "weight": 3,
             "score": 50,
             "risk_categories": ["off_platform_payment", "urgency_pressure"],
-            "next_node_id": "n4_danger"
+            "next_node_id": "n4_protected"
           },
           {
             "id": "n3v_transfer_half",
@@ -253,7 +253,7 @@
             "weight": 3,
             "score": 50,
             "risk_categories": ["external_link", "fake_payment_delivery"],
-            "next_node_id": "n4_danger"
+            "next_node_id": "n4_protected"
           },
           {
             "id": "n3f_enter_card_details",

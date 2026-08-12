@@ -204,7 +204,7 @@
             "weight": 3,
             "score": 50,
             "risk_categories": ["off_platform_payment", "urgency_pressure"],
-            "next_node_id": "n4_danger"
+            "next_node_id": "n4_protected"
           },
           {
             "id": "n3v_ignore_support_and_refund",

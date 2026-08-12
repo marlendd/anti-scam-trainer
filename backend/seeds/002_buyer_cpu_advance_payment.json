@@ -83,7 +83,7 @@
             "weight": 2,
             "score": 100,
             "risk_categories": [],
-            "next_node_id": "n3_final_pressure"
+            "next_node_id": "n4_refusal_result"
           },
           {
             "id": "n2p_require_platform_rules",
@@ -133,7 +133,7 @@
             "weight": 2,
             "score": 100,
             "risk_categories": [],
-            "next_node_id": "n3_final_pressure"
+            "next_node_id": "n4_refusal_result"
           },
           {
             "id": "n2e_reverse_search_and_block",
@@ -143,7 +143,7 @@
             "weight": 2,
             "score": 100,
             "risk_categories": [],
-            "next_node_id": "n3_final_pressure"
+            "next_node_id": "n4_refusal_result"
           },
           {
             "id": "n2e_ask_phone_deposit",
@@ -200,7 +200,7 @@
             "weight": 3,
             "score": 50,
             "risk_categories": ["urgency_pressure"],
-            "next_node_id": "n4_money_lost"
+            "next_node_id": "n4_refusal_result"
           },
           {
             "id": "n3v_send_prepayment",
@@ -247,7 +247,7 @@
             "weight": 3,
             "score": 50,
             "risk_categories": ["off_platform_payment"],
-            "next_node_id": "n4_money_lost"
+            "next_node_id": "n4_refusal_result"
           },
           {
             "id": "n3f_transfer_and_send_receipt",
@@ -264,7 +264,7 @@
       {
         "id": "n4_refusal_result",
         "author": "seller",
-        "text": "Продавец переходит на оскорбления и добавляет вас в чёрный список. Через десять минут площадка блокирует его профиль с пометкой «Подозрительная активность».",
+        "text": "Переписка прекращается. Через десять минут площадка блокирует профиль продавца с пометкой «Подозрительная активность».",
         "choices": [
           {
             "id": "n4p_find_safe_listing",
@@ -304,7 +304,7 @@
             "weight": 3,
             "score": 0,
             "risk_categories": ["urgency_pressure"],
-            "ending_id": "ending_loss"
+            "ending_id": "ending_uncertain"
           }
         ]
       },
