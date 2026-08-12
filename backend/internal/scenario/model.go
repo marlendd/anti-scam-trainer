@@ -100,11 +100,12 @@ type Ending struct {
 }
 
 type Content struct {
-	Product             Product    `json:"product"`
-	StartNodeID         NodeID     `json:"start_node_id"`
-	SuccessfulEndingIDs []EndingID `json:"successful_ending_ids,omitempty"`
-	Nodes               []Node     `json:"nodes"`
-	Endings             []Ending   `json:"endings"`
+	Product             Product        `json:"product"`
+	StartNodeID         NodeID         `json:"start_node_id"`
+	SuccessfulEndingIDs []EndingID     `json:"successful_ending_ids,omitempty"`
+	RiskCategories      []RiskCategory `json:"risk_categories,omitempty"`
+	Nodes               []Node         `json:"nodes"`
+	Endings             []Ending       `json:"endings"`
 }
 
 func (s Scenario) IsSuccessfulEnding(endingID EndingID) bool {

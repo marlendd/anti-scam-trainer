@@ -14,6 +14,14 @@
     },
     "start_node_id": "n1_overpayment_claim",
     "successful_ending_ids": ["ending_safe", "ending_recovered"],
+    "risk_categories": [
+      "fake_payment_delivery",
+      "off_platform_payment",
+      "disable_protection",
+      "external_link",
+      "urgency_pressure",
+      "sms_code"
+    ],
     "nodes": [
       {
         "id": "n1_overpayment_claim",
