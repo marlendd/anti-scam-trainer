@@ -38,7 +38,7 @@ type handlerService interface {
 		ctx context.Context,
 		userID string,
 		scenarioID scenario.ScenarioID,
-	) (Attempt, error)
+	) (State, error)
 
 	Restart(
 		ctx context.Context,
@@ -78,10 +78,19 @@ type historyNodeResponse struct {
 }
 
 type historyItemResponse struct {
-	Node           historyNodeResponse  `json:"node"`
-	SelectedChoice choiceOptionResponse `json:"selected_choice"`
-	Consequence    string               `json:"consequence"`
-	AnsweredAt     time.Time            `json:"answered_at"`
+	Node           historyNodeResponse     `json:"node"`
+	SelectedChoice choiceOptionResponse    `json:"selected_choice"`
+	ChoiceScore    scenario.ChoiceScore    `json:"choice_score"`
+	Consequence    string                  `json:"consequence"`
+	Explanation    string                  `json:"explanation"`
+	RiskCategories []scenario.RiskCategory `json:"risk_categories"`
+	AnsweredAt     time.Time               `json:"answered_at"`
+}
+
+type endingResponse struct {
+	ID     scenario.EndingID `json:"id"`
+	Header string            `json:"header"`
+	Result string            `json:"result"`
 }
 
 type scenarioHeaderResponse struct {
@@ -96,6 +105,7 @@ type attemptStateResponse struct {
 	Scenario    scenarioHeaderResponse `json:"scenario"`
 	CurrentNode *currentNodeResponse   `json:"current_node,omitempty"`
 	History     []historyItemResponse  `json:"history"`
+	Ending      *endingResponse        `json:"ending,omitempty"`
 }
 
 type Handler struct {
@@ -149,6 +159,11 @@ func newAttemptStateResponse(state State) attemptStateResponse {
 	}
 
 	for _, item := range state.History {
+		riskCategories := item.RiskCategories
+		if riskCategories == nil {
+			riskCategories = make([]scenario.RiskCategory, 0)
+		}
+
 		response.History = append(response.History, historyItemResponse{
 			Node: historyNodeResponse{
 				ID:       item.Node.ID,
@@ -157,9 +172,20 @@ func newAttemptStateResponse(state State) attemptStateResponse {
 				Messages: newMessageResponses(item.Node.Messages),
 			},
 			SelectedChoice: choiceOptionResponse(item.SelectedChoice),
+			ChoiceScore:    item.ChoiceScore,
 			Consequence:    item.Consequence,
+			Explanation:    item.Explanation,
+			RiskCategories: riskCategories,
 			AnsweredAt:     item.AnsweredAt,
 		})
+	}
+
+	if state.Ending != nil {
+		response.Ending = &endingResponse{
+			ID:     state.Ending.ID,
+			Header: state.Ending.Header,
+			Result: state.Ending.Result,
+		}
 	}
 
 	if state.CurrentNode == nil {
@@ -225,7 +251,25 @@ func (h *Handler) Resume(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetLatestCompleted(w http.ResponseWriter, r *http.Request) {
-	h.handleAttemptOperation(w, r, http.StatusOK, h.service.GetLatestCompleted)
+	userID, ok := auth.UserIDFromContext(r.Context())
+	if !ok || userID == "" {
+		respondError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	scenarioID := scenario.ScenarioID(r.PathValue("scenarioID"))
+	if scenarioID == "" {
+		respondError(w, http.StatusBadRequest, "scenario_id is required")
+		return
+	}
+
+	state, err := h.service.GetLatestCompleted(r.Context(), userID, scenarioID)
+	if err != nil {
+		h.respondAttemptError(w, err)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, newAttemptStateResponse(state))
 }
 
 func (h *Handler) Restart(w http.ResponseWriter, r *http.Request) {

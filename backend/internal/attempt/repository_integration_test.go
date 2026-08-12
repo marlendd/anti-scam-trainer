@@ -49,7 +49,9 @@ func TestPgRepository_AttemptLifecycle_Integration(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, created, byID)
 
-	active, err := repository.GetActive(ctx, testUserID, testScenarioID)
+	// Новый экземпляр репозитория имитирует повторный вход после перезагрузки страницы.
+	reloadedRepository := attempt.NewPgRepository(db)
+	active, err := reloadedRepository.GetActive(ctx, testUserID, testScenarioID)
 	require.NoError(t, err)
 	require.Equal(t, created, active)
 

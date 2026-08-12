@@ -71,11 +71,11 @@ func (stub *answerSubmitterStub) GetLatestCompleted(
 	_ context.Context,
 	userID string,
 	scenarioID scenario.ScenarioID,
-) (attempt.Attempt, error) {
+) (attempt.State, error) {
 	stub.gotOperation = "get_latest_completed"
 	stub.gotUserID = userID
 	stub.gotScenarioID = scenarioID
-	return stub.attemptResult, stub.attemptErr
+	return stub.stateResult, stub.stateErr
 }
 
 func (stub *answerSubmitterStub) Restart(

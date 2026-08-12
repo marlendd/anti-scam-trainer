@@ -248,11 +248,13 @@ func TestServiceGetState(t *testing.T) {
 		t.Parallel()
 
 		fixture := testfixture.ValidScenario()
+		endingID := testfixture.SafeEndingID
 		currentAttempt := attempt.Attempt{
 			ID:         "attempt-1",
 			UserID:     userID,
 			ScenarioID: fixture.ID,
 			Status:     attempt.StatusCompleted,
+			EndingID:   &endingID,
 		}
 		repository := &attemptRepositoryStub{
 			getByIDFn: func(
@@ -274,9 +276,12 @@ func TestServiceGetState(t *testing.T) {
 		answers := &answerRepositoryFake{
 			historyAnswers: []attempt.Answer{
 				{
-					NodeID:      testfixture.StartNodeID,
-					ChoiceID:    testfixture.StartChoiceID,
-					Consequence: "Последствие выбора",
+					NodeID:         testfixture.StartNodeID,
+					ChoiceID:       testfixture.StartChoiceID,
+					ChoiceScore:    scenario.ScoreSafe,
+					Consequence:    "Последствие выбора",
+					Explanation:    "Объяснение выбора",
+					RiskCategories: []scenario.RiskCategory{"external_payment"},
 				},
 			},
 		}
@@ -288,6 +293,15 @@ func TestServiceGetState(t *testing.T) {
 		require.Equal(t, currentAttempt, state.Attempt)
 		require.Nil(t, state.CurrentNode)
 		require.Len(t, state.History, 1)
+		require.Equal(t, scenario.ScoreSafe, state.History[0].ChoiceScore)
+		require.Equal(t, "Последствие выбора", state.History[0].Consequence)
+		require.Equal(t, "Объяснение выбора", state.History[0].Explanation)
+		require.Equal(t, []scenario.RiskCategory{"external_payment"}, state.History[0].RiskCategories)
+		require.Equal(t, &attempt.Ending{
+			ID:     testfixture.SafeEndingID,
+			Header: fixture.Endings[0].Header,
+			Result: fixture.Endings[0].Result,
+		}, state.Ending)
 	})
 
 	t.Run("preserves repository error", func(t *testing.T) {
@@ -491,11 +505,14 @@ func TestServiceGetLatestCompleted(t *testing.T) {
 	t.Parallel()
 
 	completedAt := time.Date(2026, time.August, 12, 10, 0, 0, 0, time.UTC)
+	fixture := testfixture.ValidScenario()
+	endingID := testfixture.SafeEndingID
 	expected := attempt.Attempt{
 		ID:          "attempt-completed",
 		UserID:      userID,
-		ScenarioID:  scenarioID,
+		ScenarioID:  fixture.ID,
 		Status:      attempt.StatusCompleted,
+		EndingID:    &endingID,
 		CompletedAt: &completedAt,
 	}
 
@@ -509,16 +526,42 @@ func TestServiceGetLatestCompleted(t *testing.T) {
 				gotScenarioID scenario.ScenarioID,
 			) (attempt.Attempt, error) {
 				require.Equal(t, userID, gotUserID)
-				require.Equal(t, scenarioID, gotScenarioID)
+				require.Equal(t, fixture.ID, gotScenarioID)
 				return expected, nil
 			},
 		}
-		service := attempt.NewService(repository, nil, nil)
+		answers := &answerRepositoryFake{
+			historyAnswers: []attempt.Answer{
+				{
+					NodeID:         testfixture.StartNodeID,
+					ChoiceID:       testfixture.StartChoiceID,
+					ChoiceScore:    scenario.ScoreSafe,
+					Consequence:    "Последствие",
+					Explanation:    "Объяснение",
+					RiskCategories: []scenario.RiskCategory{"external_payment"},
+				},
+			},
+		}
+		provider := &scenarioProviderStub{
+			getByIDFn: func(
+				context.Context,
+				scenario.ScenarioID,
+			) (scenario.Scenario, error) {
+				return fixture, nil
+			},
+		}
+		service := attempt.NewService(repository, answers, provider)
 
-		actual, err := service.GetLatestCompleted(context.Background(), userID, scenarioID)
+		actual, err := service.GetLatestCompleted(context.Background(), userID, fixture.ID)
 
 		require.NoError(t, err)
-		require.Equal(t, expected, actual)
+		require.Equal(t, expected, actual.Attempt)
+		require.Equal(t, fixture.Title, actual.Scenario.Title)
+		require.Nil(t, actual.CurrentNode)
+		require.Len(t, actual.History, 1)
+		require.Equal(t, "Объяснение", actual.History[0].Explanation)
+		require.Equal(t, fixture.Endings[0].Header, actual.Ending.Header)
+		require.Equal(t, fixture.Endings[0].Result, actual.Ending.Result)
 	})
 
 	t.Run("preserves repository error", func(t *testing.T) {
@@ -539,7 +582,7 @@ func TestServiceGetLatestCompleted(t *testing.T) {
 		actual, err := service.GetLatestCompleted(context.Background(), userID, scenarioID)
 
 		require.ErrorIs(t, err, repositoryErr)
-		require.Equal(t, attempt.Attempt{}, actual)
+		require.Equal(t, attempt.State{}, actual)
 	})
 }
 

@@ -300,11 +300,11 @@ paths:
         - $ref: '#/components/parameters/ScenarioID'
       responses:
         '200':
-          description: Последняя завершённая попытка текущего пользователя
+          description: Сохранённое состояние последней завершённой попытки текущего пользователя
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttemptResponse'
+                $ref: '#/components/schemas/AttemptStateResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -365,7 +365,7 @@ paths:
     get:
       tags: [attempts]
       summary: Получить состояние попытки
-      description: Для активной попытки возвращает текущий узел и безопасные поля вариантов. Внутренние переходы, оценки, веса, последствия и объяснения не раскрываются.
+      description: Для активной попытки возвращает текущий узел и безопасные поля вариантов. Для завершённой попытки возвращает концовку и сохранённый разбор ответов. Внутренние данные ещё не выбранных вариантов не раскрываются.
       security:
         - cookieAuth: []
       parameters:
@@ -692,18 +692,42 @@ components:
               description: Previously answered dialogue nodes in chronological order.
               items:
                 $ref: '#/components/schemas/AttemptHistoryItem'
+            ending:
+              $ref: '#/components/schemas/AttemptEnding'
+
+    AttemptEnding:
+      type: object
+      additionalProperties: false
+      required: [id, header, result]
+      properties:
+        id:
+          type: string
+        header:
+          type: string
+        result:
+          type: string
 
     AttemptHistoryItem:
       type: object
       additionalProperties: false
-      required: [node, selected_choice, consequence, answered_at]
+      required: [node, selected_choice, choice_score, consequence, explanation, risk_categories, answered_at]
       properties:
         node:
           $ref: '#/components/schemas/HistoryNode'
         selected_choice:
           $ref: '#/components/schemas/ChoiceOption'
+        choice_score:
+          type: integer
+          minimum: 0
+          maximum: 100
         consequence:
           type: string
+        explanation:
+          type: string
+        risk_categories:
+          type: array
+          items:
+            type: string
         answered_at:
           type: string
           format: date-time
