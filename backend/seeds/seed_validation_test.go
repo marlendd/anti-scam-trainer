@@ -38,6 +38,14 @@ func TestScenarioSeedsAreValid(t *testing.T) {
 			for _, message := range messages {
 				require.NotContains(t, message.Text, "Покупатель:")
 				require.NotContains(t, message.Text, "Продавец:")
+				if message.Author != "system" {
+					require.NotContains(t, message.Text, ": «")
+					require.False(t, strings.HasPrefix(message.Text, "Покупатель "))
+					require.False(t, strings.HasPrefix(message.Text, "Продавцу "))
+					require.False(t, strings.HasPrefix(message.Text, "Звонящий "))
+					require.False(t, strings.HasPrefix(message.Text, "С неизвестного номера "))
+					require.False(t, strings.HasPrefix(message.Text, "После первого действия "))
+				}
 			}
 		}
 	}
