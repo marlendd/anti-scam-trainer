@@ -73,7 +73,7 @@ func (s *Service) Generate(ctx context.Context, userID, attemptID string) (Attem
 		return AttemptFeedback{}, err
 	}
 
-	llmCtx, cancel := context.WithTimeout(ctx, 7*time.Second)
+	llmCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
 	jsonStr, err := s.llm.GenerateJSON(llmCtx, systemPrompt, promptBuf.String())
