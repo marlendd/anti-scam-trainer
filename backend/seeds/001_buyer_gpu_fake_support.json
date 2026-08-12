@@ -14,6 +14,15 @@
     },
     "start_node_id": "n1_scarcity_pressure",
     "successful_ending_ids": ["ending_safe", "ending_recovered"],
+    "risk_categories": [
+      "external_messenger",
+      "off_platform_payment",
+      "urgency_pressure",
+      "disable_protection",
+      "fake_payment_delivery",
+      "external_link",
+      "sms_code"
+    ],
     "nodes": [
       {
         "id": "n1_scarcity_pressure",
