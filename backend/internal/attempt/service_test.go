@@ -33,6 +33,11 @@ type attemptRepositoryStub struct {
 		userID string,
 		scenarioID scenario.ScenarioID,
 	) (attempt.Attempt, error)
+	getLatestCompletedFn func(
+		ctx context.Context,
+		userID string,
+		scenarioID scenario.ScenarioID,
+	) (attempt.Attempt, error)
 	abortFn func(
 		ctx context.Context,
 		attemptID attempt.AttemptID,
@@ -90,6 +95,18 @@ func (s *attemptRepositoryStub) GetActive(
 	}
 
 	return s.getActiveFn(ctx, userID, scenarioID)
+}
+
+func (s *attemptRepositoryStub) GetLatestCompleted(
+	ctx context.Context,
+	userID string,
+	scenarioID scenario.ScenarioID,
+) (attempt.Attempt, error) {
+	if s.getLatestCompletedFn == nil {
+		panic("unexpected GetLatestCompleted call")
+	}
+
+	return s.getLatestCompletedFn(ctx, userID, scenarioID)
 }
 
 func (s *attemptRepositoryStub) Abort(
@@ -467,6 +484,62 @@ func TestServiceStart(t *testing.T) {
 		_, err := service.Start(context.Background(), userID, currentScenario.ID)
 
 		require.ErrorIs(t, err, attempt.ErrActiveAttemptExists)
+	})
+}
+
+func TestServiceGetLatestCompleted(t *testing.T) {
+	t.Parallel()
+
+	completedAt := time.Date(2026, time.August, 12, 10, 0, 0, 0, time.UTC)
+	expected := attempt.Attempt{
+		ID:          "attempt-completed",
+		UserID:      userID,
+		ScenarioID:  scenarioID,
+		Status:      attempt.StatusCompleted,
+		CompletedAt: &completedAt,
+	}
+
+	t.Run("returns repository result", func(t *testing.T) {
+		t.Parallel()
+
+		repository := &attemptRepositoryStub{
+			getLatestCompletedFn: func(
+				_ context.Context,
+				gotUserID string,
+				gotScenarioID scenario.ScenarioID,
+			) (attempt.Attempt, error) {
+				require.Equal(t, userID, gotUserID)
+				require.Equal(t, scenarioID, gotScenarioID)
+				return expected, nil
+			},
+		}
+		service := attempt.NewService(repository, nil, nil)
+
+		actual, err := service.GetLatestCompleted(context.Background(), userID, scenarioID)
+
+		require.NoError(t, err)
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("preserves repository error", func(t *testing.T) {
+		t.Parallel()
+
+		repositoryErr := errors.New("repository failed")
+		repository := &attemptRepositoryStub{
+			getLatestCompletedFn: func(
+				context.Context,
+				string,
+				scenario.ScenarioID,
+			) (attempt.Attempt, error) {
+				return attempt.Attempt{}, repositoryErr
+			},
+		}
+		service := attempt.NewService(repository, nil, nil)
+
+		actual, err := service.GetLatestCompleted(context.Background(), userID, scenarioID)
+
+		require.ErrorIs(t, err, repositoryErr)
+		require.Equal(t, attempt.Attempt{}, actual)
 	})
 }
 

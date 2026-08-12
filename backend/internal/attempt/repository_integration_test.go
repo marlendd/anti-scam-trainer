@@ -192,6 +192,109 @@ func TestPgRepository_GetByIDRejectsOtherUser_Integration(t *testing.T) {
 	require.ErrorIs(t, err, attempt.ErrAttemptNotFound)
 }
 
+func TestPgRepository_GetLatestCompleted_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	olderCompletedAt := time.Now().Add(-time.Hour).UTC()
+	newerCompletedAt := olderCompletedAt.Add(30 * time.Minute)
+
+	olderID := insertCompletedAttempt(
+		t,
+		ctx,
+		db,
+		testUserID,
+		testScenarioID,
+		"ending-older",
+		50,
+		olderCompletedAt,
+	)
+	newerID := insertCompletedAttempt(
+		t,
+		ctx,
+		db,
+		testUserID,
+		testScenarioID,
+		"ending-newer",
+		100,
+		newerCompletedAt,
+	)
+
+	repository := attempt.NewPgRepository(db)
+	latest, err := repository.GetLatestCompleted(ctx, testUserID, testScenarioID)
+
+	require.NoError(t, err)
+	require.Equal(t, newerID, latest.ID)
+	require.NotEqual(t, olderID, latest.ID)
+	require.Equal(t, attempt.StatusCompleted, latest.Status)
+	require.Nil(t, latest.CurrentNodeID)
+	require.NotNil(t, latest.EndingID)
+	require.Equal(t, scenario.EndingID("ending-newer"), *latest.EndingID)
+	require.NotNil(t, latest.Score)
+	require.Equal(t, 100, *latest.Score)
+	require.NotNil(t, latest.CompletedAt)
+	require.WithinDuration(t, newerCompletedAt, *latest.CompletedAt, time.Microsecond)
+}
+
+func TestPgRepository_GetLatestCompletedNotFound_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	repository := attempt.NewPgRepository(db)
+	_, err := repository.GetLatestCompleted(ctx, testUserID, testScenarioID)
+
+	require.ErrorIs(t, err, attempt.ErrCompletedAttemptNotFound)
+}
+
+func insertCompletedAttempt(
+	t *testing.T,
+	ctx context.Context,
+	db *sql.DB,
+	userID string,
+	scenarioID scenario.ScenarioID,
+	endingID scenario.EndingID,
+	score int,
+	completedAt time.Time,
+) attempt.AttemptID {
+	t.Helper()
+
+	const query = `
+		INSERT INTO attempts (
+			user_id,
+			scenario_id,
+			status,
+			ending_id,
+			score,
+			completed_at,
+			updated_at
+		)
+		VALUES ($1, $2, 'completed', $3, $4, $5, $5)
+		RETURNING id
+	`
+
+	var id attempt.AttemptID
+	err := db.QueryRowContext(
+		ctx,
+		query,
+		userID,
+		scenarioID,
+		endingID,
+		score,
+		completedAt,
+	).Scan(&id)
+	require.NoError(t, err)
+
+	return id
+}
+
 func TestPgRepository_WithinTransactionRollsBack_Integration(t *testing.T) {
 	db := openTestDB(t)
 	ctx := context.Background()

@@ -290,6 +290,32 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /api/v1/scenarios/{scenarioID}/attempts/latest:
+    get:
+      tags: [attempts]
+      summary: Получить последнюю завершённую попытку сценария
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ScenarioID'
+      responses:
+        '200':
+          description: Последняя завершённая попытка текущего пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Завершённая попытка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /api/v1/attempts/{attemptID}/answers:
     post:
       tags: [attempts]

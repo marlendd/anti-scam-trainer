@@ -37,6 +37,12 @@ type AttemptRepository interface {
 		scenarioID scenario.ScenarioID,
 	) (Attempt, error)
 
+	GetLatestCompleted(
+		ctx context.Context,
+		userID string,
+		scenarioID scenario.ScenarioID,
+	) (Attempt, error)
+
 	Abort(
 		ctx context.Context,
 		attemptID AttemptID,
@@ -241,6 +247,19 @@ func (s *Service) Resume(
 	}
 
 	return currentAttempt, nil
+}
+
+func (s *Service) GetLatestCompleted(
+	ctx context.Context,
+	userID string,
+	scenarioID scenario.ScenarioID,
+) (Attempt, error) {
+	latestAttempt, err := s.attempts.GetLatestCompleted(ctx, userID, scenarioID)
+	if err != nil {
+		return Attempt{}, fmt.Errorf("get latest completed attempt: %w", err)
+	}
+
+	return latestAttempt, nil
 }
 
 func (s *Service) Restart(

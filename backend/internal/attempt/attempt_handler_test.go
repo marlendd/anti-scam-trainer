@@ -64,6 +64,14 @@ func TestHandler_AttemptOperations(t *testing.T) {
 			wantStatus: http.StatusCreated,
 			call:       (*attempt.Handler).Restart,
 		},
+		{
+			name:       "gets latest completed attempt",
+			method:     http.MethodGet,
+			path:       "/api/v1/scenarios/scenario-1/attempts/latest",
+			operation:  "get_latest_completed",
+			wantStatus: http.StatusOK,
+			call:       (*attempt.Handler).GetLatestCompleted,
+		},
 	}
 
 	for _, test := range tests {
@@ -345,6 +353,12 @@ func TestHandler_AttemptOperationMapsServiceErrors(t *testing.T) {
 		{
 			name:       "active attempt not found",
 			err:        attempt.ErrActiveAttemptNotFound,
+			wantStatus: http.StatusNotFound,
+			wantError:  "attempt not found",
+		},
+		{
+			name:       "completed attempt not found",
+			err:        attempt.ErrCompletedAttemptNotFound,
 			wantStatus: http.StatusNotFound,
 			wantError:  "attempt not found",
 		},

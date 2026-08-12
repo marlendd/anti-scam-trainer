@@ -67,6 +67,17 @@ func (stub *answerSubmitterStub) Resume(
 	return stub.attemptResult, stub.attemptErr
 }
 
+func (stub *answerSubmitterStub) GetLatestCompleted(
+	_ context.Context,
+	userID string,
+	scenarioID scenario.ScenarioID,
+) (attempt.Attempt, error) {
+	stub.gotOperation = "get_latest_completed"
+	stub.gotUserID = userID
+	stub.gotScenarioID = scenarioID
+	return stub.attemptResult, stub.attemptErr
+}
+
 func (stub *answerSubmitterStub) Restart(
 	_ context.Context,
 	userID string,

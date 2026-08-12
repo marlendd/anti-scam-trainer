@@ -34,6 +34,12 @@ type handlerService interface {
 		scenarioID scenario.ScenarioID,
 	) (Attempt, error)
 
+	GetLatestCompleted(
+		ctx context.Context,
+		userID string,
+		scenarioID scenario.ScenarioID,
+	) (Attempt, error)
+
 	Restart(
 		ctx context.Context,
 		userID string,
@@ -218,6 +224,10 @@ func (h *Handler) Resume(w http.ResponseWriter, r *http.Request) {
 	h.handleAttemptOperation(w, r, http.StatusOK, h.service.Resume)
 }
 
+func (h *Handler) GetLatestCompleted(w http.ResponseWriter, r *http.Request) {
+	h.handleAttemptOperation(w, r, http.StatusOK, h.service.GetLatestCompleted)
+}
+
 func (h *Handler) Restart(w http.ResponseWriter, r *http.Request) {
 	h.handleAttemptOperation(w, r, http.StatusCreated, h.service.Restart)
 }
@@ -254,6 +264,7 @@ func (h *Handler) respondAttemptError(w http.ResponseWriter, err error) {
 	case errors.Is(err, scenario.ErrScenarioNotFound):
 		respondError(w, http.StatusNotFound, "scenario not found")
 	case errors.Is(err, ErrActiveAttemptNotFound),
+		errors.Is(err, ErrCompletedAttemptNotFound),
 		errors.Is(err, ErrAttemptNotFound):
 		respondError(w, http.StatusNotFound, "attempt not found")
 	case errors.Is(err, scenario.ErrScenarioInactive):

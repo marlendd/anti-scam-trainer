@@ -144,6 +144,10 @@ func run(cfg *config.Config, log *slog.Logger) error {
 		requireAuth(http.HandlerFunc(attemptHandler.Resume)),
 	)
 	mux.Handle(
+		"GET /api/v1/scenarios/{scenarioID}/attempts/latest",
+		requireAuth(http.HandlerFunc(attemptHandler.GetLatestCompleted)),
+	)
+	mux.Handle(
 		"POST /api/v1/scenarios/{scenarioID}/attempts/restart",
 		requireAuth(http.HandlerFunc(attemptHandler.Restart)),
 	)
