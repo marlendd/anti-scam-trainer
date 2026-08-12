@@ -12,6 +12,7 @@ import (
 	"github.com/marlendd/anti-scam-trainer/internal/attempt"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 	"github.com/marlendd/anti-scam-trainer/internal/scenario"
+	"github.com/marlendd/anti-scam-trainer/internal/testfixture"
 	"github.com/stretchr/testify/require"
 )
 
@@ -254,6 +255,140 @@ func TestPgRepository_GetLatestCompletedNotFound_Integration(t *testing.T) {
 	_, err := repository.GetLatestCompleted(ctx, testUserID, testScenarioID)
 
 	require.ErrorIs(t, err, attempt.ErrCompletedAttemptNotFound)
+}
+
+func TestService_RestartPreservesCompletedResults_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	completedAt := time.Now().Add(-time.Hour).UTC()
+	completedID := insertCompletedAttempt(
+		t,
+		ctx,
+		db,
+		testUserID,
+		testScenarioID,
+		testfixture.SafeEndingID,
+		100,
+		completedAt,
+	)
+	insertCompletedAnswer(t, ctx, db, completedID)
+
+	repository := attempt.NewPgRepository(db)
+	activeBeforeRestart, err := repository.Create(
+		ctx,
+		testUserID,
+		testScenarioID,
+		testfixture.MiddleNodeID,
+	)
+	require.NoError(t, err)
+
+	fixture := testfixture.ValidScenario()
+	fixture.ID = testScenarioID
+	service := attempt.NewService(
+		repository,
+		repository,
+		integrationScenarioProvider{currentScenario: fixture},
+	)
+
+	activeAfterRestart, err := service.Restart(ctx, testUserID, testScenarioID)
+	require.NoError(t, err)
+	require.NotEqual(t, activeBeforeRestart.ID, activeAfterRestart.ID)
+	require.Equal(t, attempt.StatusInProgress, activeAfterRestart.Status)
+	require.NotNil(t, activeAfterRestart.CurrentNodeID)
+	require.Equal(t, fixture.StartNodeID, *activeAfterRestart.CurrentNodeID)
+
+	aborted, err := repository.GetByID(ctx, activeBeforeRestart.ID, testUserID)
+	require.NoError(t, err)
+	require.Equal(t, attempt.StatusAborted, aborted.Status)
+
+	latestCompleted, err := service.GetLatestCompleted(ctx, testUserID, testScenarioID)
+	require.NoError(t, err)
+	require.Equal(t, completedID, latestCompleted.Attempt.ID)
+	require.Equal(t, attempt.StatusCompleted, latestCompleted.Attempt.Status)
+	require.Len(t, latestCompleted.History, 1)
+	require.Equal(t, testfixture.StartChoiceID, latestCompleted.History[0].SelectedChoice.ID)
+	require.Equal(t, scenario.ScoreSafe, latestCompleted.History[0].ChoiceScore)
+	require.Equal(t, "Сохранённое последствие", latestCompleted.History[0].Consequence)
+	require.Equal(t, "Сохранённое объяснение", latestCompleted.History[0].Explanation)
+	require.NotNil(t, latestCompleted.Ending)
+	require.Equal(t, testfixture.SafeEndingID, latestCompleted.Ending.ID)
+
+	var completedAttempts int
+	err = db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(*) FROM attempts WHERE id = $1 AND status = 'completed'`,
+		completedID,
+	).Scan(&completedAttempts)
+	require.NoError(t, err)
+	require.Equal(t, 1, completedAttempts)
+
+	var savedAnswers int
+	err = db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(*) FROM answers WHERE attempt_id = $1`,
+		completedID,
+	).Scan(&savedAnswers)
+	require.NoError(t, err)
+	require.Equal(t, 1, savedAnswers)
+}
+
+type integrationScenarioProvider struct {
+	currentScenario scenario.Scenario
+}
+
+func (p integrationScenarioProvider) GetActiveByID(
+	context.Context,
+	scenario.ScenarioID,
+) (scenario.Scenario, error) {
+	return p.currentScenario, nil
+}
+
+func (p integrationScenarioProvider) GetByID(
+	context.Context,
+	scenario.ScenarioID,
+) (scenario.Scenario, error) {
+	return p.currentScenario, nil
+}
+
+func insertCompletedAnswer(
+	t *testing.T,
+	ctx context.Context,
+	db *sql.DB,
+	attemptID attempt.AttemptID,
+) {
+	t.Helper()
+
+	const query = `
+		INSERT INTO answers (
+			attempt_id,
+			node_id,
+			choice_id,
+			idempotency_key,
+			weight,
+			choice_score,
+			risk_categories,
+			consequence,
+			explanation,
+			response
+		)
+		VALUES ($1, $2, $3, gen_random_uuid(), 1, 100, '[]'::jsonb, $4, $5, '{}'::jsonb)
+	`
+
+	_, err := db.ExecContext(
+		ctx,
+		query,
+		attemptID,
+		testfixture.StartNodeID,
+		testfixture.StartChoiceID,
+		"Сохранённое последствие",
+		"Сохранённое объяснение",
+	)
+	require.NoError(t, err)
 }
 
 func insertCompletedAttempt(
