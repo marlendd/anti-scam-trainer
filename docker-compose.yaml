@@ -60,8 +60,9 @@ services:
     ports:
       - "3000:80"
     environment:
-      - BACKEND_URL=http://backend:8080
-      - BACKEND_HOST=backend:8080
+      - BACKEND_PROTOCOL=http
+      - BACKEND_HOST=backend
+      - BACKEND_PORT=8080
     networks:
       - antiscam_net
   pgadmin:
