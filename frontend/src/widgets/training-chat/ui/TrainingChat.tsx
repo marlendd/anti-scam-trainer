@@ -1,4 +1,4 @@
-import type { TrainingAttemptState } from '@/entities/training-attempt'
+import {type TrainingAttemptState, useRestartAttempt} from '@/entities/training-attempt'
 import {
     useAttemptFeedback,
     useAttemptResult,
@@ -7,14 +7,14 @@ import type {
     TrainingScenario,
     TrainingScenarioSummary,
 } from '@/entities/training-scenario'
-import { AttemptPlayer } from '@/features/attempt-player'
+import {AttemptPlayer} from '@/features/attempt-player'
 import {
     ScenarioPlayer,
     type ScenarioPlaybackMode,
 } from '@/features/scenario-player'
-import { ChatProductHeader } from '@/shared/ui/chat-product-header'
+import {ChatProductHeader} from '@/shared/ui/chat-product-header'
 
-import { TrainingSummary } from './TrainingSummary'
+import {TrainingSummary} from './TrainingSummary'
 
 import styles from './TrainingChat.module.scss'
 
@@ -27,11 +27,11 @@ type TrainingChatProps = {
 }
 
 export function TrainingChat({
-    scenario = null,
-    attempt = null,
-    mode = 'preview',
-    onScenarioComplete,
-}: TrainingChatProps) {
+                                 scenario = null,
+                                 attempt = null,
+                                 mode = 'preview',
+                                 onScenarioComplete,
+                             }: TrainingChatProps) {
     const isInteractive = mode === 'interactive'
     const isCompleted =
         isInteractive && attempt?.status === 'completed'
@@ -53,6 +53,8 @@ export function TrainingChat({
         attempt?.id ?? null,
         isCompleted,
     )
+
+    const restartAttempt = useRestartAttempt()
 
     if (isInteractive && !attempt) {
         return (
@@ -97,6 +99,10 @@ export function TrainingChat({
                     productTitle={attempt.scenario.product.title}
                     productPrice={attempt.scenario.product.price}
                     imageUrl={tempImage}
+                    onRestart={() => {
+                        restartAttempt.mutate(attempt.id)
+                    }}
+                    isRestarting={restartAttempt.isPending}
                 />
 
                 <AttemptPlayer

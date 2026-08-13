@@ -36,7 +36,7 @@ export function GameHeader({
     }
 
     const handleBack = () => {
-        navigate(-1)
+        navigate('/training/role-selection')
     }
 
     const handleHome = () => {
@@ -48,17 +48,24 @@ export function GameHeader({
             <div className={styles.inner}>
                 <div className={styles.left}>
                     <div className={styles.controls}>
-                        <Button variant="ghost" onClick={handleBack}>
-                            <Icon icon={faChevronLeft} />
-                        </Button>
                         {isSession ? (
-                            <Button variant="ghost" onClick={handlePause}>
-                                <Icon icon={faPause} />
-                            </Button>
+                            <>
+                                <Button variant="ghost" onClick={handlePause}>
+                                    <Icon icon={faChevronLeft} />
+                                </Button>
+                                <Button variant="ghost" onClick={handlePause}>
+                                    <Icon icon={faPause} />
+                                </Button>
+                            </>
                         ) : (
-                            <Button variant="ghost" onClick={handleHome}>
-                                <Icon icon={faHome} />
-                            </Button>
+                            <>
+                                <Button variant="ghost" onClick={handleBack}>
+                                    <Icon icon={faChevronLeft} />
+                                </Button>
+                                <Button variant="ghost" onClick={handleHome}>
+                                    <Icon icon={faHome} />
+                                </Button>
+                            </>
                         )}
                     </div>
 
