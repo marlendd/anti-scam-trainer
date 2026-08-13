@@ -3,6 +3,7 @@ export { useTrainingSession } from './api/use-training-session'
 export { useSubmitAnswer } from './api/use-submit-answer'
 export { useAttemptResult } from './api/use-attempt-result'
 export { useAttemptFeedback } from './api/use-attempt-feedback'
+export { useRestartAttempt } from './api/use-restart-attempt'
 
 export type { AttemptResult } from './api/get-attempt-result'
 
