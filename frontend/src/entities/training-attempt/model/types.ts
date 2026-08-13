@@ -55,7 +55,7 @@ export interface TrainingAttempt {
     status: AttemptStatus
     currentNodeId?: string
     endingId?: string
-    ending?: AttemptEnding
+    ending?: AttemptEnding | null
     score?: number
     startedAt: string
     updatedAt: string

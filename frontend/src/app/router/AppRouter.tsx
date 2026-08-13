@@ -35,12 +35,22 @@ export function AppRouter() {
             <Route element={<GameLayout/>}>
                 <Route path="/training">
                     <Route path="role-selection" element={<RoleSelectionPage/>}/>
-                        <Route path="path/:pathId">
-                            <Route index element={<BuyerPathPage/>}/>
-                            <Route element={<RequireAuth/>}>
-                                <Route path=":schemeId" element={<BuyerPathPage/>}/>
-                            </Route>
+
+                    <Route element={<RequireAuth/>}>
+                        <Route path="scam-or-not" element={<ScamOrNotPage/>}/>
+                        <Route
+                            path="scam-or-not/:logicalScenarioId"
+                            element={<ScamOrNotPage/>}
+                        />
+                    </Route>
+
+
+                    <Route path="path/:pathId">
+                        <Route index element={<BuyerPathPage/>}/>
+                        <Route element={<RequireAuth/>}>
+                            <Route path=":schemeId" element={<BuyerPathPage/>}/>
                         </Route>
+                    </Route>
                 </Route>
             </Route>
 

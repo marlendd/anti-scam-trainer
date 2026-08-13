@@ -113,10 +113,6 @@ export function TrainingChat({
                         undefined
                     }
                     feedback={feedback}
-                    isResultPending={isResultPending}
-                    isFeedbackPending={isFeedbackPending}
-                    isResultError={isResultError}
-                    isFeedbackError={isFeedbackError}
                     logicalScenarioId={scenarioSummary?.logicalId}
                     isResultPending={
                         isResultPending
