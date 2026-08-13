@@ -51,8 +51,17 @@ type HistoryNode struct {
 type HistoryItem struct {
 	Node           HistoryNode
 	SelectedChoice ChoiceOption
+	ChoiceScore    scenario.ChoiceScore
 	Consequence    string
+	Explanation    string
+	RiskCategories []scenario.RiskCategory
 	AnsweredAt     time.Time
+}
+
+type Ending struct {
+	ID     scenario.EndingID
+	Header string
+	Result string
 }
 
 type ScenarioHeader struct {
@@ -67,4 +76,5 @@ type State struct {
 	Scenario    ScenarioHeader
 	CurrentNode *CurrentNode
 	History     []HistoryItem
+	Ending      *Ending
 }

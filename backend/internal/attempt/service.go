@@ -37,6 +37,12 @@ type AttemptRepository interface {
 		scenarioID scenario.ScenarioID,
 	) (Attempt, error)
 
+	GetLatestCompleted(
+		ctx context.Context,
+		userID string,
+		scenarioID scenario.ScenarioID,
+	) (Attempt, error)
+
 	Abort(
 		ctx context.Context,
 		attemptID AttemptID,
@@ -92,6 +98,14 @@ func (s *Service) GetState(
 		return State{}, fmt.Errorf("get attempt by id: %w", err)
 	}
 
+	return s.buildState(ctx, userID, currentAttempt)
+}
+
+func (s *Service) buildState(
+	ctx context.Context,
+	userID string,
+	currentAttempt Attempt,
+) (State, error) {
 	currentScenario, err := s.scenarios.GetByID(ctx, currentAttempt.ScenarioID)
 	if err != nil {
 		return State{}, fmt.Errorf("get scenario by id: %w", err)
@@ -101,7 +115,7 @@ func (s *Service) GetState(
 		return State{}, fmt.Errorf("validate scenario: %w", err)
 	}
 
-	answers, err := s.answers.ListAnswersByAttempt(ctx, attemptID, userID)
+	answers, err := s.answers.ListAnswersByAttempt(ctx, currentAttempt.ID, userID)
 	if err != nil {
 		return State{}, fmt.Errorf("list attempt answers: %w", err)
 	}
@@ -141,12 +155,28 @@ func (s *Service) GetState(
 				ID:   choice.ID,
 				Text: choice.Text,
 			},
-			Consequence: answer.Consequence,
-			AnsweredAt:  answer.CreatedAt,
+			ChoiceScore:    answer.ChoiceScore,
+			Consequence:    answer.Consequence,
+			Explanation:    answer.Explanation,
+			RiskCategories: answer.RiskCategories,
+			AnsweredAt:     answer.CreatedAt,
 		})
 	}
 
 	if currentAttempt.Status != StatusInProgress {
+		if currentAttempt.Status == StatusCompleted {
+			ending, found := findScenarioEnding(currentScenario, currentAttempt.EndingID)
+			if !found {
+				return State{}, ErrInvalidAttemptState
+			}
+
+			state.Ending = &Ending{
+				ID:     ending.ID,
+				Header: ending.Header,
+				Result: ending.Result,
+			}
+		}
+
 		return state, nil
 	}
 
@@ -178,6 +208,23 @@ func (s *Service) GetState(
 	}
 
 	return state, nil
+}
+
+func findScenarioEnding(
+	currentScenario scenario.Scenario,
+	endingID *scenario.EndingID,
+) (scenario.Ending, bool) {
+	if endingID == nil {
+		return scenario.Ending{}, false
+	}
+
+	for _, ending := range currentScenario.Endings {
+		if ending.ID == *endingID {
+			return ending, true
+		}
+	}
+
+	return scenario.Ending{}, false
 }
 
 func findScenarioNode(
@@ -241,6 +288,24 @@ func (s *Service) Resume(
 	}
 
 	return currentAttempt, nil
+}
+
+func (s *Service) GetLatestCompleted(
+	ctx context.Context,
+	userID string,
+	scenarioID scenario.ScenarioID,
+) (State, error) {
+	latestAttempt, err := s.attempts.GetLatestCompleted(ctx, userID, scenarioID)
+	if err != nil {
+		return State{}, fmt.Errorf("get latest completed attempt: %w", err)
+	}
+
+	state, err := s.buildState(ctx, userID, latestAttempt)
+	if err != nil {
+		return State{}, fmt.Errorf("build latest completed attempt state: %w", err)
+	}
+
+	return state, nil
 }
 
 func (s *Service) Restart(

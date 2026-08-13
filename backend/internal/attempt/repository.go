@@ -227,6 +227,47 @@ func (pg *PgRepository) GetActive(
 	return attempt, nil
 }
 
+func (pg *PgRepository) GetLatestCompleted(
+	ctx context.Context,
+	userID string,
+	scenarioID scenario.ScenarioID,
+) (Attempt, error) {
+	const query = `SELECT id,
+						  user_id,
+						  scenario_id,
+						  status,
+						  current_node_id,
+						  ending_id,
+						  score,
+						  started_at,
+						  updated_at,
+						  completed_at
+					FROM attempts
+					WHERE user_id = $1
+					  AND scenario_id = $2
+					  AND status = $3
+					ORDER BY completed_at DESC, id DESC
+					LIMIT 1
+	`
+
+	latestAttempt, err := scanAttempt(pg.executor.QueryRowContext(
+		ctx,
+		query,
+		userID,
+		scenarioID,
+		StatusCompleted,
+	))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Attempt{}, ErrCompletedAttemptNotFound
+		}
+
+		return Attempt{}, fmt.Errorf("get latest completed attempt: %w", err)
+	}
+
+	return latestAttempt, nil
+}
+
 func (pg *PgRepository) Abort(
 	ctx context.Context,
 	attemptID AttemptID,

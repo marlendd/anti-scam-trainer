@@ -107,7 +107,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	llmProvider := feedback.NewOpenRouterLLMProvider(
 		openRouterKey,
 		"https://openrouter.ai/api/v1",
-		"openai/gpt-oss-20b:free",
+		"google/gemma-4-26b-a4b-it:free",
 	)
 
 	feedbackRepo := feedback.NewPgRepository(db, log)
@@ -142,6 +142,10 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	mux.Handle(
 		"GET /api/v1/scenarios/{scenarioID}/attempts/active",
 		requireAuth(http.HandlerFunc(attemptHandler.Resume)),
+	)
+	mux.Handle(
+		"GET /api/v1/scenarios/{scenarioID}/attempts/latest",
+		requireAuth(http.HandlerFunc(attemptHandler.GetLatestCompleted)),
 	)
 	mux.Handle(
 		"POST /api/v1/scenarios/{scenarioID}/attempts/restart",
