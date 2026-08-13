@@ -355,6 +355,184 @@ func TestServiceGetState(t *testing.T) {
 
 		require.ErrorIs(t, err, attempt.ErrInvalidAttemptState)
 	})
+
+	t.Run("preserves scenario provider error", func(t *testing.T) {
+		t.Parallel()
+
+		providerErr := errors.New("scenario provider failed")
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(context.Context, attempt.AttemptID, string) (attempt.Attempt, error) {
+				return attempt.Attempt{ScenarioID: scenarioID}, nil
+			},
+		}
+		provider := &scenarioProviderStub{
+			getByIDFn: func(context.Context, scenario.ScenarioID) (scenario.Scenario, error) {
+				return scenario.Scenario{}, providerErr
+			},
+		}
+
+		_, err := attempt.NewService(repository, &answerRepositoryFake{}, provider).
+			GetState(context.Background(), userID, "attempt-1")
+
+		require.ErrorIs(t, err, providerErr)
+	})
+
+	t.Run("rejects invalid scenario", func(t *testing.T) {
+		t.Parallel()
+
+		fixture := testfixture.ValidScenario()
+		fixture.StartNodeID = ""
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(context.Context, attempt.AttemptID, string) (attempt.Attempt, error) {
+				return attempt.Attempt{ScenarioID: fixture.ID}, nil
+			},
+		}
+		provider := &scenarioProviderStub{
+			getByIDFn: func(context.Context, scenario.ScenarioID) (scenario.Scenario, error) {
+				return fixture, nil
+			},
+		}
+
+		_, err := attempt.NewService(repository, &answerRepositoryFake{}, provider).
+			GetState(context.Background(), userID, "attempt-1")
+
+		require.ErrorIs(t, err, scenario.ErrEmptyStartNodeID)
+	})
+
+	t.Run("preserves answer history error", func(t *testing.T) {
+		t.Parallel()
+
+		fixture := testfixture.ValidScenario()
+		historyErr := errors.New("answer history failed")
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(context.Context, attempt.AttemptID, string) (attempt.Attempt, error) {
+				return attempt.Attempt{ScenarioID: fixture.ID}, nil
+			},
+		}
+		provider := &scenarioProviderStub{
+			getByIDFn: func(context.Context, scenario.ScenarioID) (scenario.Scenario, error) {
+				return fixture, nil
+			},
+		}
+
+		_, err := attempt.NewService(
+			repository,
+			&answerRepositoryFake{historyErr: historyErr},
+			provider,
+		).GetState(context.Background(), userID, "attempt-1")
+
+		require.ErrorIs(t, err, historyErr)
+	})
+
+	invalidStates := []struct {
+		name    string
+		current attempt.Attempt
+		answers []attempt.Answer
+	}{
+		{
+			name: "history references missing node",
+			current: attempt.Attempt{
+				ScenarioID: fixtureScenarioID(),
+				Status:     attempt.StatusAborted,
+			},
+			answers: []attempt.Answer{{NodeID: "missing-node", ChoiceID: "choice"}},
+		},
+		{
+			name: "history references missing choice",
+			current: attempt.Attempt{
+				ScenarioID: fixtureScenarioID(),
+				Status:     attempt.StatusAborted,
+			},
+			answers: []attempt.Answer{{NodeID: testfixture.StartNodeID, ChoiceID: "missing-choice"}},
+		},
+		{
+			name: "completed attempt has no ending",
+			current: attempt.Attempt{
+				ScenarioID: fixtureScenarioID(),
+				Status:     attempt.StatusCompleted,
+			},
+		},
+		{
+			name: "completed attempt has unknown ending",
+			current: func() attempt.Attempt {
+				endingID := scenario.EndingID("missing-ending")
+				return attempt.Attempt{
+					ScenarioID: fixtureScenarioID(),
+					Status:     attempt.StatusCompleted,
+					EndingID:   &endingID,
+				}
+			}(),
+		},
+		{
+			name: "current node is unknown",
+			current: func() attempt.Attempt {
+				nodeID := scenario.NodeID("missing-node")
+				return attempt.Attempt{
+					ScenarioID:    fixtureScenarioID(),
+					Status:        attempt.StatusInProgress,
+					CurrentNodeID: &nodeID,
+				}
+			}(),
+		},
+	}
+
+	for _, tc := range invalidStates {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			fixture := testfixture.ValidScenario()
+			repository := &attemptRepositoryStub{
+				getByIDFn: func(context.Context, attempt.AttemptID, string) (attempt.Attempt, error) {
+					return tc.current, nil
+				},
+			}
+			provider := &scenarioProviderStub{
+				getByIDFn: func(context.Context, scenario.ScenarioID) (scenario.Scenario, error) {
+					return fixture, nil
+				},
+			}
+
+			_, err := attempt.NewService(
+				repository,
+				&answerRepositoryFake{historyAnswers: tc.answers},
+				provider,
+			).GetState(context.Background(), userID, "attempt-1")
+
+			require.ErrorIs(t, err, attempt.ErrInvalidAttemptState)
+		})
+	}
+
+	t.Run("returns an aborted attempt without current node or ending", func(t *testing.T) {
+		t.Parallel()
+
+		fixture := testfixture.ValidScenario()
+		current := attempt.Attempt{
+			ID:         "attempt-aborted",
+			ScenarioID: fixture.ID,
+			Status:     attempt.StatusAborted,
+		}
+		repository := &attemptRepositoryStub{
+			getByIDFn: func(context.Context, attempt.AttemptID, string) (attempt.Attempt, error) {
+				return current, nil
+			},
+		}
+		provider := &scenarioProviderStub{
+			getByIDFn: func(context.Context, scenario.ScenarioID) (scenario.Scenario, error) {
+				return fixture, nil
+			},
+		}
+
+		state, err := attempt.NewService(repository, &answerRepositoryFake{}, provider).
+			GetState(context.Background(), userID, current.ID)
+
+		require.NoError(t, err)
+		require.Nil(t, state.CurrentNode)
+		require.Nil(t, state.Ending)
+	})
+}
+
+func fixtureScenarioID() scenario.ScenarioID {
+	return testfixture.ValidScenario().ID
 }
 
 func TestServiceStart(t *testing.T) {
