@@ -149,7 +149,7 @@ export function TrainingChat({
                     imageUrl={image}
                     onRestart={() => {
                         restartAttempt.mutate(
-                            attempt.id,
+                            attempt.scenarioId,
                         )
                     }}
                     isRestarting={
