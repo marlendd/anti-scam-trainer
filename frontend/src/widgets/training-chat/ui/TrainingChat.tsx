@@ -97,7 +97,6 @@ export function TrainingChat({
     const image = imageMock[
         attempt?.scenario.title as keyof typeof imageMock
     ]
-    console.log(attempt)
 
     if (isCompleted && attempt) {
         return (
