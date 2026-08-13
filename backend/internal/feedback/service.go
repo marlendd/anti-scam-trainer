@@ -125,6 +125,7 @@ func (s *Service) Generate(ctx context.Context, userID, attemptID string) (Attem
 	// LLM возвращает код категории риска (например "social_engineering") —
 	// переводим его в человекочитаемое русское название перед отдачей клиенту.
 	feedback.RiskProfile.DominantRisk = humanizeRisk(feedback.RiskProfile.DominantRisk)
+	feedback.Source = FeedbackSourceAI
 
 	return feedback, nil
 }
@@ -175,6 +176,7 @@ func (s *Service) generateFallbackFeedback(data *PromptData) AttemptFeedback {
 	}
 
 	return AttemptFeedback{
+		Source:     FeedbackSourceFallback,
 		Strengths:  strengths,
 		Weaknesses: weaknesses,
 		RiskProfile: RiskProfile{

@@ -34,11 +34,19 @@ type RiskProfile struct {
 	Description  string `json:"description"`
 }
 
+type FeedbackSource string
+
+const (
+	FeedbackSourceAI       FeedbackSource = "ai"
+	FeedbackSourceFallback FeedbackSource = "fallback"
+)
+
 type AttemptFeedback struct {
-	Strengths       []string    `json:"strengths"`
-	Weaknesses      []string    `json:"weaknesses"`
-	RiskProfile     RiskProfile `json:"risk_profile"`
-	Recommendations []string    `json:"recommendations"`
-	LearningTips    []string    `json:"learning_tips"`
-	Motivation      string      `json:"motivation"`
+	Source          FeedbackSource `json:"source"`
+	Strengths       []string       `json:"strengths"`
+	Weaknesses      []string       `json:"weaknesses"`
+	RiskProfile     RiskProfile    `json:"risk_profile"`
+	Recommendations []string       `json:"recommendations"`
+	LearningTips    []string       `json:"learning_tips"`
+	Motivation      string         `json:"motivation"`
 }
