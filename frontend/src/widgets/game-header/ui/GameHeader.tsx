@@ -1,13 +1,15 @@
-import { faChevronLeft, faPause } from '@fortawesome/free-solid-svg-icons'
+import {faChevronLeft, faPause} from '@fortawesome/free-solid-svg-icons'
 
-import { Icon } from '@/shared/ui/icon'
+import {Icon} from '@/shared/ui/icon'
 
 import styles from './GameHeader.module.scss'
-import { Button } from '@/shared/ui/button'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { faHome } from '@fortawesome/free-regular-svg-icons'
-import { SessionTime } from '@/entities/session-timer/ui/SessionTime.tsx'
+import {Button} from '@/shared/ui/button'
+import {Link, useLocation, useNavigate} from 'react-router-dom'
+import {faHome} from '@fortawesome/free-regular-svg-icons'
+import {SessionTime} from '@/entities/session-timer/ui/SessionTime.tsx'
 import {HeaderCounters} from "@/widgets/header";
+import {Avatar} from "@/shared/ui/avatar";
+import {useCurrentUser} from "@/entities/user";
 
 export type GameHeaderVariant = 'setup' | 'session'
 
@@ -22,12 +24,15 @@ export type GameHeaderProps = {
 }
 
 export function GameHeader({
-    variant = 'setup',
-}: GameHeaderProps) {
+                               variant = 'setup',
+                           }: GameHeaderProps) {
     const isSession = variant === 'session'
 
     const navigate = useNavigate()
-    const { pathname } = useLocation()
+    const {pathname} = useLocation()
+
+    const {data: user, isPending, isError} = useCurrentUser()
+
 
     function handlePause() {
         const parentPath = pathname.replace(/\/[^/]+$/, '')
@@ -36,7 +41,7 @@ export function GameHeader({
     }
 
     const handleBack = () => {
-        navigate(-1)
+        navigate('/training/role-selection')
     }
 
     const handleHome = () => {
@@ -48,28 +53,41 @@ export function GameHeader({
             <div className={styles.inner}>
                 <div className={styles.left}>
                     <div className={styles.controls}>
-                        <Button variant="ghost" onClick={handleBack}>
-                            <Icon icon={faChevronLeft} />
-                        </Button>
                         {isSession ? (
-                            <Button variant="ghost" onClick={handlePause}>
-                                <Icon icon={faPause} />
-                            </Button>
+                            <>
+                                <Button variant="ghost" onClick={handlePause}>
+                                    <Icon icon={faChevronLeft}/>
+                                </Button>
+                                <Button variant="ghost" onClick={handlePause}>
+                                    <Icon icon={faPause}/>
+                                </Button>
+                            </>
                         ) : (
-                            <Button variant="ghost" onClick={handleHome}>
-                                <Icon icon={faHome} />
-                            </Button>
+                            <>
+                                <Button variant="ghost" onClick={handleBack}>
+                                    <Icon icon={faChevronLeft}/>
+                                </Button>
+                                <Button variant="ghost" onClick={handleHome}>
+                                    <Icon icon={faHome}/>
+                                </Button>
+                            </>
                         )}
                     </div>
 
-                    {isSession && <SessionTime />}
+                    {isSession && <SessionTime/>}
 
-                    <span className={styles.separator} aria-hidden="true" />
+                    <span className={styles.separator} aria-hidden="true"/>
 
                     <div className={styles.stats}>
                         <HeaderCounters/>
                     </div>
+
                 </div>
+                    {!isPending && !isError && user !== null && (
+                        <Link to={'/dashboard'}>
+                            <Avatar/>
+                        </Link>
+                    )}
             </div>
         </header>
     )

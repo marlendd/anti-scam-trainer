@@ -1,15 +1,19 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 import { Icon } from '@/shared/ui/icon'
 
 import styles from './BurgerNavigation.module.scss'
 
-export const navigationItems = [
+const navigationItems = [
     {
         to: '/training/role-selection',
         label: 'Сценарии',
+    },
+    {
+        to: '/training/scam-or-not',
+        label: 'Мошенник или нет?',
     },
     {
         to: '/glossary',
@@ -27,15 +31,9 @@ export const navigationItems = [
 
 export function BurgerNavigation() {
     const menuId = useId()
-    const { pathname } = useLocation()
-
     const [isOpen, setIsOpen] = useState(false)
 
     const rootRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        setIsOpen(false)
-    }, [pathname])
 
     useEffect(() => {
         if (!isOpen) {
@@ -90,8 +88,12 @@ export function BurgerNavigation() {
                     <NavLink
                         key={item.to}
                         to={item.to}
+                        onClick={() => setIsOpen(false)}
                         className={({ isActive }) =>
-                            [styles.link, isActive ? styles.activeLink : undefined]
+                            [
+                                styles.link,
+                                isActive ? styles.activeLink : undefined,
+                            ]
                                 .filter(Boolean)
                                 .join(' ')
                         }

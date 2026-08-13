@@ -13,6 +13,33 @@
     overflow-y: auto;
 }
 
+.consequence {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    width: min(100%, 460px);
+    margin: 8px auto;
+    padding: 14px 16px;
+
+    background-color: #e6e6e6;
+    border-radius: 16px;
+}
+
+.consequenceLabel {
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #00aaff;
+}
+
+.consequenceText {
+    font-size: 14px;
+    line-height: 1.45;
+
+    color: #555;
+}
+
 .answers {
     display: flex;
 
@@ -167,4 +194,42 @@
 
 .error {
     font-size: 14px;
+}
+
+
+.complete {
+    display: flex;
+
+    width: 100%;
+    padding-top: 8px;
+
+    justify-content: center;
+}
+
+.completeButton {
+    min-height: 48px;
+    padding: 0 24px;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    color: #fff;
+
+    background-color: #00aaff;
+    border: 0;
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    transition:
+        opacity 150ms ease,
+        transform 150ms ease;
+
+    &:hover {
+        opacity: 0.9;
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
 }

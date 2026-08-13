@@ -27,6 +27,7 @@
     flex-direction: column;
 
     gap: 20px;
+
     align-items: center;
     justify-content: center;
 
@@ -119,6 +120,12 @@
     overflow-y: auto;
 
     background-color: #fff;
+
+    text-align: left;
+}
+
+.summaryTitle {
+    text-align: left;
 }
 
 .top {
@@ -130,12 +137,19 @@
     width: 100%;
 }
 
+.title {
+    display: flex;
+    flex-direction: column;
+
+}
+
 .summaryHeader {
     display: flex;
 
     flex-direction: row;
 
     gap: 16px;
+
     align-items: center;
     justify-content: start;
 
@@ -228,6 +242,45 @@
     margin: 0 auto;
 }
 
+.summaryGameCta {
+    display: flex;
+
+    gap: 24px;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 20px 22px;
+
+    color: #222;
+
+    text-align: left;
+
+    background: #f2faff;
+    border: 1px solid rgb(0 170 255 / 18%);
+    border-radius: 18px;
+
+    strong {
+        display: block;
+
+        margin-bottom: 5px;
+
+        font-size: 17px;
+    }
+
+    p {
+        font-size: 14px;
+
+        line-height: 1.45;
+
+        color: #737373;
+    }
+
+    a {
+        flex: none;
+    }
+}
+
 .summaryMotivation {
     position: relative;
 
@@ -254,7 +307,7 @@
 
         width: 4px;
 
-        content: '';
+        content: "";
 
         background-color: #0af;
         border-radius: 0 4px 4px 0;
@@ -404,6 +457,7 @@
         flex-direction: column;
 
         gap: 20px;
+
         align-items: stretch;
     }
 
@@ -451,6 +505,7 @@
 
     .summaryHeader {
         gap: 12px;
+
         align-items: flex-start;
     }
 
@@ -533,4 +588,42 @@
     .summaryError {
         font-size: 13px;
     }
+}
+
+.summaryEnding {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    width: 100%;
+    padding: 20px 24px;
+
+    background: #f5f5f5;
+    border-radius: 20px;
+}
+
+.summaryEndingLabel {
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #8a8a8a;
+}
+
+.summaryEndingTitle {
+    margin: 0;
+
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+
+    color: #111;
+}
+
+.summaryEndingResult {
+    margin: 0;
+
+    font-size: 15px;
+    line-height: 1.5;
+
+    color: #555;
 }
