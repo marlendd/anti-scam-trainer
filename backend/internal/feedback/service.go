@@ -47,12 +47,42 @@ const userTemplate = `КОНТЕКСТ СЦЕНАРИЯ:
 ЗАДАЧА: Сгенерируй структурированный фидбек в JSON-формате, следуя этим правилам:
 1. strengths (массив строк) — что пользователь сделал правильно.
 2. weaknesses (массив строк) — где пользователь ошибся.
-3. risk_profile (объект dominant_risk, risk_count, description) — анализ преобладающих категорий рисков.
-4. recommendations (массив строк) — применимые советы по безопасности на Авито.
-5. learning_tips (массив строк) — на какие аспекты обратить внимание в будущем.
-6. motivation (строка) — ободряющая фраза.
+3. risk_profile (объект dominant_risk, risk_count, description):
+   - dominant_risk: СТРОГО один код из списка "ДОСТУПНЫЕ КАТЕГОРИИ РИСКОВ" выше, без изменений, без перевода, без дополнительных слов.
+   - risk_count: число.
+   - description: связный текст на РУССКОМ языке, объясняющий суть риска. НЕ используй в description английские термины, коды категорий или обозначения в скобках (например, не пиши "(urgency_pressure)" или "(social_engineering)") — только обычный человекочитаемый русский текст.
+4. recommendations (массив строк) — применимые советы по безопасности на Авито, на русском языке, без английских терминов.
+5. learning_tips (массив строк) — на какие аспекты обратить внимание в будущем, на русском языке.
+6. motivation (строка) — ободряющая фраза на русском языке.
 
 Формат ответа: Только чистый JSON, без markdown.`
+
+// riskLabels переводит внутренние коды категорий риска в человекочитаемые
+// русские названия. Коды нужны как стабильный контракт с LLM и для внутренней
+// логики (подсчет, выбор описания/рекомендаций), а человекочитаемые названия —
+// то, что видит пользователь.
+var riskLabels = map[string]string{
+	"phishing":           "Фишинг",
+	"social_engineering": "Социальная инженерия",
+	"fake_payment":       "Фальшивая оплата",
+	"data_leak":          "Утечка данных",
+	"fake_delivery":      "Фальшивая доставка",
+	"verification_scam":  "Мошенничество через 'верификацию'",
+	"prepayment_scam":    "Мошенничество с предоплатой",
+	"account_hijack":     "Угон аккаунта",
+	"counterfeit":        "Подделка товара",
+	"urgency_pressure":   "Давление срочностью",
+	"general":            "Общие риски",
+}
+
+// humanizeRisk возвращает человекочитаемое название категории риска.
+// Если код неизвестен, возвращает его как есть (fallback).
+func humanizeRisk(code string) string {
+	if label, ok := riskLabels[strings.TrimSpace(code)]; ok {
+		return label
+	}
+	return code
+}
 
 func (s *Service) Generate(ctx context.Context, userID, attemptID string) (AttemptFeedback, error) {
 	data, err := s.repo.GetAttemptDataForFeedback(ctx, userID, attemptID)
@@ -91,6 +121,10 @@ func (s *Service) Generate(ctx context.Context, userID, attemptID string) (Attem
 			"error", err, "attempt_id", attemptID)
 		return s.generateFallbackFeedback(data), nil
 	}
+
+	// LLM возвращает код категории риска (например "social_engineering") —
+	// переводим его в человекочитаемое русское название перед отдачей клиенту.
+	feedback.RiskProfile.DominantRisk = humanizeRisk(feedback.RiskProfile.DominantRisk)
 
 	return feedback, nil
 }
@@ -144,7 +178,7 @@ func (s *Service) generateFallbackFeedback(data *PromptData) AttemptFeedback {
 		Strengths:  strengths,
 		Weaknesses: weaknesses,
 		RiskProfile: RiskProfile{
-			DominantRisk: dominantRisk,
+			DominantRisk: humanizeRisk(dominantRisk),
 			RiskCount:    maxRisk,
 			Description:  getRiskDescription(dominantRisk),
 		},
