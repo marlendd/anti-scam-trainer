@@ -1018,7 +1018,15 @@ components:
 
     AttemptFeedbackResponse:
       type: object
+      required:
+        - source
       properties:
+        source:
+          type: string
+          enum:
+            - ai
+            - fallback
+          description: Источник персонального разбора
         strengths:
           type: array
           items:

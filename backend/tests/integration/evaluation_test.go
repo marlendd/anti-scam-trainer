@@ -244,6 +244,7 @@ func TestEvaluation_Integration(t *testing.T) {
 		fb, err := fbService.Generate(ctx, uid, aid)
 		require.NoError(t, err)
 
+		require.Equal(t, feedback.FeedbackSourceFallback, fb.Source)
 		require.Contains(t, fb.Weaknesses, "Перешел по поддельной ссылке")
 		require.Contains(t, fb.Strengths, "Не перевел предоплату")
 		require.Equal(t, "Фишинг", fb.RiskProfile.DominantRisk)
