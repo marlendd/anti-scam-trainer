@@ -12,6 +12,7 @@ import (
 	"github.com/marlendd/anti-scam-trainer/internal/attempt"
 	"github.com/marlendd/anti-scam-trainer/internal/platform/postgres"
 	"github.com/marlendd/anti-scam-trainer/internal/scenario"
+	"github.com/marlendd/anti-scam-trainer/internal/testfixture"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,7 +50,9 @@ func TestPgRepository_AttemptLifecycle_Integration(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, created, byID)
 
-	active, err := repository.GetActive(ctx, testUserID, testScenarioID)
+	// Новый экземпляр репозитория имитирует повторный вход после перезагрузки страницы.
+	reloadedRepository := attempt.NewPgRepository(db)
+	active, err := reloadedRepository.GetActive(ctx, testUserID, testScenarioID)
 	require.NoError(t, err)
 	require.Equal(t, created, active)
 
@@ -190,6 +193,243 @@ func TestPgRepository_GetByIDRejectsOtherUser_Integration(t *testing.T) {
 
 	_, err = repository.GetByID(ctx, created.ID, otherUserID)
 	require.ErrorIs(t, err, attempt.ErrAttemptNotFound)
+}
+
+func TestPgRepository_GetLatestCompleted_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	olderCompletedAt := time.Now().Add(-time.Hour).UTC()
+	newerCompletedAt := olderCompletedAt.Add(30 * time.Minute)
+
+	olderID := insertCompletedAttempt(
+		t,
+		ctx,
+		db,
+		testUserID,
+		testScenarioID,
+		"ending-older",
+		50,
+		olderCompletedAt,
+	)
+	newerID := insertCompletedAttempt(
+		t,
+		ctx,
+		db,
+		testUserID,
+		testScenarioID,
+		"ending-newer",
+		100,
+		newerCompletedAt,
+	)
+
+	repository := attempt.NewPgRepository(db)
+	latest, err := repository.GetLatestCompleted(ctx, testUserID, testScenarioID)
+
+	require.NoError(t, err)
+	require.Equal(t, newerID, latest.ID)
+	require.NotEqual(t, olderID, latest.ID)
+	require.Equal(t, attempt.StatusCompleted, latest.Status)
+	require.Nil(t, latest.CurrentNodeID)
+	require.NotNil(t, latest.EndingID)
+	require.Equal(t, scenario.EndingID("ending-newer"), *latest.EndingID)
+	require.NotNil(t, latest.Score)
+	require.Equal(t, 100, *latest.Score)
+	require.NotNil(t, latest.CompletedAt)
+	require.WithinDuration(t, newerCompletedAt, *latest.CompletedAt, time.Microsecond)
+}
+
+func TestPgRepository_GetLatestCompletedNotFound_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	repository := attempt.NewPgRepository(db)
+	_, err := repository.GetLatestCompleted(ctx, testUserID, testScenarioID)
+
+	require.ErrorIs(t, err, attempt.ErrCompletedAttemptNotFound)
+}
+
+func TestService_RestartPreservesCompletedResults_Integration(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+
+	testUserID := insertTestUser(t, ctx, db)
+	testScenarioID := insertTestScenario(t, ctx, db)
+	registerFixtureCleanup(t, db, testUserID, testScenarioID)
+
+	completedAt := time.Now().Add(-time.Hour).UTC()
+	completedID := insertCompletedAttempt(
+		t,
+		ctx,
+		db,
+		testUserID,
+		testScenarioID,
+		testfixture.SafeEndingID,
+		100,
+		completedAt,
+	)
+	insertCompletedAnswer(t, ctx, db, completedID)
+
+	repository := attempt.NewPgRepository(db)
+	activeBeforeRestart, err := repository.Create(
+		ctx,
+		testUserID,
+		testScenarioID,
+		testfixture.MiddleNodeID,
+	)
+	require.NoError(t, err)
+
+	fixture := testfixture.ValidScenario()
+	fixture.ID = testScenarioID
+	service := attempt.NewService(
+		repository,
+		repository,
+		integrationScenarioProvider{currentScenario: fixture},
+	)
+
+	activeAfterRestart, err := service.Restart(ctx, testUserID, testScenarioID)
+	require.NoError(t, err)
+	require.NotEqual(t, activeBeforeRestart.ID, activeAfterRestart.ID)
+	require.Equal(t, attempt.StatusInProgress, activeAfterRestart.Status)
+	require.NotNil(t, activeAfterRestart.CurrentNodeID)
+	require.Equal(t, fixture.StartNodeID, *activeAfterRestart.CurrentNodeID)
+
+	aborted, err := repository.GetByID(ctx, activeBeforeRestart.ID, testUserID)
+	require.NoError(t, err)
+	require.Equal(t, attempt.StatusAborted, aborted.Status)
+
+	latestCompleted, err := service.GetLatestCompleted(ctx, testUserID, testScenarioID)
+	require.NoError(t, err)
+	require.Equal(t, completedID, latestCompleted.Attempt.ID)
+	require.Equal(t, attempt.StatusCompleted, latestCompleted.Attempt.Status)
+	require.Len(t, latestCompleted.History, 1)
+	require.Equal(t, testfixture.StartChoiceID, latestCompleted.History[0].SelectedChoice.ID)
+	require.Equal(t, scenario.ScoreSafe, latestCompleted.History[0].ChoiceScore)
+	require.Equal(t, "Сохранённое последствие", latestCompleted.History[0].Consequence)
+	require.Equal(t, "Сохранённое объяснение", latestCompleted.History[0].Explanation)
+	require.NotNil(t, latestCompleted.Ending)
+	require.Equal(t, testfixture.SafeEndingID, latestCompleted.Ending.ID)
+
+	var completedAttempts int
+	err = db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(*) FROM attempts WHERE id = $1 AND status = 'completed'`,
+		completedID,
+	).Scan(&completedAttempts)
+	require.NoError(t, err)
+	require.Equal(t, 1, completedAttempts)
+
+	var savedAnswers int
+	err = db.QueryRowContext(
+		ctx,
+		`SELECT COUNT(*) FROM answers WHERE attempt_id = $1`,
+		completedID,
+	).Scan(&savedAnswers)
+	require.NoError(t, err)
+	require.Equal(t, 1, savedAnswers)
+}
+
+type integrationScenarioProvider struct {
+	currentScenario scenario.Scenario
+}
+
+func (p integrationScenarioProvider) GetActiveByID(
+	context.Context,
+	scenario.ScenarioID,
+) (scenario.Scenario, error) {
+	return p.currentScenario, nil
+}
+
+func (p integrationScenarioProvider) GetByID(
+	context.Context,
+	scenario.ScenarioID,
+) (scenario.Scenario, error) {
+	return p.currentScenario, nil
+}
+
+func insertCompletedAnswer(
+	t *testing.T,
+	ctx context.Context,
+	db *sql.DB,
+	attemptID attempt.AttemptID,
+) {
+	t.Helper()
+
+	const query = `
+		INSERT INTO answers (
+			attempt_id,
+			node_id,
+			choice_id,
+			idempotency_key,
+			weight,
+			choice_score,
+			risk_categories,
+			consequence,
+			explanation,
+			response
+		)
+		VALUES ($1, $2, $3, gen_random_uuid(), 1, 100, '[]'::jsonb, $4, $5, '{}'::jsonb)
+	`
+
+	_, err := db.ExecContext(
+		ctx,
+		query,
+		attemptID,
+		testfixture.StartNodeID,
+		testfixture.StartChoiceID,
+		"Сохранённое последствие",
+		"Сохранённое объяснение",
+	)
+	require.NoError(t, err)
+}
+
+func insertCompletedAttempt(
+	t *testing.T,
+	ctx context.Context,
+	db *sql.DB,
+	userID string,
+	scenarioID scenario.ScenarioID,
+	endingID scenario.EndingID,
+	score int,
+	completedAt time.Time,
+) attempt.AttemptID {
+	t.Helper()
+
+	const query = `
+		INSERT INTO attempts (
+			user_id,
+			scenario_id,
+			status,
+			ending_id,
+			score,
+			completed_at,
+			updated_at
+		)
+		VALUES ($1, $2, 'completed', $3, $4, $5, $5)
+		RETURNING id
+	`
+
+	var id attempt.AttemptID
+	err := db.QueryRowContext(
+		ctx,
+		query,
+		userID,
+		scenarioID,
+		endingID,
+		score,
+		completedAt,
+	).Scan(&id)
+	require.NoError(t, err)
+
+	return id
 }
 
 func TestPgRepository_WithinTransactionRollsBack_Integration(t *testing.T) {

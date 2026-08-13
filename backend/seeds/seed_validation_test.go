@@ -38,12 +38,58 @@ func TestScenarioSeedsAreValid(t *testing.T) {
 			for _, message := range messages {
 				require.NotContains(t, message.Text, "Покупатель:")
 				require.NotContains(t, message.Text, "Продавец:")
+				if message.Author != "system" {
+					require.NotContains(t, message.Text, ": «")
+					require.False(t, strings.HasPrefix(message.Text, "Покупатель "))
+					require.False(t, strings.HasPrefix(message.Text, "Продавцу "))
+					require.False(t, strings.HasPrefix(message.Text, "Звонящий "))
+					require.False(t, strings.HasPrefix(message.Text, "С неизвестного номера "))
+					require.False(t, strings.HasPrefix(message.Text, "После первого действия "))
+				}
 			}
 		}
 	}
 	require.Equal(t, 2, roleCounts[scenario.RoleBuyer])
 	require.Equal(t, 2, roleCounts[scenario.RoleSeller])
 	require.Equal(t, 12, multiMessageNodeCount)
+}
+
+func TestChoicesLeadToSemanticallyConsistentBranches(t *testing.T) {
+	seeds, err := scenario.LoadSeedFiles(".")
+	require.NoError(t, err)
+
+	type expectedTransition struct {
+		nextNodeID scenario.NodeID
+		endingID   scenario.EndingID
+	}
+	expected := map[scenario.ChoiceID]expectedTransition{
+		"n2p_end_conversation":                {nextNodeID: "n4_refusal_result"},
+		"n2e_reject_unverifiable_evidence":    {nextNodeID: "n4_refusal_result"},
+		"n2e_reverse_search_and_block":        {nextNodeID: "n4_refusal_result"},
+		"n3f_delay_payment":                   {nextNodeID: "n4_refusal_result"},
+		"n3v_offer_cash_to_courier":           {nextNodeID: "n4_refusal_result"},
+		"n4p_regret_lost_bargain":             {endingID: "ending_uncertain"},
+		"n3v_request_photos_before_transfer":  {nextNodeID: "n4_protected"},
+		"n3f_open_link_without_input":         {nextNodeID: "n4_protected"},
+		"n3v_offer_refund_after_real_receipt": {nextNodeID: "n4_protected"},
+	}
+
+	for _, seed := range seeds {
+		for _, node := range seed.Content.Nodes {
+			for _, choice := range node.Choices {
+				want, exists := expected[choice.ID]
+				if !exists {
+					continue
+				}
+
+				require.Equal(t, want.nextNodeID, choice.NextNodeID, "choice %s", choice.ID)
+				require.Equal(t, want.endingID, choice.EndingID, "choice %s", choice.ID)
+				delete(expected, choice.ID)
+			}
+		}
+	}
+
+	require.Empty(t, expected, "expected choices not found")
 }
 
 func TestLoadSeedFilesRejectsInvalidFiles(t *testing.T) {
