@@ -28,6 +28,7 @@ type TrainingChatProps = {
 
 export function TrainingChat({
     scenario = null,
+    scenarioSummary = null,
     attempt = null,
     mode = 'preview',
     onScenarioComplete,
@@ -83,6 +84,7 @@ export function TrainingChat({
                     isFeedbackPending={isFeedbackPending}
                     isResultError={isResultError}
                     isFeedbackError={isFeedbackError}
+                    logicalScenarioId={scenarioSummary?.logicalId}
                 />
             </section>
         )

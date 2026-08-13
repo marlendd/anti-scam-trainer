@@ -27,6 +27,7 @@
     flex-direction: column;
 
     gap: 20px;
+
     align-items: center;
     justify-content: center;
 
@@ -136,6 +137,7 @@
     flex-direction: row;
 
     gap: 16px;
+
     align-items: center;
     justify-content: start;
 
@@ -228,6 +230,45 @@
     margin: 0 auto;
 }
 
+.summaryGameCta {
+    display: flex;
+
+    gap: 24px;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 20px 22px;
+
+    color: #222;
+
+    text-align: left;
+
+    background: #f2faff;
+    border: 1px solid rgb(0 170 255 / 18%);
+    border-radius: 18px;
+
+    strong {
+        display: block;
+
+        margin-bottom: 5px;
+
+        font-size: 17px;
+    }
+
+    p {
+        font-size: 14px;
+
+        line-height: 1.45;
+
+        color: #737373;
+    }
+
+    a {
+        flex: none;
+    }
+}
+
 .summaryMotivation {
     position: relative;
 
@@ -254,7 +295,7 @@
 
         width: 4px;
 
-        content: '';
+        content: "";
 
         background-color: #0af;
         border-radius: 0 4px 4px 0;
@@ -404,6 +445,7 @@
         flex-direction: column;
 
         gap: 20px;
+
         align-items: stretch;
     }
 
@@ -451,6 +493,7 @@
 
     .summaryHeader {
         gap: 12px;
+
         align-items: flex-start;
     }
 

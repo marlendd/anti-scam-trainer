@@ -1,4 +1,8 @@
+import { Link } from 'react-router-dom'
+
+import { hasScamOrNotTopic } from '@/entities/scam-or-not'
 import type { AttemptFeedback } from '@/entities/training-attempt'
+import { Button } from '@/shared/ui/button'
 
 import styles from './TrainingChat.module.scss'
 
@@ -10,6 +14,7 @@ type TrainingSummaryProps = {
     isFeedbackPending: boolean
     isResultError: boolean
     isFeedbackError: boolean
+    logicalScenarioId?: string
 }
 
 export function TrainingSummary({
@@ -20,7 +25,12 @@ export function TrainingSummary({
     isFeedbackPending,
     isResultError,
     isFeedbackError,
+    logicalScenarioId,
 }: TrainingSummaryProps) {
+    const hasTopicGame = logicalScenarioId
+        ? hasScamOrNotTopic(logicalScenarioId)
+        : false
+
     return (
         <div className={styles.summary}>
             <div className={styles.top}>
@@ -122,6 +132,21 @@ export function TrainingSummary({
                             </ul>
                         </div>
                     )}
+                </div>
+            )}
+
+            {hasTopicGame && (
+                <div className={styles.summaryGameCta}>
+                    <div>
+                        <strong>Закрепите тему</strong>
+                        <p>
+                            Отличите мошеннические ситуации от безопасных в
+                            короткой игре.
+                        </p>
+                    </div>
+                    <Link to={`/training/scam-or-not/${logicalScenarioId}`}>
+                        <Button>Закрепить тему в мини-игре</Button>
+                    </Link>
                 </div>
             )}
         </div>
