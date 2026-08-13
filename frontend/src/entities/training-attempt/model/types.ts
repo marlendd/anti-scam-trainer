@@ -55,14 +55,22 @@ export interface TrainingAttempt {
     status: AttemptStatus
     currentNodeId?: string
     endingId?: string
+    ending?: AttemptEnding | null
     score?: number
     startedAt: string
     updatedAt: string
     completedAt?: string
 }
 
+export type AttemptEnding = {
+    id: string
+    header: string
+    result: string
+}
+
 export interface TrainingAttemptState extends TrainingAttempt {
     scenario: AttemptScenario
     currentNode?: CurrentNode
+    ending?: AttemptEnding | null
     history: AttemptHistoryItem[]
 }

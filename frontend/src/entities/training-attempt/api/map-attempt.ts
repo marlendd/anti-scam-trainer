@@ -16,6 +16,7 @@ export function mapAttempt(
         status: dto.status,
         currentNodeId: dto.current_node_id,
         endingId: dto.ending_id,
+        ending: dto.ending,
         score: dto.score,
         startedAt: dto.started_at,
         updatedAt: dto.updated_at,

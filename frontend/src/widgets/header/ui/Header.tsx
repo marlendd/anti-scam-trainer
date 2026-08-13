@@ -19,6 +19,7 @@ export const Header = () => {
             <div className={styles.left}>
                 <nav className={styles.navigation}>
                     <Link to="/training/role-selection">Сценарии</Link>
+                    <Link to="/training/scam-or-not">Мошенник или нет?</Link>
                     <Link to="/glossary">Глоссарий</Link>
                     <Link to="/leaderboard">Лидеры</Link>
                     {!isPending && !isError && user !== null && (

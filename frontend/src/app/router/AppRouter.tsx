@@ -13,6 +13,7 @@ import {NotFoundPage} from '@/pages/not-found'
 import {RegisterPage} from '@/pages/register'
 import {RoleSelectionPage} from '@/pages/role-selection'
 import {ScamSchemePage} from '@/pages/scam-scheme'
+import {ScamOrNotPage} from '@/pages/scam-or-not'
 import {WelcomePage} from '@/pages/welcome'
 
 import {BuyerPathPage} from '../../pages/buyer-path/ui/BuyerPathPage.tsx'
@@ -31,13 +32,22 @@ export function AppRouter() {
                 <Route path="/forgot-password" element={<ForgotPasswordPage/>}/>
             </Route>
 
-            <Route element={<RequireAuth/>}>
-                <Route element={<GameLayout/>}>
-                    <Route path="/training">
-                        <Route path="role-selection" element={<RoleSelectionPage/>}/>
+            <Route element={<GameLayout/>}>
+                <Route path="/training">
+                    <Route path="role-selection" element={<RoleSelectionPage/>}/>
 
-                        <Route path="path/:pathId">
-                            <Route index element={<BuyerPathPage/>}/>
+                    <Route element={<RequireAuth/>}>
+                        <Route path="scam-or-not" element={<ScamOrNotPage/>}/>
+                        <Route
+                            path="scam-or-not/:logicalScenarioId"
+                            element={<ScamOrNotPage/>}
+                        />
+                    </Route>
+
+
+                    <Route path="path/:pathId">
+                        <Route index element={<BuyerPathPage/>}/>
+                        <Route element={<RequireAuth/>}>
                             <Route path=":schemeId" element={<BuyerPathPage/>}/>
                         </Route>
                     </Route>

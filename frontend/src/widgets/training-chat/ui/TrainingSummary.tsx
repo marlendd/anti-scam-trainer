@@ -1,127 +1,372 @@
+import { Link } from 'react-router-dom'
+
+import { hasScamOrNotTopic } from '@/entities/scam-or-not'
 import type { AttemptFeedback } from '@/entities/training-attempt'
+import { Button } from '@/shared/ui/button'
 
 import styles from './TrainingChat.module.scss'
+
+type ScenarioEnding = {
+    id: string
+    header: string
+    result: string
+}
 
 type TrainingSummaryProps = {
     title?: string
     score?: number
+    ending?: ScenarioEnding
     feedback?: AttemptFeedback
     isResultPending: boolean
     isFeedbackPending: boolean
     isResultError: boolean
     isFeedbackError: boolean
+    logicalScenarioId?: string
 }
 
 export function TrainingSummary({
     title,
     score,
+    ending,
     feedback,
     isResultPending,
     isFeedbackPending,
     isResultError,
     isFeedbackError,
+    logicalScenarioId,
 }: TrainingSummaryProps) {
+    const hasTopicGame = logicalScenarioId
+        ? hasScamOrNotTopic(logicalScenarioId)
+        : false
+
+    const isAiGenerated =
+        feedback &&
+        feedback.source !== 'fallback'
+
     return (
         <div className={styles.summary}>
             <div className={styles.top}>
                 <div className={styles.summaryHeader}>
-                    <span className={styles.summaryIcon}>✓</span>
+                    <span className={styles.summaryIcon}>
+                        ✓
+                    </span>
 
-                    <h2 className={styles.summaryTitle}>Тренировка завершена</h2>
+                    <div className={styles.title}>
+                        <h2
+                            className={
+                                styles.summaryTitle
+                            }
+                        >
+                            Тренировка завершена
+                        </h2>
 
-                    {title && <p className={styles.summaryScenario}>{title}</p>}
+                        {title && (
+                            <p
+                                className={
+                                    styles.summaryScenario
+                                }
+                            >
+                                {title}
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {isResultPending ? (
-                    <p>Подсчитываем результат...</p>
+                    <p>
+                        Подсчитываем результат...
+                    </p>
                 ) : isResultError ? (
-                    <p className={styles.summaryError}>Не удалось загрузить результат.</p>
+                    <p
+                        className={
+                            styles.summaryError
+                        }
+                    >
+                        Не удалось загрузить
+                        результат.
+                    </p>
                 ) : (
-                    <div className={styles.summaryScore}>
-                        <strong className={styles.summaryScoreValue}>{score ?? 0}</strong>
+                    <div
+                        className={
+                            styles.summaryScore
+                        }
+                    >
+                        <strong
+                            className={
+                                styles.summaryScoreValue
+                            }
+                        >
+                            {score ?? 0}
+                        </strong>
 
-                        <span className={styles.summaryScoreLabel}>баллов</span>
+                        <span
+                            className={
+                                styles.summaryScoreLabel
+                            }
+                        >
+                            баллов
+                        </span>
                     </div>
                 )}
             </div>
 
+            {ending && (
+                <div
+                    className={
+                        styles.summaryEnding
+                    }
+                >
+                    <span
+                        className={
+                            styles.summaryEndingLabel
+                        }
+                    >
+                        Результат сценария
+                    </span>
+
+                    <h3
+                        className={
+                            styles.summaryEndingTitle
+                        }
+                    >
+                        {ending.header}
+                    </h3>
+
+                    <p
+                        className={
+                            styles.summaryEndingResult
+                        }
+                    >
+                        {ending.result}
+                    </p>
+                </div>
+            )}
+
             {isFeedbackPending && (
-                <div className={styles.summaryLoading}>Анализируем прохождение...</div>
+                <div
+                    className={
+                        styles.summaryLoading
+                    }
+                >
+                    Анализируем прохождение...
+                </div>
             )}
 
             {isFeedbackError && (
-                <p className={styles.summaryError}>Не удалось загрузить персональный разбор.</p>
+                <p
+                    className={
+                        styles.summaryError
+                    }
+                >
+                    Не удалось загрузить
+                    персональный разбор.
+                </p>
             )}
 
             {feedback && (
-                <div className={styles.summaryContent}>
-                    {feedback.motivation && (
-                        <div className={styles.summaryMotivation}>{feedback.motivation}</div>
-                    )}
+                <>
+                    {isAiGenerated && (
+                        <div
+                            className={
+                                styles.summaryAiNotice
+                            }
+                        >
+                            <span
+                                className={
+                                    styles.summaryAiNoticeIcon
+                                }
+                                aria-hidden="true"
+                            >
+                                ✦
+                            </span>
 
-                    {feedback.strengths.length > 0 && (
-                        <div className={styles.summarySection}>
-                            <h3>Что получилось хорошо</h3>
+                            <div>
+                                <strong>
+                                    Разбор сгенерирован ИИ
+                                </strong>
 
-                            <ul>
-                                {feedback.strengths.map((item) => (
-                                    <li key={item}>{item}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {feedback.weaknesses.length > 0 && (
-                        <div className={styles.summarySection}>
-                            <h3>На что обратить внимание</h3>
-
-                            <ul>
-                                {feedback.weaknesses.map((item) => (
-                                    <li key={item}>{item}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    {feedback.riskProfile && (
-                        <div className={styles.summarySection}>
-                            <h3>Профиль риска</h3>
-
-                            {feedback.riskProfile.dominantRisk && (
                                 <p>
-                                    <strong>{feedback.riskProfile.dominantRisk}</strong>
+                                    Рекомендации сформированы
+                                    на основе вашего прохождения
+                                    сценария.
                                 </p>
-                            )}
-
-                            {feedback.riskProfile.description && (
-                                <p>{feedback.riskProfile.description}</p>
-                            )}
+                            </div>
                         </div>
                     )}
 
-                    {feedback.recommendations.length > 0 && (
-                        <div className={styles.summarySection}>
-                            <h3>Рекомендации</h3>
+                    <div
+                        className={
+                            styles.summaryContent
+                        }
+                    >
+                        {feedback.motivation && (
+                            <div
+                                className={
+                                    styles.summaryMotivation
+                                }
+                            >
+                                {feedback.motivation}
+                            </div>
+                        )}
 
-                            <ul>
-                                {feedback.recommendations.map((item) => (
-                                    <li key={item}>{item}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                        {feedback.strengths.length >
+                            0 && (
+                            <div
+                                className={
+                                    styles.summarySection
+                                }
+                            >
+                                <h3>
+                                    Что получилось хорошо
+                                </h3>
 
-                    {feedback.learningTips.length > 0 && (
-                        <div className={styles.summarySection}>
-                            <h3>Что стоит изучить</h3>
+                                <ul>
+                                    {feedback.strengths.map(
+                                        (item) => (
+                                            <li key={item}>
+                                                {item}
+                                            </li>
+                                        ),
+                                    )}
+                                </ul>
+                            </div>
+                        )}
 
-                            <ul>
-                                {feedback.learningTips.map((item) => (
-                                    <li key={item}>{item}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                        {feedback.weaknesses.length >
+                            0 && (
+                            <div
+                                className={
+                                    styles.summarySection
+                                }
+                            >
+                                <h3>
+                                    На что обратить
+                                    внимание
+                                </h3>
+
+                                <ul>
+                                    {feedback.weaknesses.map(
+                                        (item) => (
+                                            <li key={item}>
+                                                {item}
+                                            </li>
+                                        ),
+                                    )}
+                                </ul>
+                            </div>
+                        )}
+
+                        {feedback.riskProfile && (
+                            <div
+                                className={
+                                    styles.summarySection
+                                }
+                            >
+                                <h3>
+                                    Профиль риска
+                                </h3>
+
+                                {feedback.riskProfile
+                                    .dominantRisk && (
+                                    <p>
+                                        <strong>
+                                            {
+                                                feedback
+                                                    .riskProfile
+                                                    .dominantRisk
+                                            }
+                                        </strong>
+                                    </p>
+                                )}
+
+                                {feedback.riskProfile
+                                    .description && (
+                                    <p>
+                                        {
+                                            feedback
+                                                .riskProfile
+                                                .description
+                                        }
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {feedback.recommendations
+                            .length > 0 && (
+                            <div
+                                className={
+                                    styles.summarySection
+                                }
+                            >
+                                <h3>
+                                    Рекомендации
+                                </h3>
+
+                                <ul>
+                                    {feedback.recommendations.map(
+                                        (item) => (
+                                            <li key={item}>
+                                                {item}
+                                            </li>
+                                        ),
+                                    )}
+                                </ul>
+                            </div>
+                        )}
+
+                        {feedback.learningTips
+                            .length > 0 && (
+                            <div
+                                className={
+                                    styles.summarySection
+                                }
+                            >
+                                <h3>
+                                    Что стоит изучить
+                                </h3>
+
+                                <ul>
+                                    {feedback.learningTips.map(
+                                        (item) => (
+                                            <li key={item}>
+                                                {item}
+                                            </li>
+                                        ),
+                                    )}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {hasTopicGame && (
+                <div
+                    className={
+                        styles.summaryGameCta
+                    }
+                >
+                    <div>
+                        <strong>
+                            Закрепите тему
+                        </strong>
+
+                        <p>
+                            Отличите мошеннические
+                            ситуации от безопасных в
+                            короткой игре.
+                        </p>
+                    </div>
+
+                    <Link
+                        to={`/training/scam-or-not/${logicalScenarioId}`}
+                    >
+                        <Button>
+                            Закрепить тему в
+                            мини-игре
+                        </Button>
+                    </Link>
                 </div>
             )}
         </div>

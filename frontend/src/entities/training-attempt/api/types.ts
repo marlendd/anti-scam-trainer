@@ -1,5 +1,5 @@
 import type {
-    AttemptActor,
+    AttemptActor, AttemptEnding,
     AttemptStatus,
 } from '../model/types'
 
@@ -49,6 +49,7 @@ export interface AttemptResponseDto {
     status: AttemptStatus
     current_node_id?: string
     ending_id?: string
+    ending?: AttemptEnding
     score?: number
     started_at: string
     updated_at: string
@@ -59,5 +60,6 @@ export interface AttemptStateResponseDto
     extends AttemptResponseDto {
     scenario: AttemptScenarioDto
     current_node?: CurrentNodeDto
+    ending?: AttemptEnding
     history: AttemptHistoryItemDto[]
 }

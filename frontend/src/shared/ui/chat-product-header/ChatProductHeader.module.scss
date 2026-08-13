@@ -121,3 +121,56 @@
         font-size: 13px;
     }
 }
+
+
+.restartButton {
+    display: inline-flex;
+    flex-shrink: 0;
+
+    gap: 8px;
+    align-items: center;
+
+    min-height: 40px;
+    padding: 0 14px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    color: #858585;
+
+    background: transparent;
+    border: 0;
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    transition:
+        color 150ms ease,
+        background-color 150ms ease;
+
+    &:hover:not(:disabled) {
+        color: #111;
+
+        background-color: #f2f2f2;
+    }
+
+    &:disabled {
+        cursor: default;
+
+        opacity: 0.5;
+    }
+}
+
+@media (width <= 640px) {
+    .restartButton {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+
+        justify-content: center;
+
+        span {
+            display: none;
+        }
+    }
+}
