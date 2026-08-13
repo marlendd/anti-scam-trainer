@@ -1,4 +1,9 @@
-import { useMemo, useRef, useEffect } from 'react'
+import {
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react'
 
 import {
     type AttemptActor,
@@ -14,10 +19,111 @@ type AttemptPlayerProps = {
     onComplete?: () => void
 }
 
-type ChatEntry = {
+type MessageEntry = {
+    type: 'message'
     id: string
     author: AttemptActor
     text: string
+}
+
+type ConsequenceEntry = {
+    type: 'consequence'
+    id: string
+    text: string
+}
+
+type ChatEntry =
+    | MessageEntry
+    | ConsequenceEntry
+
+type SubmittedAnswer = {
+    nodeId: string
+    choiceId: string
+    choiceText: string
+    consequence: string
+}
+
+function hashString(value: string) {
+    let hash = 2166136261
+
+    for (
+        let index = 0;
+        index < value.length;
+        index += 1
+    ) {
+        hash ^= value.charCodeAt(index)
+        hash = Math.imul(hash, 16777619)
+    }
+
+    return hash >>> 0
+}
+
+function createSeededRandom(seed: number) {
+    let state = seed
+
+    return () => {
+        state += 0x6d2b79f5
+
+        let value = state
+
+        value = Math.imul(
+            value ^ (value >>> 15),
+            value | 1,
+        )
+
+        value ^=
+            value +
+            Math.imul(
+                value ^ (value >>> 7),
+                value | 61,
+            )
+
+        return (
+            ((value ^ (value >>> 14)) >>> 0) /
+            4294967296
+        )
+    }
+}
+
+function shuffleDeterministic<T>(
+    items: T[],
+    seed: string,
+) {
+    const result = [...items].sort((a, b) => {
+        const first = String(
+            (a as { id?: string }).id ?? '',
+        )
+
+        const second = String(
+            (b as { id?: string }).id ?? '',
+        )
+
+        return first.localeCompare(second)
+    })
+
+    const random = createSeededRandom(
+        hashString(seed),
+    )
+
+    for (
+        let index = result.length - 1;
+        index > 0;
+        index -= 1
+    ) {
+        const targetIndex = Math.floor(
+            random() * (index + 1),
+        )
+
+        ;[
+            result[index],
+            result[targetIndex],
+        ] = [
+            result[targetIndex],
+            result[index],
+        ]
+    }
+
+    return result
 }
 
 function getMessagePosition(
@@ -25,14 +131,24 @@ function getMessagePosition(
     index: number,
 ) {
     const current = messages[index]
+
+    if (
+        !current ||
+        current.type !== 'message'
+    ) {
+        return 'single' as const
+    }
+
     const previous = messages[index - 1]
     const next = messages[index + 1]
 
     const sameAsPrevious =
-        previous?.author === current?.author
+        previous?.type === 'message' &&
+        previous.author === current.author
 
     const sameAsNext =
-        next?.author === current?.author
+        next?.type === 'message' &&
+        next.author === current.author
 
     if (!sameAsPrevious && !sameAsNext) {
         return 'single' as const
@@ -59,78 +175,211 @@ export function AttemptPlayer({
     attempt,
     onComplete,
 }: AttemptPlayerProps) {
-    const messagesEndRef = useRef<HTMLDivElement>(null)
+    const messagesEndRef =
+        useRef<HTMLDivElement>(null)
 
     const submitAnswer = useSubmitAnswer()
+
+    const [
+        submittedAnswers,
+        setSubmittedAnswers,
+    ] = useState<SubmittedAnswer[]>([])
+
+    const [
+        isFinalAnswerSubmitted,
+        setIsFinalAnswerSubmitted,
+    ] = useState(false)
 
     const node = attempt.currentNode
     const playerRole = attempt.scenario.role
 
+    const choices = useMemo(() => {
+        if (!node) {
+            return []
+        }
+
+        return shuffleDeterministic(
+            node.choices,
+            `${attempt.id}:${node.id}`,
+        )
+    }, [
+        attempt.id,
+        node,
+    ])
+
     const messages = useMemo<ChatEntry[]>(() => {
+        const historyNodeIds = new Set(
+            attempt.history.map(
+                (historyItem) =>
+                    historyItem.node.id,
+            ),
+        )
+
         const historyMessages =
-            attempt.history.flatMap((historyItem) => [
-                ...historyItem.node.messages.map(
-                    (message, index) => ({
-                        id: `${historyItem.node.id}-message-${index}`,
-                        author: message.author,
-                        text: message.text,
-                    }),
-                ),
+            attempt.history.flatMap<ChatEntry>(
+                (historyItem) => {
+                    const entries: ChatEntry[] =
+                        [
+                            ...historyItem.node.messages.map(
+                                (
+                                    message,
+                                    index,
+                                ) => ({
+                                    type: 'message' as const,
+                                    id: `${historyItem.node.id}-message-${index}`,
+                                    author: message.author,
+                                    text: message.text,
+                                }),
+                            ),
 
-                {
-                    id: `${historyItem.node.id}-choice-${historyItem.selectedChoice.id}`,
-                    author: playerRole,
-                    text: historyItem.selectedChoice.text,
+                            {
+                                type: 'message',
+                                id: `${historyItem.node.id}-choice-${historyItem.selectedChoice.id}`,
+                                author: playerRole,
+                                text: historyItem
+                                    .selectedChoice
+                                    .text,
+                            },
+                        ]
+
+                    const submittedAnswer =
+                        submittedAnswers.find(
+                            (answer) =>
+                                answer.nodeId ===
+                                historyItem.node.id,
+                        )
+
+                    if (
+                        submittedAnswer?.consequence
+                    ) {
+                        entries.push({
+                            type: 'consequence',
+                            id: `${historyItem.node.id}-consequence`,
+                            text: submittedAnswer.consequence,
+                        })
+                    }
+
+                    return entries
                 },
-            ])
+            )
 
-        const currentMessages =
-            node?.messages.map((message, index) => ({
-                id: `${node.id}-message-${index}`,
-                author: message.author,
-                text: message.text,
-            })) ?? []
+        const currentMessages: ChatEntry[] =
+            node?.messages.map(
+                (message, index) => ({
+                    type: 'message',
+                    id: `${node.id}-message-${index}`,
+                    author: message.author,
+                    text: message.text,
+                }),
+            ) ?? []
+
+        const pendingMessages =
+            submittedAnswers
+                .filter(
+                    (answer) =>
+                        !historyNodeIds.has(
+                            answer.nodeId,
+                        ),
+                )
+                .flatMap<ChatEntry>(
+                    (answer) => [
+                        {
+                            type: 'message',
+                            id: `${answer.nodeId}-pending-choice-${answer.choiceId}`,
+                            author: playerRole,
+                            text: answer.choiceText,
+                        },
+
+                        {
+                            type: 'consequence',
+                            id: `${answer.nodeId}-pending-consequence`,
+                            text: answer.consequence,
+                        },
+                    ],
+                )
 
         return [
             ...historyMessages,
             ...currentMessages,
+            ...pendingMessages,
         ]
-    }, [attempt.history, node, playerRole])
+    }, [
+        attempt.history,
+        node,
+        playerRole,
+        submittedAnswers,
+    ])
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({
             behavior: 'smooth',
             block: 'end',
         })
-    }, [messages.length])
+    }, [
+        messages.length,
+        isFinalAnswerSubmitted,
+    ])
 
     async function handleChoiceSelect(
         choiceId: string,
     ) {
-        if (!node || submitAnswer.isPending) {
+        if (
+            !node ||
+            submitAnswer.isPending ||
+            isFinalAnswerSubmitted
+        ) {
             return
         }
 
-        const result = await submitAnswer.mutateAsync({
-            attemptId: attempt.id,
-            nodeId: node.id,
-            choiceId,
-        })
+        const choice = node.choices.find(
+            (item) => item.id === choiceId,
+        )
+
+        if (!choice) {
+            return
+        }
+
+        const result =
+            await submitAnswer.mutateAsync({
+                attemptId: attempt.id,
+                nodeId: node.id,
+                choiceId,
+            })
+
+        setSubmittedAnswers((current) => [
+            ...current.filter(
+                (answer) =>
+                    answer.nodeId !==
+                    result.nodeId,
+            ),
+
+            {
+                nodeId: result.nodeId,
+                choiceId: result.choiceId,
+                choiceText: choice.text,
+                consequence:
+                    result.consequence,
+            },
+        ])
 
         if (result.completed) {
-            onComplete?.()
+            setIsFinalAnswerSubmitted(true)
         }
     }
 
-    if (attempt.status === 'completed') {
+    if (
+        attempt.status === 'completed' &&
+        !isFinalAnswerSubmitted
+    ) {
         return null
     }
 
-    if (!node) {
+    if (!node && !isFinalAnswerSubmitted) {
         return (
             <div className={styles.messages}>
                 <div className={styles.error}>
-                    Не удалось получить текущий шаг сценария.
+                    Не удалось получить текущий шаг
+                    сценария.
                 </div>
             </div>
         )
@@ -138,64 +387,155 @@ export function AttemptPlayer({
 
     return (
         <div className={styles.messages}>
-            {messages.map((message, index) => {
-                const direction =
-                    message.author === playerRole
-                        ? 'outgoing'
-                        : 'incoming'
+            {messages.map(
+                (message, index) => {
+                    if (
+                        message.type ===
+                        'consequence'
+                    ) {
+                        return (
+                            <div
+                                key={message.id}
+                                className={
+                                    styles.consequence
+                                }
+                            >
+                                <span
+                                    className={
+                                        styles.consequenceLabel
+                                    }
+                                >
+                                    Последствие
+                                    выбора
+                                </span>
 
-                const position = getMessagePosition(
-                    messages,
-                    index,
-                )
+                                <span
+                                    className={
+                                        styles.consequenceText
+                                    }
+                                >
+                                    {message.text}
+                                </span>
+                            </div>
+                        )
+                    }
 
-                const showAvatar =
-                    direction === 'incoming' &&
-                    (position === 'single' ||
-                        position === 'last')
+                    const direction =
+                        message.author ===
+                        playerRole
+                            ? 'outgoing'
+                            : 'incoming'
 
-                return (
-                    <ChatMessage
-                        key={message.id}
-                        direction={direction}
-                        position={position}
-                        text={message.text}
-                        avatarText={getAuthorName(
-                            message.author,
-                        )}
-                        showAvatar={showAvatar}
-                    />
-                )
-            })}
+                    const position =
+                        getMessagePosition(
+                            messages,
+                            index,
+                        )
 
-            <div className={styles.answers}>
-                <span className={styles.answersLabel}>
-                    Выберите ответ
-                </span>
+                    const showAvatar =
+                        direction ===
+                            'incoming' &&
+                        (position ===
+                            'single' ||
+                            position ===
+                                'last')
 
-                {node.choices.map((choice) => (
-                    <button
-                        key={choice.id}
-                        type="button"
-                        className={styles.answer}
-                        disabled={submitAnswer.isPending}
-                        onClick={() => {
-                            void handleChoiceSelect(
-                                choice.id,
-                            )
-                        }}
+                    return (
+                        <ChatMessage
+                            key={message.id}
+                            direction={
+                                direction
+                            }
+                            position={
+                                position
+                            }
+                            text={
+                                message.text
+                            }
+                            avatarText={getAuthorName(
+                                message.author,
+                            )}
+                            showAvatar={
+                                showAvatar
+                            }
+                        />
+                    )
+                },
+            )}
+
+            {!isFinalAnswerSubmitted &&
+                node && (
+                    <div
+                        className={
+                            styles.answers
+                        }
                     >
-                        {choice.text}
-                    </button>
-                ))}
+                        <span
+                            className={
+                                styles.answersLabel
+                            }
+                        >
+                            Выберите ответ
+                        </span>
 
-                {submitAnswer.isError && (
-                    <span className={styles.error}>
-                        Не удалось отправить ответ.
-                        Попробуйте ещё раз.
-                    </span>
+                        {choices.map(
+                            (choice) => (
+                                <button
+                                    key={
+                                        choice.id
+                                    }
+                                    type="button"
+                                    className={
+                                        styles.answer
+                                    }
+                                    disabled={
+                                        submitAnswer.isPending
+                                    }
+                                    onClick={() => {
+                                        void handleChoiceSelect(
+                                            choice.id,
+                                        )
+                                    }}
+                                >
+                                    {
+                                        choice.text
+                                    }
+                                </button>
+                            ),
+                        )}
+
+                        {submitAnswer.isError && (
+                            <span
+                                className={
+                                    styles.error
+                                }
+                            >
+                                Не удалось
+                                отправить ответ.
+                                Попробуйте ещё
+                                раз.
+                            </span>
+                        )}
+                    </div>
                 )}
-            </div>
+
+            {isFinalAnswerSubmitted && (
+                <div
+                    className={
+                        styles.complete
+                    }
+                >
+                    <button
+                        type="button"
+                        className={
+                            styles.completeButton
+                        }
+                        onClick={onComplete}
+                    >
+                        Посмотреть результат
+                    </button>
+                </div>
+            )}
 
             <div ref={messagesEndRef} />
         </div>

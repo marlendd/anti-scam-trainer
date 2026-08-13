@@ -222,3 +222,11 @@
 
     white-space: nowrap;
 }
+
+.scenario {
+    &[data-active='true'],
+    &[data-active='true']:hover {
+        background-color: #e9f6fd;
+        border: 2px solid #d8f2fb;
+    }
+}
