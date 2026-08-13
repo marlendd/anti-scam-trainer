@@ -107,7 +107,7 @@ func run(cfg *config.Config, log *slog.Logger) error {
 	llmProvider := feedback.NewOpenRouterLLMProvider(
 		openRouterKey,
 		"https://openrouter.ai/api/v1",
-		"google/gemini-3.5-flash-lite",
+		"google/gemma-4-26b-a4b-it:free",
 	)
 
 	feedbackRepo := feedback.NewPgRepository(db, log)
