@@ -13,6 +13,7 @@ export type AttemptFeedback = {
     recommendations: string[]
     learningTips: string[]
     motivation?: string
+    source: 'fallback' | 'ai'
 }
 
 type AttemptFeedbackResponseDto = {
@@ -26,6 +27,7 @@ type AttemptFeedbackResponseDto = {
     recommendations?: string[]
     learning_tips?: string[]
     motivation?: string
+    source: 'fallback' | 'ai'
 }
 
 export async function getAttemptFeedback(attemptId: string): Promise<AttemptFeedback> {
@@ -44,5 +46,6 @@ export async function getAttemptFeedback(attemptId: string): Promise<AttemptFeed
         recommendations: response.recommendations ?? [],
         learningTips: response.learning_tips ?? [],
         motivation: response.motivation,
+        source: response.source ?? 'fallback'
     }
 }
