@@ -246,7 +246,7 @@ func TestEvaluation_Integration(t *testing.T) {
 
 		require.Contains(t, fb.Weaknesses, "Перешел по поддельной ссылке")
 		require.Contains(t, fb.Strengths, "Не перевел предоплату")
-		require.Equal(t, "phishing", fb.RiskProfile.DominantRisk)
+		require.Equal(t, "Фишинг", fb.RiskProfile.DominantRisk)
 		require.Equal(t, 1, fb.RiskProfile.RiskCount)
 		require.NotEmpty(t, fb.Recommendations)
 	})
