@@ -1,6 +1,6 @@
 # 🛡️ Anti-Scam Trainer
 
-Интерактивный тренажёр безопасных сделок для пользователей Avito. Кейс 5 хакатона **Avito Start**.
+Интерактивный тренажёр безопасных сделок для пользователей. Кейс 5.
 
 ## Проблема
 
@@ -9,6 +9,12 @@
 ## Решение
 
 Веб-приложение — интерактивный тренажёр, в котором пользователь выбирает роль (покупатель/продавец), проходит реалистичные диалоговые сценарии сделок, принимает решения в спорных моментах и получает объяснение последствий каждого выбора — не просто «правильно/неправильно», а почему решение повышает или снижает риск. 
+
+---
+
+## Доступность в интернете
+
+Приложение развёрнуто и доступно по ссылке https://antiscam-trainer-front.up.railway.app/
 
 ---
 
@@ -93,15 +99,25 @@ npm run format:check
 ---
 
 ## Переменные окружения
+BACKEND
 
-| Переменная                                  | Описание                         | Пример                                                                |
-| ------------------------------------------- | -------------------------------- | --------------------------------------------------------------------- |
-| `DATABASE_URL`                              | Подключение к PostgreSQL         | `postgres://postgres:postgres@postgres:5432/antiscam?sslmode=disable` |
-| `SMTP_HOST` / `SMTP_PASSWORD` / `SMTP_FROM` | SMTP для восстановления пароля   | `smtp.yandex.ru`                                                      |
-| `ALLOWED_ORIGINS`                           | Разрешённые origin для CORS      | `http://localhost:3000`                                               |
-| `SECURE_COOKIES`                            | HTTPS-only cookie (true в проде) | `false`                                                               |
-
+| Переменная                                  | Описание                                   | Пример                                                                |
+| ------------------------------------------- |--------------------------------------------|-----------------------------------------------------------------------|
+| `DATABASE_URL`                              | Подключение к PostgreSQL                   | `postgres://postgres:postgres@postgres:5432/antiscam?sslmode=disable` |
+| `SMTP_HOST` / `SMTP_PASSWORD` / `SMTP_FROM` | SMTP для восстановления пароля             | `smtp.yandex.ru`                                                      |
+| `ALLOWED_ORIGINS`                           | Разрешённые origin для CORS                | `http://localhost:3000`                                               |
+| `SECURE_COOKIES`                            | HTTPS-only cookie (true в проде)           | `false`                                                               | 
 Полный список — в `backend/config.example.yaml`.
+
+FRONTEND
+
+| Переменная                                  | Описание                                   | Пример                                                                |
+| ------------------------------------------- |--------------------------------------------|-----------------------------------------------------------------------|
+| `BACKEND_PROTOCOL`                          | Протокол для проксирования nginx → backend | `http` (локально) / `https` (прод)                                    |
+| `BACKEND_HOST`                              | Хост backend для nginx reverse-proxy       | `backend` (локально) / `antiscam-trainer.up.railway.app` (прод)       |
+| `BACKEND_PORT`                              | Порт backend для nginx reverse-proxy       | `8080` (локально) / `443` (прод)                                      |
+
+Дефолтные значения BACKEND_PROTOCOL, BACKEND_HOST, BACKEND_PORT заданы в `frontend/Dockerfile` (для локального docker-compose), для прода переопределяются в Railway.
 
 ---
 
@@ -203,7 +219,7 @@ anti-scam-trainer/
 │   │   ├── pages/                 # страницы приложения
 │   │   ├── shared/                # API-клиент, конфигурация, библиотеки, assets и UI-kit
 │   │   └── widgets/               # составные интерфейсные блоки
-│   ├── nginx.conf                 # раздача SPA и проксирование `/api/`
+│   ├── nginx.conf.template        # раздача SPA и проксирование `/api/`, backend-хост подставляется через envsubst
 │   ├── package.json               # npm scripts и зависимости frontend
 │   ├── vite.config.ts             # конфигурация Vite
 │   └── Dockerfile                 # сборка frontend и Nginx-образ
@@ -247,12 +263,6 @@ anti-scam-trainer/
 - Баллы, лидерборд и статистика.
 - ИИ-разбор прохождения.
 - Коллекционные фрагменты пазла.
-
----
-
-## Доступность в интернете
-
-Приложение развёрнуто и доступно по ссылке https://antiscam-trainer-front.up.railway.app/
 
 ---
 

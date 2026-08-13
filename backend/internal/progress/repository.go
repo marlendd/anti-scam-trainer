@@ -134,8 +134,7 @@ func (r *PgRepository) GetTotalAvailableFragments(ctx context.Context) (int, err
 	const q = `SELECT COUNT(DISTINCT reward_fragment_id)
 		FROM scenario_versions
 		WHERE reward_fragment_id IS NOT NULL 
-		AND is_active = TRUE
-		AND role = 'buyer'`
+		AND is_active = TRUE`
 	var count int
 	err := r.db.QueryRowContext(ctx, q).Scan(&count)
 	return count, err

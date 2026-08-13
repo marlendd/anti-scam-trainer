@@ -96,6 +96,66 @@ func TestHandler_AttemptOperations(t *testing.T) {
 	}
 }
 
+func TestHandler_GetLatestCompleted(t *testing.T) {
+	t.Parallel()
+
+	endingID := scenario.EndingID("ending-safe")
+	answeredAt := time.Date(2026, time.August, 8, 10, 0, 30, 0, time.UTC)
+	service := &answerSubmitterStub{
+		stateResult: attempt.State{
+			Attempt: attempt.Attempt{
+				ID:         "attempt-1",
+				ScenarioID: "scenario-1",
+				Status:     attempt.StatusCompleted,
+				EndingID:   &endingID,
+			},
+			Scenario: attempt.ScenarioHeader{Title: "Безопасная покупка"},
+			History: []attempt.HistoryItem{
+				{
+					Node:           attempt.HistoryNode{ID: "node-1", Author: "seller", Text: "Оплатите по ссылке"},
+					SelectedChoice: attempt.ChoiceOption{ID: "choice-1", Text: "Отказаться"},
+					ChoiceScore:    scenario.ScoreSafe,
+					Consequence:    "Деньги сохранены",
+					Explanation:    "Оплата вне платформы опасна",
+					RiskCategories: []scenario.RiskCategory{"external_payment"},
+					AnsweredAt:     answeredAt,
+				},
+			},
+			Ending: &attempt.Ending{
+				ID:     endingID,
+				Header: "Мошенничество предотвращено",
+				Result: "Вы сохранили деньги.",
+			},
+		},
+	}
+	handler := attempt.NewHandler(service, discardLogger())
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/scenarios/scenario-1/attempts/latest", nil)
+	request.SetPathValue("scenarioID", "scenario-1")
+	request = request.WithContext(auth.ContextWithUserID(request.Context(), "user-1"))
+	response := httptest.NewRecorder()
+
+	handler.GetLatestCompleted(response, request)
+
+	require.Equal(t, http.StatusOK, response.Code)
+	require.Equal(t, "get_latest_completed", service.gotOperation)
+
+	var payload map[string]any
+	require.NoError(t, json.NewDecoder(response.Body).Decode(&payload))
+	require.Equal(t, "completed", payload["status"])
+	require.NotContains(t, payload, "current_node")
+	require.Equal(t, map[string]any{
+		"id":     "ending-safe",
+		"header": "Мошенничество предотвращено",
+		"result": "Вы сохранили деньги.",
+	}, payload["ending"])
+	history := payload["history"].([]any)
+	historyItem := history[0].(map[string]any)
+	require.Equal(t, float64(scenario.ScoreSafe), historyItem["choice_score"])
+	require.Equal(t, "Деньги сохранены", historyItem["consequence"])
+	require.Equal(t, "Оплата вне платформы опасна", historyItem["explanation"])
+	require.Equal(t, []any{"external_payment"}, historyItem["risk_categories"])
+}
+
 func TestHandler_GetState(t *testing.T) {
 	t.Parallel()
 
@@ -345,6 +405,12 @@ func TestHandler_AttemptOperationMapsServiceErrors(t *testing.T) {
 		{
 			name:       "active attempt not found",
 			err:        attempt.ErrActiveAttemptNotFound,
+			wantStatus: http.StatusNotFound,
+			wantError:  "attempt not found",
+		},
+		{
+			name:       "completed attempt not found",
+			err:        attempt.ErrCompletedAttemptNotFound,
 			wantStatus: http.StatusNotFound,
 			wantError:  "attempt not found",
 		},
