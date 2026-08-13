@@ -13,6 +13,7 @@ import {NotFoundPage} from '@/pages/not-found'
 import {RegisterPage} from '@/pages/register'
 import {RoleSelectionPage} from '@/pages/role-selection'
 import {ScamSchemePage} from '@/pages/scam-scheme'
+import {ScamOrNotPage} from '@/pages/scam-or-not'
 import {WelcomePage} from '@/pages/welcome'
 
 import {BuyerPathPage} from '../../pages/buyer-path/ui/BuyerPathPage.tsx'

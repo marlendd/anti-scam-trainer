@@ -105,6 +105,7 @@ export function BuyerPathPage() {
             <div className={styles.chatColumn}>
                 <TrainingChat
                     mode="interactive"
+                    scenarioSummary={scenario}
                     attempt={attempt}
                     onScenarioComplete={() => {}}
                 />
