@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Anti-Scam Trainer API
-  description: Backend API для антискам-тренажёра – авторизация и прохождение сценариев
+  description: Backend API для антискам-тренажёра – авторизация, сценарии, попытки, результаты, обратная связь и прогресс
   version: "1.0"
 
 servers:
@@ -427,14 +427,15 @@ paths:
   /api/v1/attempts/{attemptID}/feedback:
     get:
       tags: [progress]
-      summary: Получить детальный ИИ-фидбек по завершенной попытке
+      summary: Получить персональный разбор завершённой попытки
+      description: Возвращает AI-разбор или детерминированный fallback. Поле `source` явно указывает источник текста; он не влияет на score, переходы и концовку.
       security:
         - cookieAuth: []
       parameters:
         - $ref: '#/components/parameters/AttemptID'
       responses:
         '200':
-          description: Развернутый персонализированный фидбек
+          description: Персональный AI- или fallback-разбор
           content:
             application/json:
               schema:
@@ -446,7 +447,7 @@ paths:
     get:
       tags: [progress]
       summary: Глобальная таблица лидеров
-      description: Открытый эндпоинт, авторизация не требуется.
+      description: Открытый эндпоинт, авторизация не требуется. Текущая реализация возвращает email в поле `player`; перед production-использованием требуется маскирование или отдельное отображаемое имя.
       parameters:
         - name: limit
           in: query
@@ -487,7 +488,7 @@ paths:
   /api/v1/profile/categories-progress:
     get:
       tags: [progress]
-      summary: Статистика уязвимостей по категориям рисков
+      summary: Покрытие завершённых сценариев по категориям риска
       security:
         - cookieAuth: []
       responses:
@@ -950,6 +951,7 @@ components:
           type: integer
         player:
           type: string
+          description: Текущая реализация возвращает email пользователя; поле требует маскирования перед production-использованием.
         fragments:
           type: integer
         score:
@@ -969,6 +971,9 @@ components:
     PuzzleFragment:
       type: object
       properties:
+        scenario_id:
+          type: string
+          format: uuid
         fragment_id:
           type: string
         earned_at:
