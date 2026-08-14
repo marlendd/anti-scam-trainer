@@ -3,6 +3,7 @@ env: "local"
 port: "8080"
 timeout: "5s"
 log_level: "DEBUG"
+database_url: "postgres://postgres:postgres@127.0.0.1:5433/antiscam?sslmode=disable"
 
 migrations_path: "migrations"
 seeds_path: "seeds"
