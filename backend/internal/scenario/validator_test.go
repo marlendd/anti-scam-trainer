@@ -68,6 +68,13 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 			wantErr: scenario.ErrEmptyStartNodeID,
 		},
 		{
+			name: "blank reward fragment ID",
+			mutate: func(s *scenario.Scenario) {
+				s.RewardFragmentID = "   "
+			},
+			wantErr: scenario.ErrInvalidRewardFragment,
+		},
+		{
 			name: "unknown start node",
 			mutate: func(s *scenario.Scenario) {
 				s.StartNodeID = scenario.NodeID("unknown")
@@ -156,6 +163,27 @@ func TestValidate_InvalidScenarios(t *testing.T) {
 				s.Endings = append(s.Endings, s.Endings[0])
 			},
 			wantErr: scenario.ErrDuplicateEndingID,
+		},
+		{
+			name: "unknown successful ending",
+			mutate: func(s *scenario.Scenario) {
+				s.SuccessfulEndingIDs = []scenario.EndingID{"unknown-ending"}
+			},
+			wantErr: scenario.ErrUnknownSuccessfulEnding,
+		},
+		{
+			name: "duplicated successful ending",
+			mutate: func(s *scenario.Scenario) {
+				s.SuccessfulEndingIDs = append(s.SuccessfulEndingIDs, s.SuccessfulEndingIDs[0])
+			},
+			wantErr: scenario.ErrDuplicateSuccessfulEnding,
+		},
+		{
+			name: "reward without successful ending",
+			mutate: func(s *scenario.Scenario) {
+				s.SuccessfulEndingIDs = nil
+			},
+			wantErr: scenario.ErrMissingSuccessfulEnding,
 		},
 		{
 			name: "node has fewer than four choices",
